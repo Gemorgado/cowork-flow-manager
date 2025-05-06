@@ -1,6 +1,11 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { generateRooms, generateWorkStations } from '@/mock/locations';
+import { Database } from "@/integrations/supabase/types";
+
+// Define types for Supabase insert operations
+type RoomInsert = Database["public"]["Tables"]["rooms"]["Insert"];
+type WorkstationInsert = Database["public"]["Tables"]["workstations"]["Insert"];
 
 /**
  * Utility function to seed the Supabase database with initial test data
@@ -21,10 +26,10 @@ export async function seedSupabaseWithOccupancyData() {
 
     // Insert rooms
     console.log('Inserting rooms...');
-    const roomsData = mockRooms.map(room => ({
+    const roomsData: RoomInsert[] = mockRooms.map(room => ({
       id: room.id,
       number: room.number,
-      floor: room.floor.toString(),
+      floor: room.floor.toString() as "1" | "2" | "3", // Cast to the expected enum type
       status: room.status,
       client_id: room.clientId || null,
       area: room.area,
@@ -36,10 +41,10 @@ export async function seedSupabaseWithOccupancyData() {
 
     // Insert workstations
     console.log('Inserting workstations...');
-    const workstationsData = mockWorkstations.map(station => ({
+    const workstationsData: WorkstationInsert[] = mockWorkstations.map(station => ({
       id: station.id,
       number: station.number,
-      floor: station.floor.toString(),
+      floor: station.floor.toString() as "1" | "2" | "3", // Cast to the expected enum type
       type: station.type,
       status: station.status,
       client_id: station.clientId || null
