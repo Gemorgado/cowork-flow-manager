@@ -7,11 +7,13 @@ import { RoomsTab } from './tabs/RoomsTab';
 import { WorkStationsTab } from './tabs/WorkStationsTab';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Laptop, ChevronUp } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface OccupancyTabsProps {
   rooms: Room[];
   workStations: WorkStation[];
   currentFloor: string;
+  isLoading?: boolean;
   onAllocateFlexToFixed?: (stationId: string, clientId: string) => void;
 }
 
@@ -19,6 +21,7 @@ export const OccupancyTabs: React.FC<OccupancyTabsProps> = ({
   rooms,
   workStations,
   currentFloor,
+  isLoading = false,
   onAllocateFlexToFixed
 }) => {
   const [activeTab, setActiveTab] = React.useState<string>("rooms");
@@ -46,11 +49,15 @@ export const OccupancyTabs: React.FC<OccupancyTabsProps> = ({
           <Card className="backdrop-blur-sm bg-white/5 border border-white/10 shadow-md shadow-black/10">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg font-medium">{currentFloor}º Andar</CardTitle>
-              <CardDescription>
-                {floorRooms.length} salas | {floorRooms.filter(room => room.status === 'occupied').length} ocupadas
-              </CardDescription>
+              {!isLoading ? (
+                <CardDescription>
+                  {floorRooms.length} salas | {floorRooms.filter(room => room.status === 'occupied').length} ocupadas
+                </CardDescription>
+              ) : (
+                <Skeleton className="h-4 w-36" />
+              )}
             </CardHeader>
-            <RoomsTab rooms={rooms} currentFloor={currentFloor} />
+            <RoomsTab rooms={rooms} currentFloor={currentFloor} isLoading={isLoading} />
           </Card>
         )}
         
@@ -59,7 +66,12 @@ export const OccupancyTabs: React.FC<OccupancyTabsProps> = ({
             <CardHeader className="pb-2">
               <CardTitle className="text-lg font-medium">{currentFloor}º Andar</CardTitle>
             </CardHeader>
-            <WorkStationsTab workStations={workStations} currentFloor={currentFloor} onAllocateFlexToFixed={onAllocateFlexToFixed} />
+            <WorkStationsTab 
+              workStations={workStations} 
+              currentFloor={currentFloor} 
+              onAllocateFlexToFixed={onAllocateFlexToFixed} 
+              isLoading={isLoading}
+            />
           </Card>
         )}
       </div>

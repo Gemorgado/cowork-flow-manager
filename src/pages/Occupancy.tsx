@@ -7,8 +7,9 @@ import { OccupancyTabs } from '@/components/occupancy/OccupancyTabs';
 import { OccupancySummary } from '@/components/occupancy/OccupancySummary';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
-import { useOccupancy } from '@/hooks/occupancy/useOccupancy';
+import { useSupabaseOccupancy } from '@/hooks/occupancy/useSupabaseOccupancy';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Occupancy = () => {
   const {
@@ -18,10 +19,11 @@ const Occupancy = () => {
     workStations,
     roomOccupancy,
     stationOccupancy,
+    isLoading,
     isRefreshing,
     handleRefresh,
     handleConvertFlexToFixed,
-  } = useOccupancy();
+  } = useSupabaseOccupancy();
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -32,10 +34,10 @@ const Occupancy = () => {
             variant="outline" 
             size="sm" 
             onClick={handleRefresh}
-            disabled={isRefreshing}
+            disabled={isRefreshing || isLoading}
             className="flex items-center gap-1 bg-white/5 backdrop-blur-sm border-white/10 hover:bg-white/10"
           >
-            <RefreshCw className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
+            <RefreshCw className={cn("h-4 w-4", (isRefreshing || isLoading) && "animate-spin")} />
             Atualizar
           </Button>
           <OccupancyFloorSelector 
@@ -46,25 +48,39 @@ const Occupancy = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <OccupancyStats 
-          roomOccupancy={roomOccupancy} 
-          stationOccupancy={stationOccupancy} 
-        />
-        <StatusLegend />
+        {isLoading ? (
+          <>
+            <Skeleton className="h-28" />
+            <Skeleton className="h-28 col-span-2" />
+          </>
+        ) : (
+          <>
+            <OccupancyStats 
+              roomOccupancy={roomOccupancy} 
+              stationOccupancy={stationOccupancy} 
+            />
+            <StatusLegend />
+          </>
+        )}
       </div>
 
       <OccupancyTabs 
         rooms={rooms} 
         workStations={workStations} 
         currentFloor={currentFloor} 
+        isLoading={isLoading}
         onAllocateFlexToFixed={handleConvertFlexToFixed}
       />
       
       {/* Summary section */}
-      <OccupancySummary 
-        rooms={rooms}
-        workStations={workStations}
-      />
+      {!isLoading ? (
+        <OccupancySummary 
+          rooms={rooms}
+          workStations={workStations}
+        />
+      ) : (
+        <Skeleton className="h-32" />
+      )}
     </div>
   );
 };
