@@ -1,0 +1,41 @@
+
+import React from 'react';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+
+interface Periodicity {
+  label: string;
+  key: string;
+  price: number;
+  times?: number;
+}
+
+interface PeriodicityToggleProps {
+  items: Periodicity[];
+  value: string;
+  onValueChange: (value: string) => void;
+}
+
+const PeriodicityToggle = ({ items, value, onValueChange }: PeriodicityToggleProps) => {
+  return (
+    <ToggleGroup
+      type="single"
+      value={value}
+      onValueChange={(val) => {
+        if (val) onValueChange(val);
+      }}
+      className="flex justify-start bg-white/5 dark:bg-neutral-900/60 rounded-full p-1 backdrop-blur-sm"
+    >
+      {items.map((period) => (
+        <ToggleGroupItem
+          key={period.key}
+          value={period.key}
+          className="text-xs px-3 py-1 data-[state=on]:bg-cowork-500 data-[state=on]:text-white rounded-full transition-all"
+        >
+          {period.label}
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>
+  );
+};
+
+export default PeriodicityToggle;

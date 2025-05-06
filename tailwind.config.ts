@@ -103,6 +103,9 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.3s ease-out',
 				'slide-up': 'slide-up 0.3s ease-out'
+			},
+			backgroundImage: {
+				gloss: 'linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.0))',
 			}
 		}
 	},
