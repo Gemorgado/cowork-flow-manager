@@ -4,7 +4,6 @@ import { OccupancyFloorSelector } from '@/components/occupancy/OccupancyFloorSel
 import { OccupancyStats } from '@/components/occupancy/OccupancyStats';
 import { StatusLegend } from '@/components/occupancy/StatusLegend';
 import { OccupancyTabs } from '@/components/occupancy/OccupancyTabs';
-import { TestControls } from '@/components/occupancy/TestControls';
 import { OccupancySummary } from '@/components/occupancy/OccupancySummary';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
@@ -22,8 +21,6 @@ const Occupancy = () => {
     isRefreshing,
     handleRefresh,
     handleConvertFlexToFixed,
-    handleTestFlexAllocation,
-    handleTestFlexRelease,
   } = useOccupancy();
 
   return (
@@ -55,12 +52,6 @@ const Occupancy = () => {
         />
         <StatusLegend />
       </div>
-
-      {/* Test buttons for flex allocation - for demonstration */}
-      <TestControls
-        onAllocateTest={handleTestFlexAllocation}
-        onReleaseTest={handleTestFlexRelease}
-      />
 
       <OccupancyTabs 
         rooms={rooms} 
