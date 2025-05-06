@@ -6,7 +6,8 @@ import {
   Client, 
   DashboardData, 
   User,
-  Permission
+  Permission,
+  LocationStatus
 } from '../types';
 
 // Mock users

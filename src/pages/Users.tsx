@@ -36,6 +36,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 import { users as mockUsers } from '@/mock/data';
 import { User, Permission } from '@/types';
 import { PlusCircle, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
