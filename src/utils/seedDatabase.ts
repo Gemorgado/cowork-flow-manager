@@ -11,6 +11,7 @@ export async function seedDatabase() {
     
     if (adminResult.success) {
       toast.success('Usuário administrador criado com sucesso');
+      toast.info('Importante: Verifique a caixa de entrada do email admin@cowork.com para confirmar o cadastro ou desative a confirmação de email no painel de controle do Supabase.');
     } else if (adminResult.exists) {
       toast.info('Usuário administrador já existe');
     } else {
@@ -117,32 +118,18 @@ async function seedAdminUser() {
       return { success: false, error: profileError, exists: false };
     }
 
-    // Auto-confirm the email since this is just demo data
-    const { error: adminError } = await supabase.auth.admin.updateUserById(
-      authData.user.id,
-      { email_confirm: true }
-    );
-    
-    if (adminError) {
-      console.error('Error confirming admin email:', adminError);
-      // This is not critical, so continue
-    }
+    // Note: We're removing the following code since it doesn't work from client-side:
+    // const { error: adminError } = await supabase.auth.admin.updateUserById(
+    //   authData.user.id,
+    //   { email_confirm: true }
+    // );
     
     console.log('Admin user created and profile updated successfully');
+    console.log('IMPORTANT: Email confirmation required. Check inbox for admin@cowork.com or disable email confirmation in Supabase settings.');
+    
     return { success: true, exists: false };
   } catch (error) {
     console.error('Error in seedAdminUser:', error);
     return { success: false, error, exists: false };
   }
 }
-
-// To seed the database, call this function from a component:
-/*
-import { seedDatabase } from '@/utils/seedDatabase';
-
-useEffect(() => {
-  seedDatabase().then(result => {
-    console.log('Seed result:', result);
-  });
-}, []);
-*/
