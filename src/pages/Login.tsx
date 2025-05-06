@@ -31,6 +31,7 @@ const Login = () => {
       toast.success('Login realizado com sucesso!');
       navigate('/dashboard');
     } catch (error) {
+      console.error('Login error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro durante o login.';
       toast.error(errorMessage);
     } finally {
@@ -41,15 +42,20 @@ const Login = () => {
   const handleSeedDatabase = async () => {
     setIsSeeding(true);
     try {
+      console.log('Creating admin account...');
       const result = await seedDatabase();
       if (result.success) {
-        toast.success('Banco de dados populado com sucesso! Tente fazer login agora.');
+        toast.success('Conta de administrador criada com sucesso! Tente fazer login agora.');
+        // Automatically fill in the login form with admin credentials
+        setEmail('admin@cowork.com');
+        setPassword('senha123');
       } else {
-        toast.error('Erro ao popular banco de dados.');
+        toast.error('Erro ao criar conta de administrador.');
+        console.error('Error details:', result.error);
       }
     } catch (error) {
-      console.error('Error seeding database:', error);
-      toast.error('Erro ao popular banco de dados');
+      console.error('Error creating admin account:', error);
+      toast.error('Erro ao criar conta de administrador');
     } finally {
       setIsSeeding(false);
     }

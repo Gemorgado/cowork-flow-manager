@@ -30,12 +30,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Check for existing session when app loads
     const checkSession = async () => {
       try {
+        console.log('Checking for existing session...');
         const { data: sessionData } = await supabase.auth.getSession();
         
         if (sessionData?.session) {
+          console.log('Session found, getting user data');
           const { data: userData } = await supabase.auth.getUser();
           
           if (userData?.user) {
+            console.log('User found, getting profile data');
             // Get user profile data with permissions
             const { data: profileData } = await supabase
               .from('profiles')
@@ -44,6 +47,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               .single();
               
             if (profileData) {
+              console.log('Profile found:', profileData);
               // Convert string[] permissions to Permission[] type by validating each permission
               const validPermissions = (profileData.permissions || []).filter((p: string) => 
                 ['dashboard', 'users', 'clients', 'plans', 'services', 'occupancy'].includes(p)
@@ -61,8 +65,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 createdAt: new Date(userData.user.created_at || ''),
                 updatedAt: new Date(userData.user.updated_at || ''),
               });
+              console.log('User set in context');
             }
           }
+        } else {
+          console.log('No session found');
         }
       } catch (error) {
         console.error('Error checking session:', error);
@@ -132,48 +139,53 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (error) {
         console.error('Login error:', error);
-        throw error;
+        throw new Error(`Erro de login: ${error.message}`);
       }
 
-      if (data.user) {
-        console.log('Login successful:', data.user);
+      if (!data.user || !data.session) {
+        console.error('Login failed: No user or session returned');
+        throw new Error('Login falhou: usuário não encontrado ou sessão inválida');
+      }
+
+      console.log('Login successful:', data.user);
+      
+      // Get user profile data with permissions
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+      
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+        throw new Error(`Erro ao buscar perfil: ${profileError.message}`);
+      }
         
-        // Get user profile data with permissions
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
+      if (profileData) {
+        // Convert string[] permissions to Permission[] type by validating each permission
+        const validPermissions = (profileData.permissions || []).filter((p: string) => 
+          ['dashboard', 'users', 'clients', 'plans', 'services', 'occupancy'].includes(p)
+        ) as Permission[];
         
-        if (profileError) {
-          console.error('Error fetching profile:', profileError);
-        }
-          
-        if (profileData) {
-          // Convert string[] permissions to Permission[] type by validating each permission
-          const validPermissions = (profileData.permissions || []).filter((p: string) => 
-            ['dashboard', 'users', 'clients', 'plans', 'services', 'occupancy'].includes(p)
-          ) as Permission[];
-          
-          setUser({
-            id: data.user.id,
-            name: profileData.name || data.user.user_metadata?.name || '',
-            email: data.user.email || '',
-            phone: profileData.phone || '',
-            address: profileData.address || '',
-            password: '', // Don't store password
-            permissions: validPermissions,
-            token: data.session?.access_token || '',
-            createdAt: new Date(data.user.created_at || ''),
-            updatedAt: new Date(data.user.updated_at || ''),
-          });
-          toast.success(`Bem-vindo, ${profileData.name}!`);
-        }
+        setUser({
+          id: data.user.id,
+          name: profileData.name || data.user.user_metadata?.name || '',
+          email: data.user.email || '',
+          phone: profileData.phone || '',
+          address: profileData.address || '',
+          password: '', // Don't store password
+          permissions: validPermissions,
+          token: data.session?.access_token || '',
+          createdAt: new Date(data.user.created_at || ''),
+          updatedAt: new Date(data.user.updated_at || ''),
+        });
+        toast.success(`Bem-vindo, ${profileData.name}!`);
+      } else {
+        throw new Error('Perfil de usuário não encontrado');
       }
     } catch (error: any) {
       console.error('Login failed:', error);
-      toast.error(`Falha na autenticação: ${error.message || 'Verifique suas credenciais'}`);
-      throw new Error('Falha na autenticação. Verifique suas credenciais.');
+      throw error;
     } finally {
       setLoading(false);
     }
