@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -27,8 +26,8 @@ interface ProtectedRouteProps {
   requiredPermission?: string;
 }
 
-const ProtectedRoute = ({ children, requiredPermission }: ProtectedRouteProps) => {
-  const { user, loading, hasPermission } = useAuth();
+const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+  const { user, loading } = useAuth();
   
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
@@ -38,10 +37,7 @@ const ProtectedRoute = ({ children, requiredPermission }: ProtectedRouteProps) =
     return <Navigate to="/login" replace />;
   }
   
-  if (requiredPermission && !hasPermission(requiredPermission as any)) {
-    return <Navigate to="/dashboard" replace />;
-  }
-  
+  // Removed permission check - all authenticated users can access all pages
   return <>{children}</>;
 };
 
@@ -57,7 +53,7 @@ const AppRoutes = () => (
     <Route 
       path="/dashboard" 
       element={
-        <ProtectedRoute requiredPermission="dashboard">
+        <ProtectedRoute>
           <AppLayout>
             <Dashboard />
           </AppLayout>
@@ -68,7 +64,7 @@ const AppRoutes = () => (
     <Route 
       path="/users" 
       element={
-        <ProtectedRoute requiredPermission="users">
+        <ProtectedRoute>
           <AppLayout>
             <Users />
           </AppLayout>
@@ -79,7 +75,7 @@ const AppRoutes = () => (
     <Route 
       path="/clients" 
       element={
-        <ProtectedRoute requiredPermission="clients">
+        <ProtectedRoute>
           <AppLayout>
             <Clients />
           </AppLayout>
@@ -90,7 +86,7 @@ const AppRoutes = () => (
     <Route 
       path="/services" 
       element={
-        <ProtectedRoute requiredPermission="services">
+        <ProtectedRoute>
           <AppLayout>
             <Services />
           </AppLayout>
@@ -101,7 +97,7 @@ const AppRoutes = () => (
     <Route 
       path="/occupancy" 
       element={
-        <ProtectedRoute requiredPermission="occupancy">
+        <ProtectedRoute>
           <AppLayout>
             <Occupancy />
           </AppLayout>

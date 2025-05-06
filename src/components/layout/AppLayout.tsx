@@ -42,20 +42,19 @@ interface SidebarItem {
   title: string;
   icon: React.ElementType;
   path: string;
-  permission?: string;
 }
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
-  const { user, logout, hasPermission, loading } = useAuth();
+  const { user, logout, loading } = useAuth();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const sidebarItems: SidebarItem[] = [
-    { title: 'Dashboard', icon: BarChart3, path: '/dashboard', permission: 'dashboard' },
-    // Removendo o item de usuários, pois agora está dentro das configurações
-    { title: 'Clientes', icon: Building2, path: '/clients', permission: 'clients' },
-    { title: 'Planos & Serviços', icon: Package, path: '/services', permission: 'services' },
-    { title: 'Ocupação', icon: Map, path: '/occupancy', permission: 'occupancy' },
+    { title: 'Dashboard', icon: BarChart3, path: '/dashboard' },
+    { title: 'Usuários', icon: Users, path: '/users' },
+    { title: 'Clientes', icon: Building2, path: '/clients' },
+    { title: 'Planos & Serviços', icon: Package, path: '/services' },
+    { title: 'Ocupação', icon: Map, path: '/occupancy' },
     { title: 'Configurações', icon: Settings, path: '/settings' },
   ];
 
@@ -123,39 +122,27 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
         <div className="flex-1 py-4 overflow-y-auto">
           <nav className="px-2 space-y-1">
-            {sidebarItems.map((item) => {
-              // Sempre exibir o Dashboard, independentemente das permissões
-              // Para outros itens, verificar as permissões
-              const shouldShow = item.title === 'Dashboard' || 
-                                item.title === 'Configurações' || 
-                                (item.permission && hasPermission(item.permission as any));
-                                
-              if (!shouldShow) {
-                return null;
-              }
-
-              return (
-                <TooltipProvider key={item.path} delayDuration={300}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className={cn(
-                          'w-full justify-start mb-1 hover:bg-cowork-50',
-                          !isSidebarOpen && 'justify-center'
-                        )}
-                        onClick={() => navigate(item.path)}
-                      >
-                        <item.icon className={cn("h-5 w-5 text-cowork-600", 
-                          isSidebarOpen ? "mr-3" : "mr-0")} />
-                        {isSidebarOpen && <span>{item.title}</span>}
-                      </Button>
-                    </TooltipTrigger>
-                    {!isSidebarOpen && <TooltipContent side="right">{item.title}</TooltipContent>}
-                  </Tooltip>
-                </TooltipProvider>
-              );
-            })}
+            {sidebarItems.map((item) => (
+              <TooltipProvider key={item.path} delayDuration={300}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        'w-full justify-start mb-1 hover:bg-cowork-50',
+                        !isSidebarOpen && 'justify-center'
+                      )}
+                      onClick={() => navigate(item.path)}
+                    >
+                      <item.icon className={cn("h-5 w-5 text-cowork-600", 
+                        isSidebarOpen ? "mr-3" : "mr-0")} />
+                      {isSidebarOpen && <span>{item.title}</span>}
+                    </Button>
+                  </TooltipTrigger>
+                  {!isSidebarOpen && <TooltipContent side="right">{item.title}</TooltipContent>}
+                </Tooltip>
+              </TooltipProvider>
+            ))}
           </nav>
         </div>
 
