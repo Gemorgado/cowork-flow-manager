@@ -61,69 +61,33 @@ async function seedAdminUser() {
     console.log('Checking for admin user...');
     
     // Check if admin user already exists in auth.users
-    const { data: authUsers, error: authCheckError } = await supabase.auth.admin.listUsers();
+    const { data: existingUser, error: lookupError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('email', 'admin@cowork.com')
+      .maybeSingle();
     
-    if (authCheckError) {
-      console.error('Error checking for existing users:', authCheckError);
-      return { success: false, error: authCheckError, exists: false };
+    if (lookupError) {
+      console.error('Error checking for existing admin:', lookupError);
     }
     
-    // Add proper type checking for users array
-    if (!authUsers || !authUsers.users || !Array.isArray(authUsers.users)) {
-      console.error('Invalid response format from listUsers:', authUsers);
-      return { success: false, error: new Error('Invalid response format from listUsers'), exists: false };
+    if (existingUser) {
+      console.log('Admin user already exists in profiles');
+      return { success: true, exists: true };
     }
     
-    // Explicitly type the user object to include email property
-    interface AuthUser {
-      id: string;
-      email?: string;
-      [key: string]: any; // Allow other properties
-    }
-    
-    const existingAdminUser = authUsers.users.find((user: AuthUser) => 
-      user.email === 'admin@cowork.com'
-    );
-
-    if (existingAdminUser) {
-      console.log('Admin user already exists in auth');
-      
-      // Make sure profile is complete
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', existingAdminUser.id)
-        .single();
-      
-      if (profileError && profileError.code !== 'PGRST116') {
-        console.error('Error checking admin profile:', profileError);
-      } else if (profileData) {
-        // Update permissions if needed
-        if (!profileData.permissions || !profileData.permissions.includes('dashboard')) {
-          const { error: updateError } = await supabase
-            .from('profiles')
-            .update({
-              permissions: ['dashboard', 'users', 'clients', 'plans', 'services', 'occupancy']
-            })
-            .eq('id', existingAdminUser.id);
-            
-          if (updateError) {
-            console.error('Error updating admin permissions:', updateError);
-          }
-        }
-        return { success: true, exists: true };
-      }
-    }
-
-    // Admin doesn't exist, create a new one
+    // If we reach here, admin doesn't exist, so create a new one
     console.log('Creating admin user...');
 
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    // First create the auth user
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email: 'admin@cowork.com',
       password: 'senha123',
-      email_confirm: true,
-      user_metadata: {
-        name: 'Administrador'
+      options: {
+        emailRedirectTo: window.location.origin,
+        data: {
+          name: 'Administrador'
+        }
       }
     });
 
@@ -139,7 +103,7 @@ async function seedAdminUser() {
 
     console.log('Admin user created in auth, updating profile...');
     
-    // Update the profile with all permissions
+    // Manual update to the profile with all permissions
     const { error: profileError } = await supabase
       .from('profiles')
       .update({
@@ -151,6 +115,17 @@ async function seedAdminUser() {
     if (profileError) {
       console.error('Error updating admin profile:', profileError);
       return { success: false, error: profileError, exists: false };
+    }
+
+    // Auto-confirm the email since this is just demo data
+    const { error: adminError } = await supabase.auth.admin.updateUserById(
+      authData.user.id,
+      { email_confirm: true }
+    );
+    
+    if (adminError) {
+      console.error('Error confirming admin email:', adminError);
+      // This is not critical, so continue
     }
     
     console.log('Admin user created and profile updated successfully');
@@ -171,4 +146,3 @@ useEffect(() => {
   });
 }, []);
 */
-

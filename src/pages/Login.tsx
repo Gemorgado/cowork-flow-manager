@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { seedDatabase } from '@/utils/seedDatabase';
+import { Loader2 } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('admin@cowork.com');
@@ -34,6 +35,7 @@ const Login = () => {
       console.error('Login error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro durante o login.';
       toast.error(errorMessage);
+      toast.info('Tente criar a conta de administrador primeiro clicando no botão abaixo');
     } finally {
       setIsLoading(false);
     }
@@ -111,11 +113,16 @@ const Login = () => {
                 className="w-full mt-6 bg-cowork-600 hover:bg-cowork-700" 
                 disabled={isLoading}
               >
-                {isLoading ? 'Entrando...' : 'Entrar'}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Entrando...
+                  </>
+                ) : 'Entrar'}
               </Button>
             </form>
             
-            <div className="mt-4">
+            <div className="mt-6">
               <Button
                 type="button"
                 variant="outline"
@@ -123,16 +130,24 @@ const Login = () => {
                 onClick={handleSeedDatabase}
                 disabled={isSeeding}
               >
-                {isSeeding ? 'Criando conta...' : 'Criar conta de administrador'}
+                {isSeeding ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Criando conta...
+                  </>
+                ) : 'Criar conta de administrador'}
               </Button>
             </div>
           </CardContent>
-          <CardFooter className="flex justify-center">
-            <div className="text-sm text-gray-500">
+          <CardFooter className="flex flex-col justify-center items-center">
+            <div className="text-sm text-gray-500 text-center">
               <p className="mb-1 font-semibold">Credenciais de acesso:</p>
               <p><strong>Email:</strong> admin@cowork.com</p>
               <p><strong>Senha:</strong> senha123</p>
             </div>
+            <p className="text-xs text-gray-500 mt-4 text-center">
+              Clique em "Criar conta de administrador" antes de tentar fazer login pela primeira vez.
+            </p>
           </CardFooter>
         </Card>
       </div>
