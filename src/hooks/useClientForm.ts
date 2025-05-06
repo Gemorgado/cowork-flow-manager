@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Client } from '@/types';
 import { useClientDialogs } from './clients/useClientDialogs';
 import { useClientOperations } from './clients/useClientOperations';
@@ -24,14 +24,14 @@ const useClientForm = ({ clients, setClients }: UseClientFormProps) => {
     handleDateChange,
     handleServiceChange,
     resetForm,
-    openEditDialog,
-    openDeleteDialog,
+    openEditDialog: openEditDialogBase,
+    openDeleteDialog: openDeleteDialogBase,
   } = useClientDialogs();
 
   const {
-    handleAddClient,
-    handleEditClient,
-    handleDeleteClient,
+    handleAddClient: addClient,
+    handleEditClient: editClient,
+    handleDeleteClient: deleteClient,
   } = useClientOperations({
     clients,
     setClients,
@@ -42,9 +42,27 @@ const useClientForm = ({ clients, setClients }: UseClientFormProps) => {
     setSelectedClient,
   });
 
-  const addClient = () => handleAddClient(formData);
-  const editClient = () => handleEditClient(formData, selectedClient);
-  const deleteClient = () => handleDeleteClient(selectedClient);
+  // Enhanced open edit dialog function that also sets the form data
+  const openEditDialog = (client: Client) => {
+    // Set selected client
+    setSelectedClient(client);
+    
+    // Reset form with client data
+    resetForm(client);
+    
+    // Open dialog
+    openEditDialogBase(client);
+  };
+  
+  // Enhanced open delete dialog
+  const openDeleteDialog = (client: Client) => {
+    setSelectedClient(client);
+    openDeleteDialogBase(client);
+  };
+
+  const handleAddClient = () => addClient(formData);
+  const handleEditClient = () => editClient(formData, selectedClient);
+  const handleDeleteClient = () => deleteClient(selectedClient);
 
   return {
     formData,
@@ -58,11 +76,12 @@ const useClientForm = ({ clients, setClients }: UseClientFormProps) => {
     handleInputChange,
     handleDateChange,
     handleServiceChange,
-    handleAddClient: addClient,
-    handleEditClient: editClient,
-    handleDeleteClient: deleteClient,
+    handleAddClient,
+    handleEditClient,
+    handleDeleteClient,
     openEditDialog,
     openDeleteDialog,
+    resetForm,
   };
 };
 

@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -14,6 +13,23 @@ import AddClientDialog from '@/components/clients/AddClientDialog';
 import EditClientDialog from '@/components/clients/EditClientDialog';
 import DeleteClientDialog from '@/components/clients/DeleteClientDialog';
 import useClientForm from '@/hooks/useClientForm';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+
+const EMPTY_CLIENT = {
+  companyName: '',
+  tradeName: '',
+  document: '',
+  email: '',
+  phone: '',
+  address: '',
+  startDate: new Date(),
+  endDate: new Date(),
+  loyaltyMonths: 0,
+  value: 0,
+  dueDay: 1,
+  services: []
+};
 
 const Clients = () => {
   const [clients, setClients] = useState<Client[]>(mockClients);
@@ -35,21 +51,46 @@ const Clients = () => {
     handleDeleteClient,
     openEditDialog,
     openDeleteDialog,
+    resetForm,
   } = useClientForm({ clients, setClients });
+
+  // Reset form data when opening the add client dialog
+  const handleOpenAddDialog = () => {
+    // Reset form to empty state
+    const resetFormData = {
+      ...EMPTY_CLIENT,
+      id: '', // Clear the ID to indicate it's a new client
+    };
+    
+    // Update formData state with empty values
+    Object.keys(formData).forEach(key => {
+      if (key in resetFormData) {
+        handleInputChange({
+          target: { name: key, value: resetFormData[key as keyof typeof resetFormData] }
+        } as React.ChangeEvent<HTMLInputElement>);
+      }
+    });
+    
+    // Reset date fields
+    handleDateChange('startDate', new Date());
+    handleDateChange('endDate', new Date());
+    
+    // Reset services
+    handleServiceChange('', []);
+    
+    // Open the dialog
+    setIsAddClientOpen(true);
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Gerenciamento de Clientes</h1>
-        <AddClientDialog
-          isOpen={isAddClientOpen}
-          onOpenChange={setIsAddClientOpen}
-          formData={formData}
-          handleInputChange={handleInputChange}
-          handleDateChange={handleDateChange}
-          handleServiceChange={handleServiceChange}
-          handleAddClient={handleAddClient}
-        />
+        <Button 
+          onClick={handleOpenAddDialog}
+        >
+          Novo Cliente
+        </Button>
       </div>
 
       <Card>
@@ -68,6 +109,20 @@ const Clients = () => {
         </CardContent>
       </Card>
 
+      {/* Add Client Dialog */}
+      <AddClientDialog
+        isOpen={isAddClientOpen}
+        onOpenChange={setIsAddClientOpen}
+        formData={formData}
+        handleInputChange={handleInputChange}
+        handleDateChange={handleDateChange}
+        handleServiceChange={handleServiceChange}
+        handleAddClient={() => {
+          handleAddClient();
+          toast.success("Cliente adicionado com sucesso!");
+        }}
+      />
+
       {/* Edit Client Dialog */}
       <EditClientDialog
         isOpen={isEditClientOpen}
@@ -76,7 +131,10 @@ const Clients = () => {
         handleInputChange={handleInputChange}
         handleDateChange={handleDateChange}
         handleServiceChange={handleServiceChange}
-        handleEditClient={handleEditClient}
+        handleEditClient={() => {
+          handleEditClient();
+          toast.success("Cliente atualizado com sucesso!");
+        }}
       />
 
       {/* Delete Client Dialog */}
@@ -84,7 +142,10 @@ const Clients = () => {
         isOpen={isDeleteClientOpen}
         onOpenChange={setIsDeleteClientOpen}
         selectedClient={selectedClient}
-        onDelete={handleDeleteClient}
+        onDelete={() => {
+          handleDeleteClient();
+          toast.success("Cliente removido com sucesso!");
+        }}
       />
     </div>
   );

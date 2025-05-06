@@ -1,13 +1,30 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Room } from '@/types';
 import { statusColors, statusLabels } from './StatusLegend';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger,
+  DialogFooter
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Edit } from 'lucide-react';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { Form, FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useForm } from 'react-hook-form';
 
 interface RoomMapProps {
   rooms: Room[];
@@ -16,6 +33,27 @@ interface RoomMapProps {
 
 export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
   const floorRooms = rooms.filter((room) => room.floor === parseInt(currentFloor) as any);
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isClientLinkDialogOpen, setIsClientLinkDialogOpen] = useState(false);
+  
+  // Mock clients data - this would come from an API in a real app
+  const mockClients = [
+    { id: 'client1', name: 'Empresa A' },
+    { id: 'client2', name: 'Empresa B' },
+    { id: 'client3', name: 'Empresa C' }
+  ];
+  
+  const [selectedClientId, setSelectedClientId] = useState<string>('');
+  
+  // Form for room editing
+  const roomForm = useForm({
+    defaultValues: {
+      status: 'available',
+      area: 0,
+      capacity: 0
+    }
+  });
   
   // Function to arrange rooms in a specific layout based on floor
   const getFloorLayout = () => {
@@ -41,6 +79,35 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
     if (!clientId) return "Nenhum cliente";
     // In a real app, we would fetch client details here
     return `Cliente #${clientId.replace('client', '')}`;
+  };
+
+  // Handler for opening edit dialog
+  const handleOpenEditDialog = (room: Room) => {
+    setSelectedRoom(room);
+    roomForm.reset({
+      status: room.status,
+      area: room.area,
+      capacity: room.capacity
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  // Handler for room update
+  const handleRoomUpdate = (data: any) => {
+    console.log("Updating room with data:", data);
+    // Here you would call your API to update the room
+    // For now, we'll just close the dialog
+    setIsEditDialogOpen(false);
+  };
+
+  // Handler for client linking
+  const handleClientLink = () => {
+    if (!selectedRoom || !selectedClientId) return;
+    
+    console.log(`Linking client ${selectedClientId} to room ${selectedRoom.id}`);
+    // Here you would call your API to link the client to the room
+    // For now, we'll just close the dialog
+    setIsClientLinkDialogOpen(false);
   };
 
   // Function to render rooms in a U shape for floor 2
@@ -171,8 +238,23 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
           <div className="pt-4">
             <p className="text-sm font-medium mb-2">Ações</p>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">Editar</Button>
-              <Button variant="default" size="sm">Vincular Cliente</Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handleOpenEditDialog(room)}
+              >
+                Editar
+              </Button>
+              <Button 
+                variant="default" 
+                size="sm" 
+                onClick={() => {
+                  setSelectedRoom(room);
+                  setIsClientLinkDialogOpen(true);
+                }}
+              >
+                Vincular Cliente
+              </Button>
               {room.clientId && (
                 <Button variant="destructive" size="sm">Desvincular</Button>
               )}
@@ -183,9 +265,127 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
     </Dialog>
   );
   
+  // Room Edit Dialog
+  const RoomEditDialog = () => (
+    <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Editar Sala {selectedRoom?.number}</DialogTitle>
+        </DialogHeader>
+        <Form {...roomForm}>
+          <form onSubmit={roomForm.handleSubmit(handleRoomUpdate)} className="space-y-4">
+            <FormField
+              control={roomForm.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="available">Livre</SelectItem>
+                      <SelectItem value="occupied">Ocupado</SelectItem>
+                      <SelectItem value="reserved">Reservado</SelectItem>
+                      <SelectItem value="maintenance">Manutenção</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={roomForm.control}
+              name="area"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Área (m²)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      {...field} 
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={roomForm.control}
+              name="capacity"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Capacidade</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      {...field} 
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <Button type="submit">Salvar</Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+  
+  // Client Link Dialog
+  const ClientLinkDialog = () => (
+    <Dialog open={isClientLinkDialogOpen} onOpenChange={setIsClientLinkDialogOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Vincular Cliente à Sala {selectedRoom?.number}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <FormItem>
+            <FormLabel>Cliente</FormLabel>
+            <Select 
+              onValueChange={setSelectedClientId} 
+              value={selectedClientId}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um cliente" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {mockClients.map(client => (
+                  <SelectItem key={client.id} value={client.id}>
+                    {client.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormItem>
+          <DialogFooter>
+            <Button 
+              onClick={handleClientLink} 
+              disabled={!selectedClientId}
+            >
+              Vincular
+            </Button>
+          </DialogFooter>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+  
   return (
     <>
       {parseInt(currentFloor) === 2 ? renderFloor2Layout() : renderStandardLayout()}
+      {selectedRoom && <RoomEditDialog />}
+      {selectedRoom && <ClientLinkDialog />}
     </>
   );
 };
