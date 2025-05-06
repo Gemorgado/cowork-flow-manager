@@ -1,9 +1,8 @@
 
 import React, { useState } from 'react';
 import { Room } from '@/types';
-import { useForm } from 'react-hook-form';
+import { useForm, FieldValues } from 'react-hook-form';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { DialogProvider } from '@/components/ui/dialog';
 import { RoomEditDialog, ClientLinkDialog, RoomDetailsDialogContent } from './room/RoomDialogs';
 import { StandardFloorLayout, Floor2Layout } from './room/FloorLayouts';
 import { getClientInfo, mockClients } from './room/RoomUtils';
@@ -21,8 +20,12 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
   const [hoveredRoomId, setHoveredRoomId] = useState<string | null>(null);
   const [selectedClientId, setSelectedClientId] = useState<string>('');
   
-  // Form for room editing
-  const roomForm = useForm({
+  // Form for room editing with proper type definition
+  const roomForm = useForm<{
+    status: string;
+    area: number;
+    capacity: number;
+  }>({
     defaultValues: {
       status: 'available',
       area: 0,
@@ -67,49 +70,47 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
   
   return (
     <TooltipProvider>
-      <DialogProvider>
-        {parseInt(currentFloor) === 2 ? (
-          <Floor2Layout 
-            rooms={rooms}
-            floorRooms={floorRooms}
-            hoveredRoomId={hoveredRoomId}
-            setHoveredRoomId={setHoveredRoomId}
-            getClientInfo={getClientInfo}
-          />
-        ) : (
-          <StandardFloorLayout 
-            rooms={rooms}
-            floorRooms={floorRooms}
-            hoveredRoomId={hoveredRoomId}
-            setHoveredRoomId={setHoveredRoomId}
-            getClientInfo={getClientInfo}
-          />
-        )}
-        
-        {/* Room edit dialog */}
-        {selectedRoom && (
-          <RoomEditDialog
-            isOpen={isEditDialogOpen}
-            onOpenChange={setIsEditDialogOpen}
-            selectedRoom={selectedRoom}
-            roomForm={roomForm}
-            handleRoomUpdate={handleRoomUpdate}
-          />
-        )}
-        
-        {/* Client link dialog */}
-        {selectedRoom && (
-          <ClientLinkDialog
-            isOpen={isClientLinkDialogOpen}
-            onOpenChange={setIsClientLinkDialogOpen}
-            selectedRoom={selectedRoom}
-            selectedClientId={selectedClientId}
-            setSelectedClientId={setSelectedClientId}
-            mockClients={mockClients}
-            handleClientLink={handleClientLink}
-          />
-        )}
-      </DialogProvider>
+      {parseInt(currentFloor) === 2 ? (
+        <Floor2Layout 
+          rooms={rooms}
+          floorRooms={floorRooms}
+          hoveredRoomId={hoveredRoomId}
+          setHoveredRoomId={setHoveredRoomId}
+          getClientInfo={getClientInfo}
+        />
+      ) : (
+        <StandardFloorLayout 
+          rooms={rooms}
+          floorRooms={floorRooms}
+          hoveredRoomId={hoveredRoomId}
+          setHoveredRoomId={setHoveredRoomId}
+          getClientInfo={getClientInfo}
+        />
+      )}
+      
+      {/* Room edit dialog */}
+      {selectedRoom && (
+        <RoomEditDialog
+          isOpen={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          selectedRoom={selectedRoom}
+          roomForm={roomForm}
+          handleRoomUpdate={handleRoomUpdate}
+        />
+      )}
+      
+      {/* Client link dialog */}
+      {selectedRoom && (
+        <ClientLinkDialog
+          isOpen={isClientLinkDialogOpen}
+          onOpenChange={setIsClientLinkDialogOpen}
+          selectedRoom={selectedRoom}
+          selectedClientId={selectedClientId}
+          setSelectedClientId={setSelectedClientId}
+          mockClients={mockClients}
+          handleClientLink={handleClientLink}
+        />
+      )}
     </TooltipProvider>
   );
 };

@@ -21,14 +21,21 @@ import {
 } from '@/components/ui/select';
 import { Form, FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useForm } from 'react-hook-form';
+import { UseFormReturn } from 'react-hook-form';
+
+// Define the RoomFormValues type for better type safety
+interface RoomFormValues {
+  status: string;
+  area: number;
+  capacity: number;
+}
 
 interface RoomEditDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   selectedRoom: Room | null;
-  roomForm: ReturnType<typeof useForm>;
-  handleRoomUpdate: (data: any) => void;
+  roomForm: UseFormReturn<RoomFormValues>;
+  handleRoomUpdate: (data: RoomFormValues) => void;
 }
 
 export const RoomEditDialog: React.FC<RoomEditDialogProps> = ({
