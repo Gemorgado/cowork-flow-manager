@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 
 interface HeaderProps {
   isSidebarOpen: boolean;
