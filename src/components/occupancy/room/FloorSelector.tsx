@@ -3,8 +3,8 @@ import React from 'react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 interface FloorSelectorProps {
-  value: number;
-  onChange: (value: number) => void;
+  value: string;
+  onChange: (value: string) => void;
 }
 
 export function FloorSelector({ value, onChange }: FloorSelectorProps) {
@@ -12,8 +12,8 @@ export function FloorSelector({ value, onChange }: FloorSelectorProps) {
     <div className="flex justify-center mb-8">
       <ToggleGroup
         type="single"
-        value={value.toString()}
-        onValueChange={(val) => val && onChange(parseInt(val))}
+        value={value}
+        onValueChange={(val) => val && onChange(val)}
         className="rounded-full bg-white/5 backdrop-blur-sm shadow-sm p-1"
       >
         <ToggleGroupItem value="1" className="rounded-full data-[state=on]:bg-primary">

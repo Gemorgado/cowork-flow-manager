@@ -35,16 +35,18 @@ export const OccupancyTabs: React.FC<OccupancyTabsProps> = ({
       
       <TabsContent value="rooms" className="mt-0">
         <RoomsTab 
-          rooms={rooms.filter(room => room.floor === parseInt(currentFloor))} 
-          isLoading={isLoading} 
+          rooms={rooms.filter(room => room.floor === parseInt(currentFloor) as any)} 
+          isLoading={isLoading}
+          currentFloor={currentFloor}
         />
       </TabsContent>
       
       <TabsContent value="workstations" className="mt-0">
         <WorkStationsTab 
-          workStations={workStations.filter(station => station.floor === parseInt(currentFloor))} 
+          workStations={workStations.filter(station => station.floor === parseInt(currentFloor) as any)} 
           isLoading={isLoading}
           onAllocateFlexToFixed={onAllocateFlexToFixed}
+          currentFloor={currentFloor}
         />
       </TabsContent>
     </Tabs>

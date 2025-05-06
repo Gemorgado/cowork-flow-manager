@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Room, WorkStation } from '@/types';
+import { Room, WorkStation, LocationStatus } from '@/types';
 import { toast } from '@/components/ui/use-toast';
 import { calculateOccupancyRate } from '@/components/occupancy/OccupancyStats';
 import { convertFlexToFixed } from '@/components/occupancy/utils/occupancyUtils';
@@ -94,7 +94,7 @@ export function useSupabaseOccupancy() {
   const roomOccupancy = calculateOccupancyRate(floorRooms);
   const stationOccupancy = calculateOccupancyRate(floorStations);
 
-  const updateRoomStatus = useCallback(async (roomId: string, status: string, clientId?: string) => {
+  const updateRoomStatus = useCallback(async (roomId: string, status: LocationStatus, clientId?: string) => {
     try {
       // First update the local state for immediate UI feedback
       setRooms(prevRooms => 

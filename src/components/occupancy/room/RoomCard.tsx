@@ -12,17 +12,24 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 interface RoomCardProps {
   room: Room;
+  hoveredRoomId?: string | null;
+  setHoveredRoomId?: (id: string | null) => void;
+  getClientInfo?: (clientId?: string) => string;
 }
 
 export const RoomCard: React.FC<RoomCardProps> = ({
   room,
+  hoveredRoomId,
+  setHoveredRoomId,
+  getClientInfo
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   
   // Get client name for display
   const getClientName = (clientId?: string) => {
     if (!clientId) return "Nenhum cliente";
-    // In a real app, you would fetch the client name
+    if (getClientInfo) return getClientInfo(clientId);
+    // Fallback if getClientInfo is not provided
     return `Cliente #${clientId.replace('client', '')}`;
   };
 
@@ -38,8 +45,14 @@ export const RoomCard: React.FC<RoomCardProps> = ({
                 "hover:-translate-y-0.5 hover:shadow-lg/20 transition-all duration-150",
                 statusColors[room.status].replace('bg-', 'bg-opacity-20 bg-')
               )}
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
+              onMouseEnter={() => {
+                setIsHovered(true);
+                setHoveredRoomId && setHoveredRoomId(room.id);
+              }}
+              onMouseLeave={() => {
+                setIsHovered(false);
+                setHoveredRoomId && setHoveredRoomId(null);
+              }}
             >
               <span className="text-sm font-medium mb-1 text-muted-foreground">{room.number}</span>
               <Badge 
