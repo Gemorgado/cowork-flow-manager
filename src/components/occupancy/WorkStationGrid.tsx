@@ -4,7 +4,6 @@ import { WorkStation } from '@/types';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { StationDialogContent } from './workstation/StationDialogContent';
 import { getClientInfo } from './workstation/StationUtils';
-import { statusColors } from './StatusLegend';
 import { cn } from '@/lib/utils';
 
 interface WorkStationGridProps {

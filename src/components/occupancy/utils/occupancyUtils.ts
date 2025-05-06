@@ -14,41 +14,6 @@ export const findRandomAvailableStation = (workStations: WorkStation[]): WorkSta
   return availableStations[randomIndex];
 };
 
-// Function to allocate flex stations
-export const allocateFlexStations = (workStations: WorkStation[], count: number): WorkStation[] => {
-  const newStations = [...workStations];
-  let allocated = 0;
-  
-  // Find all available workstations
-  const availableStations = newStations.filter(
-    station => station.status === 'available'
-  );
-  
-  if (availableStations.length < count) {
-    toast.error(`Só foi possível alocar ${availableStations.length} estações flex. Capacidade insuficiente!`);
-    count = availableStations.length;
-  }
-  
-  // Randomly select and mark as flex
-  while (allocated < count && availableStations.length > 0) {
-    const randomIndex = Math.floor(Math.random() * availableStations.length);
-    const station = availableStations.splice(randomIndex, 1)[0];
-    
-    // Find this station in the original array and update it
-    const stationIndex = newStations.findIndex(s => s.id === station.id);
-    if (stationIndex !== -1) {
-      newStations[stationIndex] = { ...newStations[stationIndex], status: 'flex' };
-      allocated++;
-    }
-  }
-  
-  if (allocated > 0) {
-    toast.success(`${allocated} estações flex foram alocadas com sucesso!`);
-  }
-  
-  return newStations;
-};
-
 // Function to convert a flex station to fixed
 export const convertFlexToFixed = (workStations: WorkStation[], stationId: string, clientId: string): WorkStation[] => {
   const newStations = [...workStations];
@@ -75,41 +40,6 @@ export const convertFlexToFixed = (workStations: WorkStation[], stationId: strin
     toast.success(`Estação ${newStations[stationIndex].number} convertida para Fixa. Uma nova estação Flex foi alocada automaticamente.`);
   } else {
     toast.warning(`Estação ${newStations[stationIndex].number} convertida para Fixa. Não há mais estações disponíveis para alocação Flex.`);
-  }
-  
-  return newStations;
-};
-
-// Function to release flex stations
-export const releaseFlexStations = (workStations: WorkStation[], count: number): WorkStation[] => {
-  const newStations = [...workStations];
-  let released = 0;
-  
-  // Find all flex workstations
-  const flexStations = newStations.filter(
-    station => station.status === 'flex'
-  );
-  
-  if (flexStations.length < count) {
-    toast.warning(`Só é possível liberar ${flexStations.length} estações flex.`);
-    count = flexStations.length;
-  }
-  
-  // Randomly select and mark as available
-  while (released < count && flexStations.length > 0) {
-    const randomIndex = Math.floor(Math.random() * flexStations.length);
-    const station = flexStations.splice(randomIndex, 1)[0];
-    
-    // Find this station in the original array and update it
-    const stationIndex = newStations.findIndex(s => s.id === station.id);
-    if (stationIndex !== -1) {
-      newStations[stationIndex] = { ...newStations[stationIndex], status: 'available', clientId: undefined };
-      released++;
-    }
-  }
-  
-  if (released > 0) {
-    toast.success(`${released} estações flex foram liberadas com sucesso!`);
   }
   
   return newStations;
