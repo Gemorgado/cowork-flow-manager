@@ -22,7 +22,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { X } from 'lucide-react';
 
 // Define the schema for plan editing
@@ -92,8 +92,8 @@ const PlanEditDialog = ({ open, onOpenChange, plan }: PlanEditDialogProps) => {
     
   const { fields: benefitFields, append: appendBenefit, remove: removeBenefit } = 
     useFieldArray({
-      control: form.control,
       name: "benefits",
+      control: form.control,
     });
 
   async function onSubmit(data: PlanFormValues) {
@@ -110,10 +110,7 @@ const PlanEditDialog = ({ open, onOpenChange, plan }: PlanEditDialogProps) => {
         throw new Error('Falha ao atualizar o plano');
       }
       
-      toast({
-        title: "Plano atualizado",
-        description: "Plano atualizado com sucesso.",
-      });
+      toast.success("Plano atualizado com sucesso.");
       
       // Invalidate the plans queries to refetch
       queryClient.invalidateQueries({ queryKey: ['plans'] });
@@ -122,11 +119,7 @@ const PlanEditDialog = ({ open, onOpenChange, plan }: PlanEditDialogProps) => {
       onOpenChange(false);
     } catch (error) {
       console.error("Erro ao atualizar plano:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro ao atualizar",
-        description: "Não foi possível atualizar o plano. Tente novamente.",
-      });
+      toast.error("Não foi possível atualizar o plano. Tente novamente.");
     }
   }
 
@@ -178,7 +171,11 @@ const PlanEditDialog = ({ open, onOpenChange, plan }: PlanEditDialogProps) => {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => appendPeriodicity({ key: '', label: '', price: 0 })}
+                  onClick={() => appendPeriodicity({
+                    key: '',
+                    label: '',
+                    price: 0
+                  })}
                   className="h-8 px-2"
                 >
                   Adicionar
