@@ -68,6 +68,7 @@ export type FloorNumber = 1 | 2 | 3;
 export type LocationStatus = 
   | 'available'
   | 'occupied'
+  | 'flex'
   | 'reserved'
   | 'maintenance';
 

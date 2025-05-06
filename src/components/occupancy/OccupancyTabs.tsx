@@ -10,12 +10,14 @@ interface OccupancyTabsProps {
   rooms: Room[];
   workStations: WorkStation[];
   currentFloor: string;
+  onAllocateFlexToFixed?: (stationId: string, clientId: string) => void;
 }
 
 export const OccupancyTabs: React.FC<OccupancyTabsProps> = ({
   rooms,
   workStations,
   currentFloor,
+  onAllocateFlexToFixed,
 }) => {
   return (
     <TooltipProvider>
@@ -28,7 +30,11 @@ export const OccupancyTabs: React.FC<OccupancyTabsProps> = ({
           <RoomMap rooms={rooms} currentFloor={currentFloor} />
         </TabsContent>
         <TabsContent value="stations" className="mt-4">
-          <WorkStationMap workStations={workStations} currentFloor={currentFloor} />
+          <WorkStationMap 
+            workStations={workStations} 
+            currentFloor={currentFloor}
+            onAllocateFlexToFixed={onAllocateFlexToFixed}
+          />
         </TabsContent>
       </Tabs>
     </TooltipProvider>

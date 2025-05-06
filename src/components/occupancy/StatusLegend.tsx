@@ -6,15 +6,17 @@ import { cn } from '@/lib/utils';
 import { LocationStatus } from '@/types';
 
 export const statusColors: Record<LocationStatus, string> = {
-  available: 'bg-gray-100 border-gray-300 hover:bg-gray-200', // Changed to gray for "Livre"
-  occupied: 'bg-green-100 border-green-300 hover:bg-green-200', // Changed to green for "Ocupado"
-  reserved: 'bg-amber-100 border-amber-300 hover:bg-amber-200', // Amber for "Reservado"
-  maintenance: 'bg-red-100 border-red-300 hover:bg-red-200', // Red for "Manutenção"
+  available: 'bg-gray-200 border-gray-300 hover:bg-gray-300', // Changed to gray for "Livre"
+  occupied: 'bg-green-500 border-green-600 hover:bg-green-600', // Changed to green for "Ocupado"
+  flex: 'bg-yellow-300 border-yellow-400 hover:bg-yellow-400', // Yellow for "Flex"
+  reserved: 'bg-yellow-500 border-yellow-600 hover:bg-yellow-600', // Darker yellow for "Reservado"
+  maintenance: 'bg-red-500 border-red-600 hover:bg-red-600', // Red for "Manutenção"
 };
 
 export const statusLabels: Record<LocationStatus, string> = {
   available: 'Livre',
   occupied: 'Ocupado',
+  flex: 'Flex',
   reserved: 'Reservado',
   maintenance: 'Manutenção',
 };
@@ -41,6 +43,7 @@ export const StatusLegend: React.FC = () => {
           <p>• Salas: Espaços privativos com acessos controlados</p>
           <p>• Estações Fixas: Posições dedicadas a um único cliente</p>
           <p>• Estações Flex: Posições compartilhadas sem reserva fixa</p>
+          <p className="mt-2 italic">Nota: Estações Flex (amarelo claro) são marcadores aleatórios e não representam posições físicas específicas.</p>
         </div>
       </CardContent>
     </Card>
