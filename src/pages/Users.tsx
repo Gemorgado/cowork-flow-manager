@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -8,19 +8,20 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { User } from '@/types';
-import { users as mockUsers } from '@/mock/users';
 import AddUserDialog from '@/components/users/AddUserDialog';
 import EditUserDialog from '@/components/users/EditUserDialog';
 import DeleteUserDialog from '@/components/users/DeleteUserDialog';
 import UsersTable from '@/components/users/UsersTable';
 import useUserForm from '@/hooks/useUserForm';
+import { fetchUsers } from '@/utils/supabaseUsers';
 
 interface UsersProps {
   isTab?: boolean;
 }
 
 const Users: React.FC<UsersProps> = ({ isTab = false }) => {
-  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
   
   const {
     formData,
@@ -41,6 +42,23 @@ const Users: React.FC<UsersProps> = ({ isTab = false }) => {
     openDeleteDialog,
   } = useUserForm({ users, setUsers });
 
+  // Load users from Supabase when component mounts
+  useEffect(() => {
+    const loadUsers = async () => {
+      setLoading(true);
+      try {
+        const userData = await fetchUsers();
+        setUsers(userData);
+      } catch (error) {
+        console.error('Error loading users:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUsers();
+  }, []);
+
   if (isTab) {
     return (
       <div className="space-y-4">
@@ -57,12 +75,18 @@ const Users: React.FC<UsersProps> = ({ isTab = false }) => {
           />
         </div>
         
-        <UsersTable
-          users={users}
-          permissionOptions={permissionOptions}
-          onEdit={openEditDialog}
-          onDelete={openDeleteDialog}
-        />
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        ) : (
+          <UsersTable
+            users={users}
+            permissionOptions={permissionOptions}
+            onEdit={openEditDialog}
+            onDelete={openDeleteDialog}
+          />
+        )}
 
         {/* Edit User Dialog */}
         <EditUserDialog
@@ -109,12 +133,18 @@ const Users: React.FC<UsersProps> = ({ isTab = false }) => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <UsersTable
-            users={users}
-            permissionOptions={permissionOptions}
-            onEdit={openEditDialog}
-            onDelete={openDeleteDialog}
-          />
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : (
+            <UsersTable
+              users={users}
+              permissionOptions={permissionOptions}
+              onEdit={openEditDialog}
+              onDelete={openDeleteDialog}
+            />
+          )}
         </CardContent>
       </Card>
 

@@ -2,6 +2,11 @@
 import { User } from '@/types';
 import { toast } from 'sonner';
 import { FormData } from './useUserFormState';
+import { 
+  addUser as addUserToSupabase,
+  updateUser as updateUserInSupabase,
+  deleteUser as deleteUserFromSupabase
+} from '@/utils/supabaseUsers';
 
 interface UseUserOperationsProps {
   users: User[];
@@ -22,65 +27,86 @@ export const useUserOperations = ({
   setIsDeleteUserOpen,
   setSelectedUser,
 }: UseUserOperationsProps) => {
-  const handleAddUser = (formData: FormData) => {
-    // Validação simples
+  const handleAddUser = async (formData: FormData) => {
+    // Simple validation
     if (!formData.name || !formData.email || !formData.password) {
       toast.error('Nome, email e senha são obrigatórios');
       return;
     }
 
-    const newUser: User = {
-      id: (users.length + 1).toString(),
-      ...formData,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    try {
+      const newUser = await addUserToSupabase({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        password: formData.password,
+        permissions: formData.permissions,
+      });
 
-    setUsers([...users, newUser]);
-    setIsAddUserOpen(false);
-    resetForm();
-    toast.success('Usuário adicionado com sucesso!');
+      if (newUser) {
+        setUsers(prev => [...prev, newUser]);
+        setIsAddUserOpen(false);
+        resetForm();
+        toast.success('Usuário adicionado com sucesso!');
+      }
+    } catch (error) {
+      console.error('Error adding user:', error);
+      toast.error('Erro ao adicionar usuário');
+    }
   };
 
-  const handleEditUser = (formData: FormData, selectedUser: User | null) => {
+  const handleEditUser = async (formData: FormData, selectedUser: User | null) => {
     if (!selectedUser) return;
 
-    // Validação simples
+    // Simple validation
     if (!formData.name || !formData.email) {
       toast.error('Nome e email são obrigatórios');
       return;
     }
 
-    const updatedUsers = users.map((user) =>
-      user.id === selectedUser.id
-        ? {
-            ...user,
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            address: formData.address,
-            password: formData.password, // Include password in update
-            permissions: formData.permissions,
-            updatedAt: new Date(),
-          }
-        : user
-    );
+    try {
+      const updatedUser = await updateUserInSupabase({
+        ...selectedUser,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        password: formData.password, // Include password in update
+        permissions: formData.permissions,
+      });
 
-    setUsers(updatedUsers);
-    setIsEditUserOpen(false);
-    setSelectedUser(null);
-    resetForm();
-    toast.success('Usuário atualizado com sucesso!');
+      if (updatedUser) {
+        setUsers(prev => prev.map(user => 
+          user.id === selectedUser.id ? updatedUser : user
+        ));
+        setIsEditUserOpen(false);
+        setSelectedUser(null);
+        resetForm();
+        toast.success('Usuário atualizado com sucesso!');
+      }
+    } catch (error) {
+      console.error('Error updating user:', error);
+      toast.error('Erro ao atualizar usuário');
+    }
   };
 
-  const handleDeleteUser = (selectedUser: User | null) => {
+  const handleDeleteUser = async (selectedUser: User | null) => {
     if (!selectedUser) return;
 
-    const updatedUsers = users.filter((user) => user.id !== selectedUser.id);
-    setUsers(updatedUsers);
-    setIsDeleteUserOpen(false);
-    setSelectedUser(null);
-    toast.success('Usuário removido com sucesso!');
+    try {
+      const success = await deleteUserFromSupabase(selectedUser.id);
+      
+      if (success) {
+        setUsers(prev => prev.filter(user => user.id !== selectedUser.id));
+        setIsDeleteUserOpen(false);
+        setSelectedUser(null);
+        toast.success('Usuário removido com sucesso!');
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast.error('Erro ao excluir usuário');
+    }
   };
 
   return {

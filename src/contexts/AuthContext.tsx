@@ -1,6 +1,8 @@
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { AuthUser, Permission } from '../types';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -20,56 +22,146 @@ export const useAuth = () => {
   return context;
 };
 
-// Fix: Define AuthProvider as a proper function component
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for saved user in localStorage
-    const savedUser = localStorage.getItem('cowork-user');
-    if (savedUser) {
+    // Check for existing session when app loads
+    const checkSession = async () => {
       try {
-        setUser(JSON.parse(savedUser));
+        const { data: sessionData } = await supabase.auth.getSession();
+        
+        if (sessionData?.session) {
+          const { data: userData } = await supabase.auth.getUser();
+          
+          if (userData?.user) {
+            // Get user profile data with permissions
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', userData.user.id)
+              .single();
+              
+            if (profileData) {
+              setUser({
+                id: userData.user.id,
+                name: profileData.name || userData.user.user_metadata?.name || '',
+                email: userData.user.email || '',
+                phone: profileData.phone || '',
+                address: profileData.address || '',
+                password: '', // Don't store password
+                permissions: profileData.permissions || [],
+                token: sessionData.session.access_token,
+                createdAt: new Date(userData.user.created_at || ''),
+                updatedAt: new Date(userData.user.updated_at || ''),
+              });
+            }
+          }
+        }
       } catch (error) {
-        console.error('Failed to parse saved user:', error);
-        localStorage.removeItem('cowork-user');
+        console.error('Error checking session:', error);
+      } finally {
+        setLoading(false);
       }
-    }
-    setLoading(false);
+    };
+
+    checkSession();
+
+    // Subscribe to auth changes
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        const { data: userData } = await supabase.auth.getUser();
+        
+        if (userData?.user) {
+          // Get user profile data with permissions
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', userData.user.id)
+            .single();
+            
+          if (profileData) {
+            setUser({
+              id: userData.user.id,
+              name: profileData.name || userData.user.user_metadata?.name || '',
+              email: userData.user.email || '',
+              phone: profileData.phone || '',
+              address: profileData.address || '',
+              password: '', // Don't store password
+              permissions: profileData.permissions || [],
+              token: session.access_token,
+              createdAt: new Date(userData.user.created_at || ''),
+              updatedAt: new Date(userData.user.updated_at || ''),
+            });
+          }
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      }
+    });
+
+    return () => {
+      if (authListener && authListener.subscription) {
+        authListener.subscription.unsubscribe();
+      }
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
-      // In a real application, this would make an API call
-      // For now, we'll simulate a successful login with mock data
-      const mockUser: AuthUser = {
-        id: '1',
-        name: 'Administrador',
-        email: email,
-        phone: '(11) 99999-9999',
-        address: 'Rua Exemplo, 123',
-        password: password, // Add the password field
-        permissions: ['dashboard', 'users', 'clients', 'plans', 'services', 'occupancy'],
-        token: 'mock-jwt-token',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      
-      setUser(mockUser);
-      localStorage.setItem('cowork-user', JSON.stringify(mockUser));
-    } catch (error) {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.user) {
+        // Get user profile data with permissions
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', data.user.id)
+          .single();
+          
+        if (profileData) {
+          setUser({
+            id: data.user.id,
+            name: profileData.name || data.user.user_metadata?.name || '',
+            email: data.user.email || '',
+            phone: profileData.phone || '',
+            address: profileData.address || '',
+            password: '', // Don't store password
+            permissions: profileData.permissions || [],
+            token: data.session?.access_token || '',
+            createdAt: new Date(data.user.created_at || ''),
+            updatedAt: new Date(data.user.updated_at || ''),
+          });
+          toast.success(`Bem-vindo, ${profileData.name}!`);
+        }
+      }
+    } catch (error: any) {
       console.error('Login failed:', error);
+      toast.error(`Falha na autenticação: ${error.message || 'Verifique suas credenciais'}`);
       throw new Error('Falha na autenticação. Verifique suas credenciais.');
     } finally {
       setLoading(false);
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('cowork-user');
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      toast.success('Logout realizado com sucesso');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      toast.error('Falha ao realizar logout');
+    }
   };
 
   const hasPermission = (permission: Permission) => {

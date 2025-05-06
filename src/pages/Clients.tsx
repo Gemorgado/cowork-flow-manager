@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   Card,
@@ -7,7 +8,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Client } from '@/types';
-import { clients as mockClients } from '@/mock/clients';
 import ClientsTable from '@/components/clients/ClientsTable';
 import AddClientDialog from '@/components/clients/AddClientDialog';
 import EditClientDialog from '@/components/clients/EditClientDialog';
@@ -15,6 +15,7 @@ import DeleteClientDialog from '@/components/clients/DeleteClientDialog';
 import useClientForm from '@/hooks/useClientForm';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { fetchClients } from '@/utils/supabaseClients';
 
 const EMPTY_CLIENT = {
   companyName: '',
@@ -32,7 +33,8 @@ const EMPTY_CLIENT = {
 };
 
 const Clients = () => {
-  const [clients, setClients] = useState<Client[]>(mockClients);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [loading, setLoading] = useState(true);
   
   const {
     formData,
@@ -53,6 +55,24 @@ const Clients = () => {
     openDeleteDialog,
     resetForm,
   } = useClientForm({ clients, setClients });
+
+  // Load clients from Supabase when component mounts
+  useEffect(() => {
+    const loadClients = async () => {
+      setLoading(true);
+      try {
+        const clientsData = await fetchClients();
+        setClients(clientsData);
+      } catch (error) {
+        console.error('Error loading clients:', error);
+        toast.error('Erro ao carregar clientes');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadClients();
+  }, []);
 
   // Reset form data when opening the add client dialog
   const handleOpenAddDialog = () => {
@@ -101,11 +121,17 @@ const Clients = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ClientsTable
-            clients={clients}
-            onEdit={openEditDialog}
-            onDelete={openDeleteDialog}
-          />
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : (
+            <ClientsTable
+              clients={clients}
+              onEdit={openEditDialog}
+              onDelete={openDeleteDialog}
+            />
+          )}
         </CardContent>
       </Card>
 
