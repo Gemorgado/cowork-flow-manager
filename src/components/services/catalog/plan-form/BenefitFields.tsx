@@ -20,7 +20,7 @@ interface BenefitFieldsProps {
 export const BenefitFields = ({ form }: BenefitFieldsProps) => {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "benefits" as keyof PlanFormValues,
+    name: "benefits",
   });
 
   return (
@@ -30,7 +30,7 @@ export const BenefitFields = ({ form }: BenefitFieldsProps) => {
         <Button
           type="button"
           variant="outline"
-          onClick={() => append("" as any)}
+          onClick={() => append("")}
           className="h-8 px-2"
         >
           Adicionar
