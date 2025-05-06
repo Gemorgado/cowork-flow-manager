@@ -20,7 +20,7 @@ interface BenefitFieldsProps {
 export const BenefitFields = ({ form }: BenefitFieldsProps) => {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "benefits",
+    name: "benefits", // This is correct for the benefits array
   });
 
   return (
@@ -30,7 +30,7 @@ export const BenefitFields = ({ form }: BenefitFieldsProps) => {
         <Button
           type="button"
           variant="outline"
-          onClick={() => append('')}
+          onClick={() => append('')} // This is correct - benefits are strings
           className="h-8 px-2"
         >
           Adicionar
