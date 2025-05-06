@@ -22,6 +22,11 @@ export const OccupancyTabs: React.FC<OccupancyTabsProps> = ({
 }) => {
   // Filter for current floor
   const floorRooms = rooms.filter((room) => room.floor === parseInt(currentFloor) as any);
+  const floorStations = workStations.filter((station) => station.floor === parseInt(currentFloor) as any);
+  
+  // Count fixed and flex stations
+  const fixedCount = floorStations.filter(s => s.type === 'fixed').length;
+  const flexCount = floorStations.filter(s => s.type === 'flex').length;
   
   return (
     <TooltipProvider>
@@ -52,8 +57,7 @@ export const OccupancyTabs: React.FC<OccupancyTabsProps> = ({
             <CardHeader>
               <CardTitle>Estações - {currentFloor}º Andar</CardTitle>
               <CardDescription>
-                Fixas: {workStations.filter(s => s.floor === parseInt(currentFloor) && s.type === 'fixed').length} | 
-                Flex: {workStations.filter(s => s.floor === parseInt(currentFloor) && s.type === 'flex').length}
+                Fixas: {fixedCount} | Flex: {flexCount}
               </CardDescription>
             </CardHeader>
             <WorkStationsTab 
