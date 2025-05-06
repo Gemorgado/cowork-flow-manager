@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 
 export function FloorMap() {
-  const [floor, setFloor] = useState<string>("1");
+  const [floor, setFloor] = useState<"1" | "2" | "3">("1");
 
   const { data: rooms, isLoading } = useQuery({
     queryKey: ['rooms', floor],
