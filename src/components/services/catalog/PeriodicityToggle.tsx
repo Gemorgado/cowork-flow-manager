@@ -2,15 +2,14 @@
 import React from 'react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
-interface Periodicity {
+interface PeriodItem {
   label: string;
   key: string;
   price: number;
-  times?: number;
 }
 
 interface PeriodicityToggleProps {
-  items: Periodicity[];
+  items: PeriodItem[];
   value: string;
   onValueChange: (value: string) => void;
 }
@@ -29,7 +28,7 @@ const PeriodicityToggle = ({ items, value, onValueChange }: PeriodicityTogglePro
         <ToggleGroupItem
           key={period.key}
           value={period.key}
-          className="text-xs px-3 py-1 data-[state=on]:bg-cowork-500 data-[state=on]:text-white rounded-full transition-all"
+          className="text-xs px-3 py-1 data-[state=on]:bg-primary data-[state=on]:text-white rounded-full transition-all"
         >
           {period.label}
         </ToggleGroupItem>

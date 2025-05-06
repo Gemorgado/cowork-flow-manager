@@ -4,6 +4,7 @@ import PlanCatalog from '@/components/services/catalog/PlanCatalog';
 import { supabase } from "@/integrations/supabase/client";
 import { Service } from '@/types';
 import { services as mockServices } from '@/mock/services';
+import { Loader2 } from 'lucide-react';
 
 const Services = () => {
   const [services, setServices] = useState<Service[]>(mockServices);
@@ -108,7 +109,7 @@ const Services = () => {
     <div className="min-h-screen bg-neutral-950 dark:bg-white text-white dark:text-neutral-950">
       {loading ? (
         <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
         </div>
       ) : (
         <PlanCatalog services={services} />

@@ -8,17 +8,16 @@ interface BenefitsAccordionProps {
 
 const BenefitsAccordion = ({ benefits }: BenefitsAccordionProps) => {
   return (
-    <Accordion type="single" collapsible className="w-full">
+    <Accordion type="single" collapsible className="w-full mt-2">
       <AccordionItem value="benefits" className="border-b-0">
         <AccordionTrigger className="text-sm font-medium py-2">
           Benefícios inclusos
         </AccordionTrigger>
         <AccordionContent>
-          <ul className="space-y-2 text-sm">
+          <ul className="space-y-1 list-disc list-inside text-sm">
             {benefits.map((benefit, index) => (
-              <li key={index} className="flex items-start">
-                <span className="text-cowork-500 mr-2">•</span>
-                <span>{benefit}</span>
+              <li key={index} className="text-sm">
+                {benefit}
               </li>
             ))}
           </ul>

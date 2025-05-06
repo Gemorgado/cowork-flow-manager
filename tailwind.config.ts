@@ -65,7 +65,8 @@ export default {
 					800: '#034b7d',
 					900: '#083f68',
 					950: '#06294a'
-				}
+				},
+				'card-glass': 'rgba(255,255,255,0.05)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -106,7 +107,10 @@ export default {
 			},
 			backgroundImage: {
 				gloss: 'linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.0))',
-			}
+			},
+			dropShadow: { 
+				glass: '0 8px 32px rgba(0,0,0,0.1)' 
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
