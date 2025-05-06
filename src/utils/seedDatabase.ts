@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { seedSupabaseWithOccupancyData } from '@/utils/seedSupabase';
+import { seedSupabaseWithServicesData } from '@/utils/seedSupabaseWithServices';
 import { toast } from "sonner";
 
 export async function seedDatabase() {
@@ -13,10 +14,10 @@ export async function seedDatabase() {
     }
     
     // Seed some services if they don't exist yet
-    const { error: servicesError } = await supabase.rpc('seed_initial_services');
+    const servicesResult = await seedSupabaseWithServicesData();
     
-    if (servicesError) {
-      console.error('Error seeding services:', servicesError);
+    if (!servicesResult.success) {
+      console.error('Error seeding services:', servicesResult.error);
       toast.error('Erro ao popular serviços iniciais');
     } else {
       console.log('Services seeded successfully');

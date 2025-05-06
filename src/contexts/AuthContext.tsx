@@ -44,6 +44,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               .single();
               
             if (profileData) {
+              // Convert string[] permissions to Permission[] type by validating each permission
+              const validPermissions = (profileData.permissions || []).filter((p: string) => 
+                ['dashboard', 'users', 'clients', 'plans', 'services', 'occupancy'].includes(p)
+              ) as Permission[];
+              
               setUser({
                 id: userData.user.id,
                 name: profileData.name || userData.user.user_metadata?.name || '',
@@ -51,7 +56,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 phone: profileData.phone || '',
                 address: profileData.address || '',
                 password: '', // Don't store password
-                permissions: profileData.permissions || [],
+                permissions: validPermissions,
                 token: sessionData.session.access_token,
                 createdAt: new Date(userData.user.created_at || ''),
                 updatedAt: new Date(userData.user.updated_at || ''),
@@ -82,6 +87,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             .single();
             
           if (profileData) {
+            // Convert string[] permissions to Permission[] type by validating each permission
+            const validPermissions = (profileData.permissions || []).filter((p: string) => 
+              ['dashboard', 'users', 'clients', 'plans', 'services', 'occupancy'].includes(p)
+            ) as Permission[];
+            
             setUser({
               id: userData.user.id,
               name: profileData.name || userData.user.user_metadata?.name || '',
@@ -89,7 +99,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               phone: profileData.phone || '',
               address: profileData.address || '',
               password: '', // Don't store password
-              permissions: profileData.permissions || [],
+              permissions: validPermissions,
               token: session.access_token,
               createdAt: new Date(userData.user.created_at || ''),
               updatedAt: new Date(userData.user.updated_at || ''),
@@ -129,6 +139,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           .single();
           
         if (profileData) {
+          // Convert string[] permissions to Permission[] type by validating each permission
+          const validPermissions = (profileData.permissions || []).filter((p: string) => 
+            ['dashboard', 'users', 'clients', 'plans', 'services', 'occupancy'].includes(p)
+          ) as Permission[];
+          
           setUser({
             id: data.user.id,
             name: profileData.name || data.user.user_metadata?.name || '',
@@ -136,7 +151,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             phone: profileData.phone || '',
             address: profileData.address || '',
             password: '', // Don't store password
-            permissions: profileData.permissions || [],
+            permissions: validPermissions,
             token: data.session?.access_token || '',
             createdAt: new Date(data.user.created_at || ''),
             updatedAt: new Date(data.user.updated_at || ''),
