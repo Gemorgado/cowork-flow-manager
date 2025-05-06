@@ -8,7 +8,7 @@ interface BenefitsAccordionProps {
 
 const BenefitsAccordion = ({ benefits }: BenefitsAccordionProps) => {
   return (
-    <Accordion type="single" collapsible className="w-full mt-2">
+    <Accordion type="single" collapsible className="w-full mt-2" aria-label="Benefícios do plano">
       <AccordionItem value="benefits" className="border-b-0">
         <AccordionTrigger className="text-sm font-medium py-2">
           Benefícios inclusos

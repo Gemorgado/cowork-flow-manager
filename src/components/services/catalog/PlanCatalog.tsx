@@ -4,8 +4,8 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Heading } from '@/components/ui/heading';
-import { Service } from '@/types';
 import { ServiceCard } from '@/components/services/ServiceCard';
+import { Service } from '@/types';
 
 interface PlanCatalogProps {
   services: Service[];

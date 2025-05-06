@@ -4,6 +4,7 @@ import { Pencil } from 'lucide-react';
 import PeriodicityToggle from './PeriodicityToggle';
 import BenefitsAccordion from './BenefitsAccordion';
 import PlanEditDialog from './PlanEditDialog';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Periodicity {
   label: string;
@@ -27,28 +28,36 @@ interface PlanCardProps {
 const PlanCard = ({ plan }: PlanCardProps) => {
   const [open, setOpen] = useState(false);
   const [period, setPeriod] = useState(plan.periodicities[0]);
+  const { hasPermission } = useAuth();
+
+  const canEditPlans = hasPermission('plans');
 
   return (
     <article className="relative rounded-2xl bg-white/5 dark:bg-neutral-100/60 backdrop-blur-sm shadow-md shadow-black/10 p-6 flex flex-col gap-4 transition hover:shadow-lg/20 hover:-translate-y-1">
       {/* Edit button */}
-      <button
-        onClick={() => setOpen(true)}
-        className="absolute top-4 right-4 opacity-50 hover:opacity-100"
-        aria-label="Editar plano"
-      >
-        <Pencil className="h-4 w-4" />
-      </button>
+      {canEditPlans && (
+        <button
+          onClick={() => setOpen(true)}
+          className="absolute top-4 right-4 opacity-40 hover:opacity-90"
+          aria-label="Editar plano"
+          tabIndex={0}
+        >
+          <Pencil className="h-4 w-4" />
+        </button>
+      )}
 
       <h3 className="text-lg font-medium">{plan.name}</h3>
-      <p className="text-sm text-muted-foreground">{plan.description}</p>
+      <p className="text-sm text-muted-foreground line-clamp-2">{plan.description}</p>
 
-      <PeriodicityToggle
-        items={plan.periodicities}
-        value={period.key}
-        onValueChange={(key) =>
-          setPeriod(plan.periodicities.find((p) => p.key === key) || plan.periodicities[0])
-        }
-      />
+      {plan.periodicities.length > 1 && (
+        <PeriodicityToggle
+          items={plan.periodicities}
+          value={period.key}
+          onValueChange={(key) =>
+            setPeriod(plan.periodicities.find((p) => p.key === key) || plan.periodicities[0])
+          }
+        />
+      )}
 
       <div>
         <span className="text-3xl font-bold tracking-tight">
@@ -63,7 +72,7 @@ const PlanCard = ({ plan }: PlanCardProps) => {
       </div>
 
       <BenefitsAccordion benefits={plan.benefits} />
-      <PlanEditDialog open={open} onOpenChange={setOpen} plan={plan} />
+      {canEditPlans && <PlanEditDialog open={open} onOpenChange={setOpen} plan={plan} />}
     </article>
   );
 };

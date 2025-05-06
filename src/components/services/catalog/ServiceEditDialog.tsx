@@ -1,20 +1,41 @@
 
 import React from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { z } from 'zod';
 import { useQueryClient } from '@tanstack/react-query';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle,
+  DialogFooter
+} from '@/components/ui/dialog';
+import { 
+  Form, 
+  FormControl, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormMessage 
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from '@/hooks/use-toast';
 import { Service } from '@/types';
-import { toast } from 'sonner';
+
+// Define the schema for service editing
+const serviceFormSchema = z.object({
+  name: z.string().min(3, {
+    message: 'O nome deve ter pelo menos 3 caracteres.',
+  }),
+  description: z.string().min(10, {
+    message: 'A descrição deve ter pelo menos 10 caracteres.',
+  }),
+});
+
+type ServiceFormValues = z.infer<typeof serviceFormSchema>;
 
 interface ServiceEditDialogProps {
   open: boolean;
@@ -25,59 +46,46 @@ interface ServiceEditDialogProps {
 const ServiceEditDialog = ({ open, onOpenChange, service }: ServiceEditDialogProps) => {
   const queryClient = useQueryClient();
   
-  const form = useForm({
+  const form = useForm<ServiceFormValues>({
+    resolver: zodResolver(serviceFormSchema),
     defaultValues: {
       name: service.name,
       description: service.description,
-      benefits: service.benefits?.map(b => b.name || '').join('\n') || '',
-      prices: service.prices?.map(p => 
-        `${p.period}|${p.price}${p.installments ? '|' + p.installments : ''}`
-      ).join('\n') || ''
-    }
+    },
   });
 
-  const onSubmit = async (data: any) => {
+  async function onSubmit(data: ServiceFormValues) {
     try {
-      // In a real application, this would be a PATCH request to the API
-      console.log('Saving service data:', data);
+      const response = await fetch(`/api/services/${service.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
       
-      // Example of how the data would be transformed for the API
-      const transformedData = {
-        ...service,
-        name: data.name,
-        description: data.description,
-        benefits: data.benefits.split('\n')
-          .filter(Boolean)
-          .map((name: string) => ({ name })),
-        prices: data.prices.split('\n')
-          .filter(Boolean)
-          .map((line: string) => {
-            const parts = line.split('|');
-            return {
-              period: parts[0],
-              price: parseFloat(parts[1]),
-              ...(parts[2] ? { installments: parseInt(parts[2]) } : {})
-            };
-          })
-      };
+      if (!response.ok) {
+        throw new Error('Falha ao atualizar o serviço');
+      }
       
-      // In a real application, make API call here
-      // await fetch(`/api/plans/${service.id}`, {
-      //   method: 'PATCH',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(transformedData),
-      // });
+      toast({
+        title: "Serviço atualizado",
+        description: "Serviço atualizado com sucesso.",
+      });
       
-      // Invalidate query to refresh data
+      // Invalidate the services queries to refetch
       queryClient.invalidateQueries({ queryKey: ['services'] });
       
-      toast.success('Serviço atualizado com sucesso!');
       onOpenChange(false);
     } catch (error) {
-      toast.error('Erro ao atualizar serviço.');
-      console.error('Error saving service:', error);
+      console.error("Erro ao atualizar serviço:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao atualizar",
+        description: "Não foi possível atualizar o serviço. Tente novamente.",
+      });
     }
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -85,23 +93,23 @@ const ServiceEditDialog = ({ open, onOpenChange, service }: ServiceEditDialogPro
         <DialogHeader>
           <DialogTitle>Editar Serviço</DialogTitle>
         </DialogHeader>
-
+        
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nome do Serviço</FormLabel>
+                  <FormLabel>Nome</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input placeholder="Nome do serviço" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
+            
             <FormField
               control={form.control}
               name="description"
@@ -109,43 +117,22 @@ const ServiceEditDialog = ({ open, onOpenChange, service }: ServiceEditDialogPro
                 <FormItem>
                   <FormLabel>Descrição</FormLabel>
                   <FormControl>
-                    <Textarea {...field} />
+                    <Textarea 
+                      placeholder="Descrição do serviço" 
+                      rows={3} 
+                      {...field} 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            <FormField
-              control={form.control}
-              name="prices"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Preços (Formato: periodo|preço|parcelas)</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} rows={4} placeholder="monthly|150&#10;semiannual|360|2&#10;yearly|400|3" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="benefits"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Benefícios (Um por linha)</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} rows={6} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
+            
             <DialogFooter>
-              <Button type="submit">Salvar Alterações</Button>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit">Salvar alterações</Button>
             </DialogFooter>
           </form>
         </Form>
