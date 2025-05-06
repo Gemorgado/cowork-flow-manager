@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Dialog,
@@ -12,7 +11,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import ClientForm from './ClientForm';
-import { Service } from '@/types';
 import { services as availableServices } from '@/mock/services';
 
 interface AddClientDialogProps {
