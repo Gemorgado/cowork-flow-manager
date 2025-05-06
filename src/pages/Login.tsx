@@ -8,8 +8,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { toast } from 'sonner';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin@cowork.com');
+  const [password, setPassword] = useState('senha123');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -91,10 +91,11 @@ const Login = () => {
             </form>
           </CardContent>
           <CardFooter className="flex justify-center">
-            <p className="text-sm text-gray-500">
-              {/* Credenciais de demonstração */}
-              Use: admin@cowork.com | senha123
-            </p>
+            <div className="text-sm text-gray-500">
+              <p className="mb-1 font-semibold">Credenciais de acesso:</p>
+              <p><strong>Email:</strong> admin@cowork.com</p>
+              <p><strong>Senha:</strong> senha123</p>
+            </div>
           </CardFooter>
         </Card>
       </div>

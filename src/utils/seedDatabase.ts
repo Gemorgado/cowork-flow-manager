@@ -24,11 +24,67 @@ export async function seedDatabase() {
       toast.success('Serviços iniciais populados com sucesso');
     }
 
+    // Create admin user if it doesn't exist
+    await seedAdminUser();
+
     return { success: true, message: 'Database seeded successfully!' };
   } catch (error) {
     console.error('Error seeding database:', error);
     toast.error('Erro ao popular banco de dados');
     return { success: false, error };
+  }
+}
+
+// Function to create admin user
+async function seedAdminUser() {
+  try {
+    // Check if admin user already exists
+    const { data: existingUser } = await supabase
+      .from('profiles')
+      .select('email')
+      .eq('email', 'admin@cowork.com')
+      .single();
+
+    if (existingUser) {
+      console.log('Admin user already exists');
+      return;
+    }
+
+    // Create admin user with auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: 'admin@cowork.com',
+      password: 'senha123',
+      options: {
+        data: {
+          name: 'Administrador',
+        }
+      }
+    });
+
+    if (authError) {
+      throw authError;
+    }
+
+    if (authData.user) {
+      // Update the profile with all permissions
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          name: 'Administrador',
+          permissions: ['dashboard', 'users', 'clients', 'plans', 'services', 'occupancy']
+        })
+        .eq('id', authData.user.id);
+
+      if (profileError) {
+        throw profileError;
+      }
+      
+      console.log('Admin user created successfully');
+      toast.success('Usuário administrador criado com sucesso');
+    }
+  } catch (error) {
+    console.error('Error creating admin user:', error);
+    toast.error('Erro ao criar usuário administrador');
   }
 }
 
