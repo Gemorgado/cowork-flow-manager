@@ -6,7 +6,7 @@ import { useAuthProvider } from '@/hooks/useAuthProvider';
 interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<AuthUser | void>;
   logout: () => void;
   hasPermission: (permission: Permission) => boolean;
 }
