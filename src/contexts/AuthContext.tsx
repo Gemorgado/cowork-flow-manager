@@ -49,6 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: email,
         phone: '(11) 99999-9999',
         address: 'Rua Exemplo, 123',
+        password: password, // Add the password field
         permissions: ['dashboard', 'users', 'clients', 'plans', 'services', 'occupancy'],
         token: 'mock-jwt-token',
         createdAt: new Date(),

@@ -18,6 +18,7 @@ interface EditUserDialogProps {
     email: string;
     phone: string;
     address: string;
+    password: string; // Added password field
     permissions: Permission[];
   };
   permissionOptions: { value: Permission; label: string }[];
