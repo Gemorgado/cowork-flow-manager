@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Room, WorkStation } from '@/types';
@@ -6,30 +5,26 @@ import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/ca
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { RoomsTab } from './tabs/RoomsTab';
 import { WorkStationsTab } from './tabs/WorkStationsTab';
-
 interface OccupancyTabsProps {
   rooms: Room[];
   workStations: WorkStation[];
   currentFloor: string;
   onAllocateFlexToFixed?: (stationId: string, clientId: string) => void;
 }
-
 export const OccupancyTabs: React.FC<OccupancyTabsProps> = ({
   rooms,
   workStations,
   currentFloor,
-  onAllocateFlexToFixed,
+  onAllocateFlexToFixed
 }) => {
   // Filter for current floor
-  const floorRooms = rooms.filter((room) => room.floor === parseInt(currentFloor) as any);
-  const floorStations = workStations.filter((station) => station.floor === parseInt(currentFloor) as any);
-  
+  const floorRooms = rooms.filter(room => room.floor === parseInt(currentFloor) as any);
+  const floorStations = workStations.filter(station => station.floor === parseInt(currentFloor) as any);
+
   // Count fixed and flex stations
   const fixedCount = floorStations.filter(s => s.type === 'fixed').length;
   const flexCount = floorStations.filter(s => s.type === 'flex').length;
-  
-  return (
-    <TooltipProvider>
+  return <TooltipProvider>
       <Tabs defaultValue="rooms" className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="rooms">Salas</TabsTrigger>
@@ -42,13 +37,10 @@ export const OccupancyTabs: React.FC<OccupancyTabsProps> = ({
               <CardTitle>Salas - {currentFloor}º Andar</CardTitle>
               <CardDescription>
                 Total: {floorRooms.length} salas | Ocupadas:{' '}
-                {floorRooms.filter((room) => room.status === 'occupied').length}
+                {floorRooms.filter(room => room.status === 'occupied').length}
               </CardDescription>
             </CardHeader>
-            <RoomsTab 
-              rooms={rooms} 
-              currentFloor={currentFloor}
-            />
+            <RoomsTab rooms={rooms} currentFloor={currentFloor} />
           </Card>
         </TabsContent>
         
@@ -56,18 +48,11 @@ export const OccupancyTabs: React.FC<OccupancyTabsProps> = ({
           <Card>
             <CardHeader>
               <CardTitle>Estações - {currentFloor}º Andar</CardTitle>
-              <CardDescription>
-                Fixas: {fixedCount} | Flex: {flexCount}
-              </CardDescription>
+              
             </CardHeader>
-            <WorkStationsTab 
-              workStations={workStations}
-              currentFloor={currentFloor}
-              onAllocateFlexToFixed={onAllocateFlexToFixed}
-            />
+            <WorkStationsTab workStations={workStations} currentFloor={currentFloor} onAllocateFlexToFixed={onAllocateFlexToFixed} />
           </Card>
         </TabsContent>
       </Tabs>
-    </TooltipProvider>
-  );
+    </TooltipProvider>;
 };
