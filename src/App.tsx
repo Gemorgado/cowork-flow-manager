@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
 import Clients from "./pages/Clients";
+import Services from "./pages/Services";
 import Occupancy from "./pages/Occupancy";
 import NotFound from "./pages/NotFound";
 
@@ -80,6 +81,17 @@ const AppRoutes = () => (
         <ProtectedRoute requiredPermission="clients">
           <AppLayout>
             <Clients />
+          </AppLayout>
+        </ProtectedRoute>
+      } 
+    />
+    
+    <Route 
+      path="/services" 
+      element={
+        <ProtectedRoute requiredPermission="services">
+          <AppLayout>
+            <Services />
           </AppLayout>
         </ProtectedRoute>
       } 
