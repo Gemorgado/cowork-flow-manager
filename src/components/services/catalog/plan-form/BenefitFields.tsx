@@ -18,10 +18,9 @@ interface BenefitFieldsProps {
 }
 
 export const BenefitFields = ({ form }: BenefitFieldsProps) => {
-  // Specify the correct type for the benefits field array
-  const { fields, append, remove } = useFieldArray<PlanFormValues>({
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "benefits" as "benefits", // Type assertion to ensure TypeScript recognizes this as a valid field
+    name: "benefits",
   });
 
   return (
@@ -31,7 +30,7 @@ export const BenefitFields = ({ form }: BenefitFieldsProps) => {
         <Button
           type="button"
           variant="outline"
-          onClick={() => append("" as any)} // Type assertion to handle string appending
+          onClick={() => append("")}
           className="h-8 px-2"
         >
           Adicionar
