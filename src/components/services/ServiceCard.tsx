@@ -71,7 +71,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
         <span className="text-xs text-muted-foreground ml-1">
           / {getPeriodLabel(selectedPrice.period).toLowerCase()}
         </span>
-        {selectedPrice.installments && (
+        {'installments' in selectedPrice && selectedPrice.installments && (
           <p className="text-xs text-muted-foreground mt-1">
             Em {selectedPrice.installments}x de R$ {(selectedPrice.price / selectedPrice.installments).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
