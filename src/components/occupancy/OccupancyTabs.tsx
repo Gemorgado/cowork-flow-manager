@@ -6,7 +6,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { RoomsTab } from './tabs/RoomsTab';
 import { WorkStationsTab } from './tabs/WorkStationsTab';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Stairs, Laptop } from 'lucide-react';
+import { Laptop, ChevronUp } from 'lucide-react';
 
 interface OccupancyTabsProps {
   rooms: Room[];
@@ -32,7 +32,7 @@ export const OccupancyTabs: React.FC<OccupancyTabsProps> = ({
         <div className="flex justify-center">
           <ToggleGroup type="single" value={activeTab} onValueChange={(value) => value && setActiveTab(value)} className="w-full max-w-md">
             <ToggleGroupItem value="rooms" className="w-full flex items-center justify-center gap-2">
-              <Stairs className="h-4 w-4" />
+              <ChevronUp className="h-4 w-4" />
               <span>Salas</span>
             </ToggleGroupItem>
             <ToggleGroupItem value="stations" className="w-full flex items-center justify-center gap-2">

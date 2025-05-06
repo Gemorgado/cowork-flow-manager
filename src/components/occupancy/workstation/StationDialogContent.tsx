@@ -10,7 +10,8 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { Form, FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
+import { Form, FormField, FormItem, FormControl } from '@/components/ui/form';
+import { useForm } from 'react-hook-form';
 
 interface StationDialogContentProps {
   station: WorkStation;
@@ -38,6 +39,12 @@ export const StationDialogContent: React.FC<StationDialogContentProps> = ({
     'reserved': 'Reservado',
     'maintenance': 'Manutenção',
   };
+
+  const form = useForm({
+    defaultValues: {
+      clientId: ''
+    }
+  });
 
   const handleLinkClient = () => {
     if (onLinkClient && selectedClientId) {
@@ -78,33 +85,44 @@ export const StationDialogContent: React.FC<StationDialogContentProps> = ({
         {/* Client selection dropdown for linking */}
         {onLinkClient && availableClients.length > 0 && !station.clientId && (
           <div className="pt-4">
-            <FormItem>
-              <FormLabel>Vincular Cliente</FormLabel>
-              <Select 
-                onValueChange={setSelectedClientId} 
-                value={selectedClientId}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um cliente" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {availableClients.map(client => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button 
-                className="mt-2 w-full"
-                onClick={handleLinkClient} 
-                disabled={!selectedClientId}
-              >
-                Vincular Cliente
-              </Button>
-            </FormItem>
+            <Form {...form}>
+              <FormField
+                control={form.control}
+                name="clientId"
+                render={({ field }) => (
+                  <FormItem>
+                    <p className="text-sm font-medium mb-1">Vincular Cliente</p>
+                    <FormControl>
+                      <Select 
+                        onValueChange={(value) => {
+                          setSelectedClientId(value);
+                          field.onChange(value);
+                        }} 
+                        value={field.value}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione um cliente" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableClients.map(client => (
+                            <SelectItem key={client.id} value={client.id}>
+                              {client.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </Form>
+            <Button 
+              className="mt-2 w-full"
+              onClick={handleLinkClient} 
+              disabled={!selectedClientId}
+            >
+              Vincular Cliente
+            </Button>
           </div>
         )}
         
