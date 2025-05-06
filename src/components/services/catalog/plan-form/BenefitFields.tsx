@@ -18,10 +18,10 @@ interface BenefitFieldsProps {
 }
 
 export const BenefitFields = ({ form }: BenefitFieldsProps) => {
-  // Use explicit type assertion to fix the TypeScript error
+  // Fix the TypeScript error by using casting with 'as const' to correctly set the field name
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "benefits" as "benefits",
+    name: "benefits" as const,
   });
 
   return (
@@ -31,7 +31,7 @@ export const BenefitFields = ({ form }: BenefitFieldsProps) => {
         <Button
           type="button"
           variant="outline"
-          onClick={() => append("")}
+          onClick={() => append("") as any}
           className="h-8 px-2"
         >
           Adicionar
