@@ -52,7 +52,12 @@ async function seedAdminUser() {
 
     // First check if the user exists in auth
     const { data: authUser } = await supabase.auth.admin.listUsers();
-    const userExists = authUser?.users?.some(user => user.email === 'admin@cowork.com');
+    
+    // Fix: Properly check if the user exists in the returned users array
+    let userExists = false;
+    if (authUser && authUser.users) {
+      userExists = authUser.users.some((user: any) => user.email === 'admin@cowork.com');
+    }
     
     if (userExists) {
       console.log('Admin user already exists in auth');
