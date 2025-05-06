@@ -206,7 +206,7 @@ const ClientForm = ({
         <Label>Serviço Contratado</Label>
         <Select
           value={formData.selectedServiceId}
-          onValueChange={(value) => handleServiceChange(value)}
+          onValueChange={(value) => handleServiceChange(value, [])}
         >
           <SelectTrigger>
             <SelectValue placeholder="Selecione um serviço" />
