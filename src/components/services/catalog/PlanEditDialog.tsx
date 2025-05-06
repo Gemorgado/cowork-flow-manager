@@ -92,8 +92,8 @@ const PlanEditDialog = ({ open, onOpenChange, plan }: PlanEditDialogProps) => {
     
   const { fields: benefitFields, append: appendBenefit, remove: removeBenefit } = 
     useFieldArray({
-      name: "benefits",
       control: form.control,
+      name: "benefits",
     });
 
   async function onSubmit(data: PlanFormValues) {

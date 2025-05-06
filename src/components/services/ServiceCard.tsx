@@ -4,7 +4,7 @@ import { Pencil } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import PeriodicityToggle from './catalog/PeriodicityToggle';
 import BenefitsAccordion from './catalog/BenefitsAccordion';
-import { Button } from '@/components/ui/button';
+import PlanEditDialog from './catalog/PlanEditDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { Service, PlanPeriod, PlanPrice, Benefit } from '@/types';
 
@@ -15,6 +15,7 @@ interface ServiceCardProps {
 export const ServiceCard = ({ service }: ServiceCardProps) => {
   const { hasPermission } = useAuth();
   const canEditPlans = hasPermission('plans');
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   
   // Convert the prices to the format expected by PeriodicityToggle
   const periodicities = service.prices.map(price => ({
@@ -32,10 +33,20 @@ export const ServiceCard = ({ service }: ServiceCardProps) => {
   // Extract benefit descriptions
   const benefitDescriptions = service.benefits.map(benefit => benefit.name);
 
+  // Convert service data to the format expected by PlanEditDialog
+  const planForDialog = {
+    id: service.id,
+    name: service.name,
+    description: service.description,
+    periodicities: periodicities,
+    benefits: benefitDescriptions
+  };
+
   return (
     <Card className="relative rounded-2xl bg-white/5 dark:bg-neutral-100/60 backdrop-blur-sm shadow-md shadow-black/10 p-6 flex flex-col gap-4 transition hover:shadow-lg/20 hover:-translate-y-1">
       {canEditPlans && (
         <button
+          onClick={() => setIsEditDialogOpen(true)}
           className="absolute top-4 right-4 opacity-40 hover:opacity-90"
           aria-label="Editar plano"
           tabIndex={0}
@@ -73,6 +84,14 @@ export const ServiceCard = ({ service }: ServiceCardProps) => {
         </div>
         
         <BenefitsAccordion benefits={benefitDescriptions} />
+        
+        {canEditPlans && (
+          <PlanEditDialog 
+            open={isEditDialogOpen}
+            onOpenChange={setIsEditDialogOpen}
+            plan={planForDialog}
+          />
+        )}
       </CardContent>
     </Card>
   );
