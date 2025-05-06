@@ -1,7 +1,5 @@
-
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Room } from '@/types';
 import { statusColors, statusLabels } from './StatusLegend';
@@ -171,17 +169,8 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
   );
   
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Salas - {currentFloor}º Andar</CardTitle>
-        <CardDescription>
-          Total: {floorRooms.length} salas | Ocupadas:{' '}
-          {floorRooms.filter((room) => room.status === 'occupied').length}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {parseInt(currentFloor) === 2 ? renderFloor2Layout() : renderStandardLayout()}
-      </CardContent>
-    </Card>
+    <>
+      {parseInt(currentFloor) === 2 ? renderFloor2Layout() : renderStandardLayout()}
+    </>
   );
 };

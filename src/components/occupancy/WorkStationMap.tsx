@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { WorkStation } from '@/types';
 import { toast } from 'sonner';
 import { OccupancyMeter } from './workstation/OccupancyMeter';
@@ -65,69 +64,61 @@ export const WorkStationMap: React.FC<WorkStationMapProps> = ({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Estações - {currentFloor}º Andar</CardTitle>
-        <CardDescription>
-          Fixas: {fixedStations.length} | Flex: {flexStations.length}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {/* Flex occupancy meters */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          {flexStations.length > 0 && (
-            <OccupancyMeter 
-              occupancyRate={currentFloorFlexOccupancy.rate} 
-              occupied={currentFloorFlexOccupancy.occupied} 
-              total={currentFloorFlexOccupancy.total}
-              title="Ocupação Flex (Andar Atual)"
-            />
-          )}
-          
-          {workStations.filter(s => s.type === 'flex').length > 0 && (
-            <OccupancyMeter 
-              occupancyRate={totalFlexOccupancy.rate} 
-              occupied={totalFlexOccupancy.occupied} 
-              total={totalFlexOccupancy.total}
-              title="Ocupação Flex (Global)"
-            />
-          )}
-        </div>
-        
-        {/* Fixed stations section */}
-        {fixedStations.length > 0 && (
-          <div className="mb-8">
-            <h3 className="text-lg font-medium mb-3">Estações Fixas</h3>
-            <div className="floor-map grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-4">
-              {fixedStations.map(station => (
-                <FixedStation 
-                  key={station.id}
-                  station={station}
-                  getClientInfo={getClientInfo}
-                  onAllocateFlexToFixed={handleAllocateFlexToFixed}
-                  allocatingFlexToFixed={allocatingFlexToFixed}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Flex stations section */}
+    <>
+      {/* Flex occupancy meters */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
         {flexStations.length > 0 && (
-          <div>
-            <h3 className="text-lg font-medium mb-3">Estações Flex</h3>
-            <div className="floor-map grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-4">
-              {flexStations.map(station => (
-                <FlexStation
-                  key={station.id}
-                  station={station}
-                  getClientInfo={getClientInfo}
-                />
-              ))}
-            </div>
-          </div>
+          <OccupancyMeter 
+            occupancyRate={currentFloorFlexOccupancy.rate} 
+            occupied={currentFloorFlexOccupancy.occupied} 
+            total={currentFloorFlexOccupancy.total}
+            title="Ocupação Flex (Andar Atual)"
+          />
         )}
-      </CardContent>
-    </Card>
+        
+        {workStations.filter(s => s.type === 'flex').length > 0 && (
+          <OccupancyMeter 
+            occupancyRate={totalFlexOccupancy.rate} 
+            occupied={totalFlexOccupancy.occupied} 
+            total={totalFlexOccupancy.total}
+            title="Ocupação Flex (Global)"
+          />
+        )}
+      </div>
+      
+      {/* Fixed stations section */}
+      {fixedStations.length > 0 && (
+        <div className="mb-8">
+          <h3 className="text-lg font-medium mb-3">Estações Fixas</h3>
+          <div className="floor-map grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-4">
+            {fixedStations.map(station => (
+              <FixedStation 
+                key={station.id}
+                station={station}
+                getClientInfo={getClientInfo}
+                onAllocateFlexToFixed={handleAllocateFlexToFixed}
+                allocatingFlexToFixed={allocatingFlexToFixed}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Flex stations section */}
+      {flexStations.length > 0 && (
+        <div>
+          <h3 className="text-lg font-medium mb-3">Estações Flex</h3>
+          <div className="floor-map grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-4">
+            {flexStations.map(station => (
+              <FlexStation
+                key={station.id}
+                station={station}
+                getClientInfo={getClientInfo}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </>
   );
 };
