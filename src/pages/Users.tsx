@@ -7,40 +7,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { users as mockUsers } from '@/mock/users';
 import { User, Permission } from '@/types';
-import { PlusCircle, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { users as mockUsers } from '@/mock/users';
 import { toast } from 'sonner';
+import AddUserDialog from '@/components/users/AddUserDialog';
+import EditUserDialog from '@/components/users/EditUserDialog';
+import DeleteUserDialog from '@/components/users/DeleteUserDialog';
+import UsersTable from '@/components/users/UsersTable';
 
 const Users = () => {
   const [users, setUsers] = useState<User[]>(mockUsers);
@@ -179,93 +152,15 @@ const Users = () => {
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Gerenciamento de Usuários</h1>
-        <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-cowork-600 hover:bg-cowork-700">
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Novo Usuário
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Adicionar Usuário</DialogTitle>
-              <DialogDescription>
-                Preencha os campos abaixo para adicionar um novo usuário.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Nome</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="Nome completo"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder="email@exemplo.com"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="phone">Telefone</Label>
-                <Input
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  placeholder="(00) 00000-0000"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="address">Endereço</Label>
-                <Input
-                  id="address"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  placeholder="Endereço completo"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label>Permissões</Label>
-                <div className="flex flex-wrap gap-4">
-                  {permissionOptions.map((permission) => (
-                    <div key={permission.value} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`permission-${permission.value}`}
-                        checked={formData.permissions.includes(permission.value)}
-                        onCheckedChange={() =>
-                          handlePermissionChange(permission.value)
-                        }
-                      />
-                      <label
-                        htmlFor={`permission-${permission.value}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        {permission.label}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddUserOpen(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={handleAddUser}>Salvar</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <AddUserDialog
+          isOpen={isAddUserOpen}
+          onOpenChange={setIsAddUserOpen}
+          formData={formData}
+          permissionOptions={permissionOptions}
+          handleInputChange={handleInputChange}
+          handlePermissionChange={handlePermissionChange}
+          handleAddUser={handleAddUser}
+        />
       </div>
 
       <Card>
@@ -276,171 +171,33 @@ const Users = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Telefone</TableHead>
-                <TableHead>Permissões</TableHead>
-                <TableHead className="w-16">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.phone || '-'}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {user.permissions.map((permission) => (
-                        <Badge
-                          key={permission}
-                          variant="secondary"
-                          className="text-xs"
-                        >
-                          {
-                            permissionOptions.find((p) => p.value === permission)
-                              ?.label
-                          }
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Abrir menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => openEditDialog(user)}>
-                          <Pencil className="h-4 w-4 mr-2" />
-                          Editar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-red-600"
-                          onClick={() => openDeleteDialog(user)}
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Excluir
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <UsersTable
+            users={users}
+            permissionOptions={permissionOptions}
+            onEdit={openEditDialog}
+            onDelete={openDeleteDialog}
+          />
         </CardContent>
       </Card>
 
       {/* Edit User Dialog */}
-      <Dialog open={isEditUserOpen} onOpenChange={setIsEditUserOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Editar Usuário</DialogTitle>
-            <DialogDescription>
-              Atualize as informações do usuário.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="edit-name">Nome</Label>
-              <Input
-                id="edit-name"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-email">Email</Label>
-              <Input
-                id="edit-email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-phone">Telefone</Label>
-              <Input
-                id="edit-phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-address">Endereço</Label>
-              <Input
-                id="edit-address"
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label>Permissões</Label>
-              <div className="flex flex-wrap gap-4">
-                {permissionOptions.map((permission) => (
-                  <div key={permission.value} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`edit-permission-${permission.value}`}
-                      checked={formData.permissions.includes(permission.value)}
-                      onCheckedChange={() =>
-                        handlePermissionChange(permission.value)
-                      }
-                    />
-                    <label
-                      htmlFor={`edit-permission-${permission.value}`}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      {permission.label}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditUserOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleEditUser}>Salvar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <EditUserDialog
+        isOpen={isEditUserOpen}
+        onOpenChange={setIsEditUserOpen}
+        formData={formData}
+        permissionOptions={permissionOptions}
+        handleInputChange={handleInputChange}
+        handlePermissionChange={handlePermissionChange}
+        handleEditUser={handleEditUser}
+      />
 
       {/* Delete User Dialog */}
-      <Dialog open={isDeleteUserOpen} onOpenChange={setIsDeleteUserOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Confirmar Exclusão</DialogTitle>
-            <DialogDescription>
-              Tem certeza que deseja excluir o usuário{' '}
-              <span className="font-medium">{selectedUser?.name}</span>?
-              <br />
-              Esta ação não pode ser desfeita.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteUserOpen(false)}>
-              Cancelar
-            </Button>
-            <Button variant="destructive" onClick={handleDeleteUser}>
-              Excluir
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteUserDialog
+        isOpen={isDeleteUserOpen}
+        onOpenChange={setIsDeleteUserOpen}
+        selectedUser={selectedUser}
+        onDelete={handleDeleteUser}
+      />
     </div>
   );
 };
