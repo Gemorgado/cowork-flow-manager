@@ -3,8 +3,6 @@ import React from 'react';
 import { CardContent } from '@/components/ui/card';
 import { WorkStation } from '@/types';
 import { WorkStationGrid } from '../WorkStationGrid';
-import { OccupancyMeter } from '../workstation/OccupancyMeter';
-import { calculateFlexOccupancyRate } from '../workstation/StationUtils';
 
 interface WorkStationsTabProps {
   workStations: WorkStation[];
@@ -22,45 +20,20 @@ export const WorkStationsTab: React.FC<WorkStationsTabProps> = ({
     (station) => station.floor === parseInt(currentFloor) as any
   );
 
-  // Separate flex stations for occupancy rates
+  // Count fixed and flex stations for display
   const flexStations = floorStations.filter((station) => station.type === 'flex');
-  const allFlexStations = workStations.filter(s => s.type === 'flex');
-
-  // Calculate occupancy rates
-  const currentFloorFlexOccupancy = calculateFlexOccupancyRate(
-    flexStations,
-    s => s.type === 'flex'
-  );
+  const flexCount = flexStations.length;
   
-  const totalFlexOccupancy = calculateFlexOccupancyRate(
-    allFlexStations,
-    s => s.type === 'flex'
-  );
-
   return (
     <CardContent>
-      {/* Flex occupancy meters */}
-      {flexStations.length > 0 || allFlexStations.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          {flexStations.length > 0 && (
-            <OccupancyMeter 
-              occupancyRate={currentFloorFlexOccupancy.rate} 
-              occupied={currentFloorFlexOccupancy.occupied} 
-              total={currentFloorFlexOccupancy.total}
-              title="Ocupação Flex (Andar Atual)"
-            />
-          )}
-          
-          {allFlexStations.length > 0 && (
-            <OccupancyMeter 
-              occupancyRate={totalFlexOccupancy.rate} 
-              occupied={totalFlexOccupancy.occupied} 
-              total={totalFlexOccupancy.total}
-              title="Ocupação Flex (Global)"
-            />
-          )}
+      {/* Simple text indicator instead of donuts */}
+      {flexCount > 0 && (
+        <div className="flex justify-end mb-4">
+          <span className="text-xs text-muted-foreground">
+            Estações Flex: {flexCount}
+          </span>
         </div>
-      ) : null}
+      )}
       
       {/* Unified grid for all station types */}
       <WorkStationGrid 

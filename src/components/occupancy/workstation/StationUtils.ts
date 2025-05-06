@@ -8,6 +8,10 @@ export const getClientInfo = (clientId?: string): string => {
   return `Cliente #${clientId.replace('client', '')}`;
 };
 
+/**
+ * @deprecated This function is no longer used in the Occupancy view.
+ * It remains available for other modules that might need it.
+ */
 // Helper function to calculate occupancy rates
 export const calculateFlexOccupancyRate = (
   stations: WorkStation[],

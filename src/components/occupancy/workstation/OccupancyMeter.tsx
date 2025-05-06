@@ -1,6 +1,9 @@
 
 import React from 'react';
 
+/**
+ * @deprecated This component is no longer used. The Flex occupancy donuts have been removed.
+ */
 interface OccupancyMeterProps {
   occupancyRate: number;
   occupied: number;
