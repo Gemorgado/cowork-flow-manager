@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -44,9 +45,23 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
 
   // Function to render rooms in a U shape for floor 2
   const renderFloor2Layout = () => {
-    const topRow = floorRooms.filter(room => parseInt(room.number) >= 201 && parseInt(room.number) <= 207);
-    const rightColumn = floorRooms.filter(room => parseInt(room.number) >= 208 && parseInt(room.number) <= 212);
-    const bottomRow = floorRooms.filter(room => parseInt(room.number) >= 213 && parseInt(room.number) <= 219);
+    // Salas 201-207 (primeira fileira)
+    const topRow = floorRooms.filter(room => {
+      const roomNum = parseInt(room.number);
+      return roomNum >= 201 && roomNum <= 207;
+    });
+    
+    // Salas 208-212 (coluna direita)
+    const rightColumn = floorRooms.filter(room => {
+      const roomNum = parseInt(room.number);
+      return roomNum >= 208 && roomNum <= 212;
+    });
+    
+    // Salas 213-219 (fileira inferior)
+    const bottomRow = floorRooms.filter(room => {
+      const roomNum = parseInt(room.number);
+      return roomNum >= 213 && roomNum <= 219;
+    });
 
     return (
       <div className="floor-layout-u relative">

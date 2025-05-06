@@ -20,9 +20,10 @@ export const generateRooms = (): Room[] => {
   
   // Pavimento 2: Salas 201-219
   for (let i = 1; i <= 19; i++) {
+    const roomNumber = i < 10 ? `20${i}` : `2${i}`;
     rooms.push({
       id: `r2${i.toString().padStart(2, '0')}`,
-      number: `20${i}`,
+      number: roomNumber,
       floor: 2,
       status: Math.random() > 0.5 ? 'occupied' : 'available',
       clientId: Math.random() > 0.5 ? `client${Math.floor(Math.random() * 5) + 1}` : undefined,
