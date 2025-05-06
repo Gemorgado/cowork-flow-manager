@@ -47,10 +47,8 @@ const useClientForm = ({ clients, setClients }: UseClientFormProps) => {
     // Set selected client
     setSelectedClient(client);
     
-    // Reset form with client data
-    resetForm(client);
-    
-    // Open dialog
+    // Update the form with client data using setFormData from useClientDialogs
+    // instead of directly calling resetForm with an argument
     openEditDialogBase(client);
   };
   
