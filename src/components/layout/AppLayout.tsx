@@ -4,9 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
-// Import our new components
+// Import our components
 import Sidebar from './sidebar/Sidebar';
 import Header from './header/Header';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -50,20 +51,22 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     : user?.email.substring(0, 2).toUpperCase() || 'U';
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <Sidebar 
-        isSidebarOpen={isSidebarOpen} 
-        toggleSidebar={toggleSidebar} 
-        userInitials={initials}
-      />
+    <SidebarProvider>
+      <div className="min-h-screen bg-gray-50 flex w-full">
+        {/* Sidebar */}
+        <Sidebar 
+          isSidebarOpen={isSidebarOpen} 
+          toggleSidebar={toggleSidebar} 
+          userInitials={initials}
+        />
 
-      {/* Main content */}
-      <main className="flex-1 overflow-y-auto">
-        <Header isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-        <div className="p-6 pb-16">{children}</div>
-      </main>
-    </div>
+        {/* Main content */}
+        <main className="flex-1 overflow-y-auto">
+          <Header isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+          <div className="p-6 pb-16">{children}</div>
+        </main>
+      </div>
+    </SidebarProvider>
   );
 };
 
