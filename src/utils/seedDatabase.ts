@@ -68,7 +68,13 @@ async function seedAdminUser() {
       return { success: false, error: authCheckError, exists: false };
     }
     
-    const existingAdminUser = authUsers?.users?.find(user => 
+    // Add proper type checking for users array
+    if (!authUsers || !authUsers.users || !Array.isArray(authUsers.users)) {
+      console.error('Invalid response format from listUsers:', authUsers);
+      return { success: false, error: new Error('Invalid response format from listUsers'), exists: false };
+    }
+    
+    const existingAdminUser = authUsers.users.find(user => 
       user.email === 'admin@cowork.com'
     );
 
