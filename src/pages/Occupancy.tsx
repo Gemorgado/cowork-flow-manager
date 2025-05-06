@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { generateRooms, generateWorkStations } from '@/mock/data';
+import { generateRooms, generateWorkStations } from '@/mock/locations';
 import { LocationStatus, Room, WorkStation } from '@/types';
 import { cn } from '@/lib/utils';
 

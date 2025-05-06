@@ -20,7 +20,7 @@ import {
   Pie,
   Legend,
 } from 'recharts';
-import { dashboardData } from '@/mock/data';
+import { dashboardData } from '@/mock/dashboard';
 import {
   Users,
   PercentSquare,
