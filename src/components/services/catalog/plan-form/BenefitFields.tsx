@@ -18,9 +18,10 @@ interface BenefitFieldsProps {
 }
 
 export const BenefitFields = ({ form }: BenefitFieldsProps) => {
+  // Use explicit type assertion to fix the TypeScript error
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "benefits",
+    name: "benefits" as "benefits",
   });
 
   return (
