@@ -7,6 +7,7 @@ import BenefitsAccordion from './catalog/BenefitsAccordion';
 import PlanEditDialog from './catalog/PlanEditDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { Service, PlanPeriod, PlanPrice, Benefit } from '@/types';
+import { PlanDialogData } from './catalog/schemas/planFormSchema';
 
 interface ServiceCardProps {
   service: Service;
@@ -34,7 +35,7 @@ export const ServiceCard = ({ service }: ServiceCardProps) => {
   const benefitDescriptions = service.benefits.map(benefit => benefit.name);
 
   // Convert service data to the format expected by PlanEditDialog
-  const planForDialog = {
+  const planForDialog: PlanDialogData = {
     id: service.id,
     name: service.name,
     description: service.description,
