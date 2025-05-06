@@ -10,6 +10,7 @@ import { useAuth, AuthProvider } from "./contexts/AuthContext";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
+import Clients from "./pages/Clients";
 import Occupancy from "./pages/Occupancy";
 import NotFound from "./pages/NotFound";
 
@@ -68,6 +69,17 @@ const AppRoutes = () => (
         <ProtectedRoute requiredPermission="users">
           <AppLayout>
             <Users />
+          </AppLayout>
+        </ProtectedRoute>
+      } 
+    />
+    
+    <Route 
+      path="/clients" 
+      element={
+        <ProtectedRoute requiredPermission="clients">
+          <AppLayout>
+            <Clients />
           </AppLayout>
         </ProtectedRoute>
       } 
