@@ -7,6 +7,7 @@ export type FormData = {
   email: string;
   phone: string;
   address: string;
+  password: string; // Added password field
   permissions: Permission[];
 };
 
@@ -16,6 +17,7 @@ export const useUserFormState = (initialUser: any = null) => {
     email: initialUser?.email || '',
     phone: initialUser?.phone || '',
     address: initialUser?.address || '',
+    password: initialUser?.password || '',
     permissions: initialUser?.permissions || [],
   });
 
@@ -56,6 +58,7 @@ export const useUserFormState = (initialUser: any = null) => {
       email: '',
       phone: '',
       address: '',
+      password: '',
       permissions: [],
     });
   };

@@ -19,6 +19,7 @@ export const useUserDialogs = () => {
       email: user.email,
       phone: user.phone || '',
       address: user.address || '',
+      password: user.password || '', // Include password in edit form
       permissions: user.permissions,
     });
     setIsEditUserOpen(true);

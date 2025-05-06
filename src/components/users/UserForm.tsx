@@ -13,6 +13,7 @@ interface UserFormProps {
     email: string;
     phone: string;
     address: string;
+    password: string; // Added password field
     permissions: Permission[];
   };
   permissionOptions: { value: Permission; label: string }[];
@@ -53,6 +54,17 @@ const UserForm: React.FC<UserFormProps> = ({
           value={formData.email}
           onChange={handleInputChange}
           placeholder="email@exemplo.com"
+        />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="password">Senha</Label>
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          value={formData.password}
+          onChange={handleInputChange}
+          placeholder="••••••••"
         />
       </div>
       <div className="grid gap-2">

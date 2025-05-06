@@ -24,8 +24,8 @@ export const useUserOperations = ({
 }: UseUserOperationsProps) => {
   const handleAddUser = (formData: FormData) => {
     // Validação simples
-    if (!formData.name || !formData.email) {
-      toast.error('Nome e email são obrigatórios');
+    if (!formData.name || !formData.email || !formData.password) {
+      toast.error('Nome, email e senha são obrigatórios');
       return;
     }
 
@@ -59,6 +59,7 @@ export const useUserOperations = ({
             email: formData.email,
             phone: formData.phone,
             address: formData.address,
+            password: formData.password, // Include password in update
             permissions: formData.permissions,
             updatedAt: new Date(),
           }

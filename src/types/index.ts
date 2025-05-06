@@ -14,6 +14,7 @@ export interface User {
   email: string;
   phone?: string;
   address?: string;
+  password: string; // Added password field
   permissions: Permission[];
   createdAt: Date;
   updatedAt: Date;
