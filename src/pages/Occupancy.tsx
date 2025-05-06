@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { OccupancyFloorSelector } from '@/components/occupancy/OccupancyFloorSelector';
 import { OccupancyStats } from '@/components/occupancy/OccupancyStats';
 import { StatusLegend } from '@/components/occupancy/StatusLegend';
 import { OccupancyTabs } from '@/components/occupancy/OccupancyTabs';
@@ -13,8 +12,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const Occupancy = () => {
   const {
-    currentFloor,
-    setCurrentFloor,
     rooms,
     workStations,
     roomOccupancy,
@@ -40,10 +37,6 @@ const Occupancy = () => {
             <RefreshCw className={cn("h-4 w-4", (isRefreshing || isLoading) && "animate-spin")} />
             Atualizar
           </Button>
-          <OccupancyFloorSelector 
-            currentFloor={currentFloor} 
-            setCurrentFloor={setCurrentFloor} 
-          />
         </div>
       </div>
 
@@ -67,7 +60,7 @@ const Occupancy = () => {
       <OccupancyTabs 
         rooms={rooms} 
         workStations={workStations} 
-        currentFloor={currentFloor} 
+        currentFloor="1"
         isLoading={isLoading}
         onAllocateFlexToFixed={handleConvertFlexToFixed}
       />

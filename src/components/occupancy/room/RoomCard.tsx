@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Room } from '@/types';
 import { statusColors, statusLabels } from '../StatusLegend';
@@ -12,17 +12,20 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 interface RoomCardProps {
   room: Room;
-  hoveredRoomId: string | null;
-  setHoveredRoomId: (id: string | null) => void;
-  getClientInfo: (clientId?: string) => string;
 }
 
 export const RoomCard: React.FC<RoomCardProps> = ({
   room,
-  hoveredRoomId,
-  setHoveredRoomId,
-  getClientInfo
 }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  
+  // Get client name for display
+  const getClientName = (clientId?: string) => {
+    if (!clientId) return "Nenhum cliente";
+    // In a real app, you would fetch the client name
+    return `Cliente #${clientId.replace('client', '')}`;
+  };
+
   return (
     <Dialog key={room.id}>
       <Tooltip>
@@ -30,34 +33,29 @@ export const RoomCard: React.FC<RoomCardProps> = ({
           <DialogTrigger asChild>
             <div
               className={cn(
-                "w-24 h-20 rounded-2xl p-2 flex flex-col justify-between backdrop-blur-sm",
-                "shadow-md shadow-black/10 transition-all duration-150",
-                "border border-white/5 cursor-pointer",
-                hoveredRoomId === room.id && "shadow-lg shadow-black/10 -translate-y-0.5",
-                statusColors[room.status].replace('bg-', 'bg-opacity-80 bg-')
+                "rounded-xl backdrop-blur-sm bg-white/5 p-3 flex flex-col",
+                "shadow-md shadow-black/10 cursor-pointer",
+                "hover:-translate-y-0.5 hover:shadow-lg/20 transition-all duration-150",
+                statusColors[room.status].replace('bg-', 'bg-opacity-20 bg-')
               )}
-              onMouseEnter={() => setHoveredRoomId(room.id)}
-              onMouseLeave={() => setHoveredRoomId(null)}
-              onFocus={() => setHoveredRoomId(room.id)}
-              onBlur={() => setHoveredRoomId(null)}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
             >
-              <span className="text-[10px] text-muted-foreground font-medium">{room.number}</span>
-              <div className="mt-auto">
-                <Badge 
-                  variant="outline" 
-                  className={cn(
-                    "w-full justify-center text-xs font-medium ring-2 ring-white/20",
-                    statusColors[room.status].replace('bg-', 'bg-opacity-90 bg-')
-                  )}
-                >
-                  {statusLabels[room.status]}
-                </Badge>
-                {room.clientId && (
-                  <div className="mt-1 text-[9px] text-center text-muted-foreground truncate">
-                    {getClientInfo(room.clientId)}
-                  </div>
+              <span className="text-sm font-medium mb-1 text-muted-foreground">{room.number}</span>
+              <Badge 
+                variant="outline" 
+                className={cn(
+                  "w-fit px-2 py-0.5 rounded-full text-xs",
+                  statusColors[room.status].replace('bg-', 'bg-opacity-90 bg-')
                 )}
-              </div>
+              >
+                {statusLabels[room.status]}
+              </Badge>
+              {room.clientId && (
+                <div className="mt-1 text-[9px] text-muted-foreground truncate">
+                  {getClientName(room.clientId)}
+                </div>
+              )}
             </div>
           </DialogTrigger>
         </TooltipTrigger>
@@ -67,8 +65,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
             <div>Status: {statusLabels[room.status]}</div>
             <div>Área: {room.area}m²</div>
             <div>Capacidade: {room.capacity} pessoas</div>
-            <div>Cliente: {getClientInfo(room.clientId)}</div>
-            {room.clientId && <div>Contrato até: 31/12/2023</div>}
+            {room.clientId && <div>Cliente: {getClientName(room.clientId)}</div>}
           </div>
         </TooltipContent>
       </Tooltip>

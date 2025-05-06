@@ -94,6 +94,46 @@ export function useSupabaseOccupancy() {
   const roomOccupancy = calculateOccupancyRate(floorRooms);
   const stationOccupancy = calculateOccupancyRate(floorStations);
 
+  const updateRoomStatus = useCallback(async (roomId: string, status: string, clientId?: string) => {
+    try {
+      // First update the local state for immediate UI feedback
+      setRooms(prevRooms => 
+        prevRooms.map(room => 
+          room.id === roomId ? { ...room, status, clientId } : room
+        )
+      );
+      
+      // Then update the database
+      const updateData: any = { status };
+      if (clientId !== undefined) {
+        updateData.client_id = clientId || null;
+      }
+
+      const { error } = await supabase
+        .from('rooms')
+        .update(updateData)
+        .eq('id', roomId);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: 'Success',
+        description: 'Room status updated',
+      });
+    } catch (error: any) {
+      console.error('Error updating room:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update room status',
+        variant: 'destructive',
+      });
+      // Revert local state on error
+      fetchRooms();
+    }
+  }, [fetchRooms]);
+
   const handleConvertFlexToFixed = useCallback(async (stationId: string, clientId: string) => {
     try {
       // First update the local state for immediate UI feedback
@@ -148,5 +188,6 @@ export function useSupabaseOccupancy() {
     isRefreshing,
     handleRefresh,
     handleConvertFlexToFixed,
+    updateRoomStatus,
   };
 }
