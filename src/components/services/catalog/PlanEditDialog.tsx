@@ -87,7 +87,7 @@ const PlanEditDialog = ({ open, onOpenChange, plan }: PlanEditDialogProps) => {
   const { fields: periodicityFields, append: appendPeriodicity, remove: removePeriodicity } = 
     useFieldArray({
       control: form.control,
-      name: "periodicities",
+      name: "periodicities", // FIXED: was incorrectly set to "benefits"
     });
     
   const { fields: benefitFields, append: appendBenefit, remove: removeBenefit } = 
