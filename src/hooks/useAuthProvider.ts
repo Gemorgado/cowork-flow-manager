@@ -30,8 +30,22 @@ export const useAuthProvider = () => {
               
             if (profileData) {
               console.log('Profile found:', profileData);
+              
+              // Ensure the user has at least the basic permissions to view the dashboard
+              let userPermissions = profileData.permissions || [];
+              if (userPermissions.length === 0) {
+                console.log('No permissions found, adding default dashboard permission');
+                userPermissions = ['dashboard'];
+                
+                // Update the profile with basic permissions
+                await supabase
+                  .from('profiles')
+                  .update({ permissions: userPermissions })
+                  .eq('id', userData.user.id);
+              }
+              
               // Convert string[] permissions to Permission[] type by validating each permission
-              const validPermissions = (profileData.permissions || []).filter((p: string) => 
+              const validPermissions = (userPermissions).filter((p: string) => 
                 ['dashboard', 'users', 'clients', 'plans', 'services', 'occupancy'].includes(p)
               ) as Permission[];
               
@@ -47,7 +61,9 @@ export const useAuthProvider = () => {
                 createdAt: new Date(userData.user.created_at || ''),
                 updatedAt: new Date(userData.user.updated_at || ''),
               });
-              console.log('User set in context');
+              console.log('User set in context with permissions:', validPermissions);
+            } else {
+              console.log('No profile found, user may not have access');
             }
           }
         } else {
@@ -78,8 +94,21 @@ export const useAuthProvider = () => {
             .single();
             
           if (profileData) {
+            // Ensure the user has at least the basic permissions to view the dashboard
+            let userPermissions = profileData.permissions || [];
+            if (userPermissions.length === 0) {
+              console.log('No permissions found, adding default dashboard permission');
+              userPermissions = ['dashboard'];
+              
+              // Update the profile with basic permissions
+              await supabase
+                .from('profiles')
+                .update({ permissions: userPermissions })
+                .eq('id', userData.user.id);
+            }
+            
             // Convert string[] permissions to Permission[] type by validating each permission
-            const validPermissions = (profileData.permissions || []).filter((p: string) => 
+            const validPermissions = (userPermissions).filter((p: string) => 
               ['dashboard', 'users', 'clients', 'plans', 'services', 'occupancy'].includes(p)
             ) as Permission[];
             
@@ -95,6 +124,7 @@ export const useAuthProvider = () => {
               createdAt: new Date(userData.user.created_at || ''),
               updatedAt: new Date(userData.user.updated_at || ''),
             });
+            console.log('User set in context with permissions:', validPermissions);
           }
         }
       } else if (event === 'SIGNED_OUT') {
@@ -144,8 +174,21 @@ export const useAuthProvider = () => {
       }
         
       if (profileData) {
+        // Ensure the user has at least the basic permissions to view the dashboard
+        let userPermissions = profileData.permissions || [];
+        if (userPermissions.length === 0) {
+          console.log('No permissions found, adding default dashboard permission');
+          userPermissions = ['dashboard'];
+          
+          // Update the profile with basic permissions
+          await supabase
+            .from('profiles')
+            .update({ permissions: userPermissions })
+            .eq('id', data.user.id);
+        }
+        
         // Convert string[] permissions to Permission[] type by validating each permission
-        const validPermissions = (profileData.permissions || []).filter((p: string) => 
+        const validPermissions = (userPermissions).filter((p: string) => 
           ['dashboard', 'users', 'clients', 'plans', 'services', 'occupancy'].includes(p)
         ) as Permission[];
         
@@ -161,6 +204,7 @@ export const useAuthProvider = () => {
           createdAt: new Date(data.user.created_at || ''),
           updatedAt: new Date(data.user.updated_at || ''),
         });
+        console.log('User set in context with permissions:', validPermissions);
         toast.success(`Bem-vindo, ${profileData.name}!`);
       } else {
         throw new Error('Perfil de usuário não encontrado');

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -29,6 +30,7 @@ import {
   Menu,
   X,
   Home,
+  Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -44,7 +46,7 @@ interface SidebarItem {
 }
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
-  const { user, logout, hasPermission } = useAuth();
+  const { user, logout, hasPermission, loading } = useAuth();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -66,11 +68,32 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     navigate('/login');
   };
 
+  // Se ainda estiver carregando, mostrar um indicador
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-cowork-600 mx-auto mb-4" />
+          <p className="text-cowork-600">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Se não tivermos um usuário, redirecionar para o login
+  if (!user) {
+    // Redirecionar para login após um curto delay para evitar loops
+    setTimeout(() => navigate('/login'), 100);
+    return null;
+  }
+
   const initials = user?.name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase();
+    ? user.name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+    : user?.email.substring(0, 2).toUpperCase() || 'U';
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -101,7 +124,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         <div className="flex-1 py-4 overflow-y-auto">
           <nav className="px-2 space-y-1">
             {sidebarItems.map((item) => {
-              if (item.permission && !hasPermission(item.permission as any)) {
+              // Sempre exibir o Dashboard, independentemente das permissões
+              // Para outros itens, verificar as permissões
+              const shouldShow = item.title === 'Dashboard' || 
+                                item.title === 'Configurações' || 
+                                (item.permission && hasPermission(item.permission as any));
+                                
+              if (!shouldShow) {
                 return null;
               }
 
@@ -145,7 +174,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                     {initials}
                   </AvatarFallback>
                 </Avatar>
-                {isSidebarOpen && <span className="ml-2 truncate">{user?.name}</span>}
+                {isSidebarOpen && <span className="ml-2 truncate">{user?.name || user?.email}</span>}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
