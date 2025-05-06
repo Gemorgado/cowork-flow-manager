@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -51,7 +50,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   const sidebarItems: SidebarItem[] = [
     { title: 'Dashboard', icon: BarChart3, path: '/dashboard', permission: 'dashboard' },
-    { title: 'Usuários', icon: Users, path: '/users', permission: 'users' },
+    // Removendo o item de usuários, pois agora está dentro das configurações
     { title: 'Clientes', icon: Building2, path: '/clients', permission: 'clients' },
     { title: 'Planos & Serviços', icon: Package, path: '/services', permission: 'services' },
     { title: 'Ocupação', icon: Map, path: '/occupancy', permission: 'occupancy' },

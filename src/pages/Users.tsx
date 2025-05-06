@@ -15,7 +15,11 @@ import DeleteUserDialog from '@/components/users/DeleteUserDialog';
 import UsersTable from '@/components/users/UsersTable';
 import useUserForm from '@/hooks/useUserForm';
 
-const Users = () => {
+interface UsersProps {
+  isTab?: boolean;
+}
+
+const Users: React.FC<UsersProps> = ({ isTab = false }) => {
   const [users, setUsers] = useState<User[]>(mockUsers);
   
   const {
@@ -36,6 +40,51 @@ const Users = () => {
     openEditDialog,
     openDeleteDialog,
   } = useUserForm({ users, setUsers });
+
+  if (isTab) {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Gerenciamento de Usuários</h2>
+          <AddUserDialog
+            isOpen={isAddUserOpen}
+            onOpenChange={setIsAddUserOpen}
+            formData={formData}
+            permissionOptions={permissionOptions}
+            handleInputChange={handleInputChange}
+            handlePermissionChange={handlePermissionChange}
+            handleAddUser={handleAddUser}
+          />
+        </div>
+        
+        <UsersTable
+          users={users}
+          permissionOptions={permissionOptions}
+          onEdit={openEditDialog}
+          onDelete={openDeleteDialog}
+        />
+
+        {/* Edit User Dialog */}
+        <EditUserDialog
+          isOpen={isEditUserOpen}
+          onOpenChange={setIsEditUserOpen}
+          formData={formData}
+          permissionOptions={permissionOptions}
+          handleInputChange={handleInputChange}
+          handlePermissionChange={handlePermissionChange}
+          handleEditUser={handleEditUser}
+        />
+
+        {/* Delete User Dialog */}
+        <DeleteUserDialog
+          isOpen={isDeleteUserOpen}
+          onOpenChange={setIsDeleteUserOpen}
+          selectedUser={selectedUser}
+          onDelete={handleDeleteUser}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">

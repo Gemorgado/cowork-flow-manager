@@ -13,6 +13,7 @@ import Users from "./pages/Users";
 import Clients from "./pages/Clients";
 import Services from "./pages/Services";
 import Occupancy from "./pages/Occupancy";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 // Components
@@ -103,6 +104,17 @@ const AppRoutes = () => (
         <ProtectedRoute requiredPermission="occupancy">
           <AppLayout>
             <Occupancy />
+          </AppLayout>
+        </ProtectedRoute>
+      } 
+    />
+    
+    <Route 
+      path="/settings" 
+      element={
+        <ProtectedRoute>
+          <AppLayout>
+            <Settings />
           </AppLayout>
         </ProtectedRoute>
       } 
