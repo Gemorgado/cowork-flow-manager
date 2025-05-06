@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Room } from '@/types';
 import { statusColors, statusLabels } from './StatusLegend';
@@ -25,6 +24,7 @@ import {
 import { Form, FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
+import { Badge } from '@/components/ui/badge';
 
 interface RoomMapProps {
   rooms: Room[];
@@ -36,6 +36,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isClientLinkDialogOpen, setIsClientLinkDialogOpen] = useState(false);
+  const [hoveredRoomId, setHoveredRoomId] = useState<string | null>(null);
   
   // Mock clients data - this would come from an API in a real app
   const mockClients = [
@@ -62,15 +63,15 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
     switch(floorNumber) {
       case 1:
         // Pavimento 1: Salas 101-107 em linha (7 salas)
-        return 'grid-cols-7';
+        return 'grid-cols-2 md:grid-cols-4 lg:grid-cols-7';
       case 2:
         // Pavimento 2: Salas 201-219 em forma de U (19 salas)
-        return 'grid-cols-7 gap-y-8';
+        return 'grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7 gap-y-8';
       case 3:
         // Pavimento 3: Salas 301-310 (10 salas)
-        return 'grid-cols-5 gap-y-6';
+        return 'grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-y-6';
       default:
-        return 'grid-cols-4';
+        return 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4';
     }
   };
 
@@ -133,22 +134,27 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
     return (
       <div className="floor-layout-u relative">
         {/* Top row */}
-        <div className="grid grid-cols-7 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7 gap-4 mb-8">
           {topRow.map(room => renderRoomCard(room))}
         </div>
         
         {/* Middle section (right column and empty space) */}
-        <div className="grid grid-cols-7 gap-4 mb-8">
-          <div className="col-span-5"></div>
-          <div className="col-span-2">
+        <div className="grid grid-cols-5 gap-4 mb-8 hidden lg:grid">
+          <div className="col-span-4"></div>
+          <div className="col-span-1">
             <div className="grid grid-cols-1 gap-4">
               {rightColumn.map(room => renderRoomCard(room))}
             </div>
           </div>
         </div>
         
+        {/* Middle section for mobile and tablet */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8 lg:hidden">
+          {rightColumn.map(room => renderRoomCard(room))}
+        </div>
+        
         {/* Bottom row */}
-        <div className="grid grid-cols-7 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7 gap-4">
           {bottomRow.map(room => renderRoomCard(room))}
         </div>
       </div>
@@ -172,31 +178,40 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
           <DialogTrigger asChild>
             <div
               className={cn(
-                "room border-2 rounded-md p-3 cursor-pointer transition-all text-center relative",
-                statusColors[room.status]
+                "w-24 h-20 rounded-2xl p-2 flex flex-col justify-between backdrop-blur-sm",
+                "shadow-md shadow-black/10 transition-all duration-150",
+                "border border-white/5 cursor-pointer",
+                hoveredRoomId === room.id && "shadow-lg shadow-black/10 -translate-y-0.5",
+                statusColors[room.status].replace('bg-', 'bg-opacity-80 bg-')
               )}
+              onMouseEnter={() => setHoveredRoomId(room.id)}
+              onMouseLeave={() => setHoveredRoomId(null)}
+              onFocus={() => setHoveredRoomId(room.id)}
+              onBlur={() => setHoveredRoomId(null)}
             >
-              <div className="text-lg font-bold">{room.number}</div>
-              <div className="text-xs text-gray-600">
-                {room.area}m² | {room.capacity} pessoas
-              </div>
-              <div className="text-xs mt-1 font-medium">
-                {statusLabels[room.status]}
-              </div>
-              {room.clientId && (
-                <Badge variant="secondary" className="mt-2 w-full">
-                  {getClientInfo(room.clientId)}
+              <span className="text-[10px] text-muted-foreground font-medium">{room.number}</span>
+              <div className="mt-auto">
+                <Badge 
+                  variant="outline" 
+                  className={cn(
+                    "w-full justify-center text-xs font-medium ring-2 ring-white/20",
+                    statusColors[room.status].replace('bg-', 'bg-opacity-90 bg-')
+                  )}
+                >
+                  {statusLabels[room.status]}
                 </Badge>
-              )}
-              <div className="absolute top-1 right-1 opacity-30 hover:opacity-100">
-                <Edit size={16} />
+                {room.clientId && (
+                  <div className="mt-1 text-[9px] text-center text-muted-foreground truncate">
+                    {getClientInfo(room.clientId)}
+                  </div>
+                )}
               </div>
             </div>
           </DialogTrigger>
         </TooltipTrigger>
-        <TooltipContent>
-          <div className="p-1">
-            <div className="font-bold">Sala {room.number}</div>
+        <TooltipContent className="backdrop-blur-md bg-black/40 border-white/10">
+          <div className="p-1 text-sm">
+            <div className="font-medium">Sala {room.number}</div>
             <div>Status: {statusLabels[room.status]}</div>
             <div>Área: {room.area}m²</div>
             <div>Capacidade: {room.capacity} pessoas</div>
@@ -206,9 +221,9 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
         </TooltipContent>
       </Tooltip>
       
-      <DialogContent>
+      <DialogContent className="backdrop-blur-md bg-white/5 border border-white/10">
         <DialogHeader>
-          <DialogTitle>Detalhes da Sala {room.number}</DialogTitle>
+          <DialogTitle className="text-lg font-medium">Sala {room.number}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="grid grid-cols-2 gap-4">
@@ -216,7 +231,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
               <p className="text-sm font-medium mb-1">Status</p>
               <Badge className={cn(
                 "px-2 py-1",
-                statusColors[room.status].replace('bg-', 'bg-opacity-20 text-').replace('-100', '-800')
+                statusColors[room.status].replace('bg-', 'bg-opacity-90 text-').replace('-100', '-800')
               )}>
                 {statusLabels[room.status]}
               </Badge>
@@ -239,9 +254,10 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
             <p className="text-sm font-medium mb-2">Ações</p>
             <div className="flex gap-2">
               <Button 
-                variant="outline" 
+                variant="ghost" 
                 size="sm" 
                 onClick={() => handleOpenEditDialog(room)}
+                className="hover:bg-white/10"
               >
                 Editar
               </Button>
@@ -252,6 +268,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
                   setSelectedRoom(room);
                   setIsClientLinkDialogOpen(true);
                 }}
+                className="hover:brightness-110"
               >
                 Vincular Cliente
               </Button>
@@ -268,9 +285,9 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
   // Room Edit Dialog
   const RoomEditDialog = () => (
     <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-      <DialogContent>
+      <DialogContent className="backdrop-blur-md bg-white/5 border border-white/10">
         <DialogHeader>
-          <DialogTitle>Editar Sala {selectedRoom?.number}</DialogTitle>
+          <DialogTitle className="text-lg font-medium">Editar Sala {selectedRoom?.number}</DialogTitle>
         </DialogHeader>
         <Form {...roomForm}>
           <form onSubmit={roomForm.handleSubmit(handleRoomUpdate)} className="space-y-4">
@@ -279,17 +296,17 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
               name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Status</FormLabel>
+                  <FormLabel className="text-sm font-medium">Status</FormLabel>
                   <Select 
                     onValueChange={field.onChange} 
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="bg-black/20 border-white/10">
                         <SelectValue placeholder="Selecione o status" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="bg-black/80 backdrop-blur-md border-white/10">
                       <SelectItem value="available">Livre</SelectItem>
                       <SelectItem value="occupied">Ocupado</SelectItem>
                       <SelectItem value="reserved">Reservado</SelectItem>
@@ -304,12 +321,13 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
               name="area"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Área (m²)</FormLabel>
+                  <FormLabel className="text-sm font-medium">Área (m²)</FormLabel>
                   <FormControl>
                     <Input 
                       type="number" 
                       {...field} 
                       onChange={(e) => field.onChange(Number(e.target.value))}
+                      className="bg-black/20 border-white/10"
                     />
                   </FormControl>
                 </FormItem>
@@ -320,19 +338,25 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
               name="capacity"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Capacidade</FormLabel>
+                  <FormLabel className="text-sm font-medium">Capacidade</FormLabel>
                   <FormControl>
                     <Input 
                       type="number" 
                       {...field} 
                       onChange={(e) => field.onChange(Number(e.target.value))}
+                      className="bg-black/20 border-white/10"
                     />
                   </FormControl>
                 </FormItem>
               )}
             />
             <DialogFooter>
-              <Button type="submit">Salvar</Button>
+              <Button 
+                type="submit"
+                className="hover:brightness-110"
+              >
+                Salvar
+              </Button>
             </DialogFooter>
           </form>
         </Form>
@@ -343,23 +367,23 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
   // Client Link Dialog
   const ClientLinkDialog = () => (
     <Dialog open={isClientLinkDialogOpen} onOpenChange={setIsClientLinkDialogOpen}>
-      <DialogContent>
+      <DialogContent className="backdrop-blur-md bg-white/5 border border-white/10">
         <DialogHeader>
-          <DialogTitle>Vincular Cliente à Sala {selectedRoom?.number}</DialogTitle>
+          <DialogTitle className="text-lg font-medium">Vincular Cliente à Sala {selectedRoom?.number}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <FormItem>
-            <FormLabel>Cliente</FormLabel>
+            <FormLabel className="text-sm font-medium">Cliente</FormLabel>
             <Select 
               onValueChange={setSelectedClientId} 
               value={selectedClientId}
             >
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger className="bg-black/20 border-white/10">
                   <SelectValue placeholder="Selecione um cliente" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent>
+              <SelectContent className="bg-black/80 backdrop-blur-md border-white/10">
                 {mockClients.map(client => (
                   <SelectItem key={client.id} value={client.id}>
                     {client.name}
@@ -372,6 +396,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
             <Button 
               onClick={handleClientLink} 
               disabled={!selectedClientId}
+              className="hover:brightness-110"
             >
               Vincular
             </Button>

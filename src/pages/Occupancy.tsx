@@ -26,14 +26,14 @@ const Occupancy = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Mapa de Ocupação</h1>
+        <h1 className="text-2xl font-medium">Mapa de Ocupação</h1>
         <div className="flex items-center gap-2">
           <Button 
             variant="outline" 
             size="sm" 
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 bg-white/5 backdrop-blur-sm border-white/10 hover:bg-white/10"
           >
             <RefreshCw className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
             Atualizar

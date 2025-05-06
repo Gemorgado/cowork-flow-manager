@@ -77,19 +77,29 @@
   }
 }
 
+@layer utilities {
+  .glass {
+    @apply backdrop-blur-sm bg-white/10 border border-white/10;
+  }
+  
+  .glass-dark {
+    @apply backdrop-blur-sm bg-black/30 border border-white/5;
+  }
+}
+
 .floor-map .room {
-  transition: all 0.2s ease-in-out;
+  transition: all 0.15s ease-in-out;
 }
 
 .floor-map .room:hover {
-  filter: brightness(1.1);
-  transform: scale(1.02);
+  filter: brightness(1.05);
+  transform: translateY(-2px);
 }
 
 .workstation {
-  transition: all 0.2s ease-in-out;
+  transition: all 0.15s ease-in-out;
 }
 
 .workstation:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }

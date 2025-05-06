@@ -14,7 +14,7 @@ export const RoomsTab: React.FC<RoomsTabProps> = ({
   currentFloor,
 }) => {
   return (
-    <CardContent>
+    <CardContent className="pt-2">
       <RoomMap rooms={rooms} currentFloor={currentFloor} />
     </CardContent>
   );

@@ -1,12 +1,8 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { CardContent } from '@/components/ui/card';
 import { WorkStation } from '@/types';
 import { WorkStationGrid } from '../WorkStationGrid';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 
 interface WorkStationsTabProps {
   workStations: WorkStation[];
