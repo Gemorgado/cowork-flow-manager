@@ -74,7 +74,14 @@ async function seedAdminUser() {
       return { success: false, error: new Error('Invalid response format from listUsers'), exists: false };
     }
     
-    const existingAdminUser = authUsers.users.find(user => 
+    // Explicitly type the user object to include email property
+    interface AuthUser {
+      id: string;
+      email?: string;
+      [key: string]: any; // Allow other properties
+    }
+    
+    const existingAdminUser = authUsers.users.find((user: AuthUser) => 
       user.email === 'admin@cowork.com'
     );
 
@@ -164,3 +171,4 @@ useEffect(() => {
   });
 }, []);
 */
+
