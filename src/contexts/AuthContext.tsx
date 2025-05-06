@@ -75,6 +75,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Subscribe to auth changes
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session);
+      
       if (event === 'SIGNED_IN' && session) {
         const { data: userData } = await supabase.auth.getUser();
         
@@ -121,22 +123,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
+      console.log('Attempting login with:', email);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
       if (error) {
+        console.error('Login error:', error);
         throw error;
       }
 
       if (data.user) {
+        console.log('Login successful:', data.user);
+        
         // Get user profile data with permissions
-        const { data: profileData } = await supabase
+        const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', data.user.id)
           .single();
+        
+        if (profileError) {
+          console.error('Error fetching profile:', profileError);
+        }
           
         if (profileData) {
           // Convert string[] permissions to Permission[] type by validating each permission

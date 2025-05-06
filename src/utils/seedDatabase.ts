@@ -50,14 +50,22 @@ async function seedAdminUser() {
       return;
     }
 
-    // Create admin user with auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    // First check if the user exists in auth
+    const { data: authUser } = await supabase.auth.admin.listUsers();
+    const userExists = authUser?.users?.some(user => user.email === 'admin@cowork.com');
+    
+    if (userExists) {
+      console.log('Admin user already exists in auth');
+      return;
+    }
+
+    // Create admin user directly with admin API to ensure proper activation
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: 'admin@cowork.com',
       password: 'senha123',
-      options: {
-        data: {
-          name: 'Administrador',
-        }
+      email_confirm: true, // Confirma o email automaticamente
+      user_metadata: {
+        name: 'Administrador',
       }
     });
 

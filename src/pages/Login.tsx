@@ -6,11 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { seedDatabase } from '@/utils/seedDatabase';
 
 const Login = () => {
   const [email, setEmail] = useState('admin@cowork.com');
   const [password, setPassword] = useState('senha123');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSeeding, setIsSeeding] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -33,6 +35,23 @@ const Login = () => {
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSeedDatabase = async () => {
+    setIsSeeding(true);
+    try {
+      const result = await seedDatabase();
+      if (result.success) {
+        toast.success('Banco de dados populado com sucesso! Tente fazer login agora.');
+      } else {
+        toast.error('Erro ao popular banco de dados.');
+      }
+    } catch (error) {
+      console.error('Error seeding database:', error);
+      toast.error('Erro ao popular banco de dados');
+    } finally {
+      setIsSeeding(false);
     }
   };
 
@@ -89,6 +108,18 @@ const Login = () => {
                 {isLoading ? 'Entrando...' : 'Entrar'}
               </Button>
             </form>
+            
+            <div className="mt-4">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleSeedDatabase}
+                disabled={isSeeding}
+              >
+                {isSeeding ? 'Criando conta...' : 'Criar conta de administrador'}
+              </Button>
+            </div>
           </CardContent>
           <CardFooter className="flex justify-center">
             <div className="text-sm text-gray-500">
