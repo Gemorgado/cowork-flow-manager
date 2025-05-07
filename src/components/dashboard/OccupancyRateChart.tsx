@@ -13,6 +13,7 @@ import {
   OccupancyBarChart,
   useOccupancyChartData 
 } from './occupancy';
+import { ChartsSkeleton } from './ChartsSkeleton';
 
 interface OccupancyRateChartProps {
   rooms: OccupancyRate;
@@ -31,6 +32,8 @@ const OccupancyRateChart: React.FC<OccupancyRateChartProps> = (props) => {
     occupancyData 
   } = useOccupancyChartData(props);
 
+  const hasData = occupancyData.length > 0;
+
   return (
     <Card className="shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -46,7 +49,15 @@ const OccupancyRateChart: React.FC<OccupancyRateChartProps> = (props) => {
         />
       </CardHeader>
       <CardContent>
-        <OccupancyBarChart data={occupancyData} />
+        {props.isLoading ? (
+          <ChartsSkeleton />
+        ) : !hasData ? (
+          <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+            Nenhum dado disponível para esta visualização
+          </div>
+        ) : (
+          <OccupancyBarChart data={occupancyData} />
+        )}
       </CardContent>
     </Card>
   );
