@@ -4,13 +4,14 @@ import { OccupancyStats } from '@/components/occupancy/OccupancyStats';
 import { StatusLegend } from '@/components/occupancy/StatusLegend';
 import { OccupancyTabs } from '@/components/occupancy/OccupancyTabs';
 import { OccupancySummary } from '@/components/occupancy/OccupancySummary';
-import { FloorLayoutVisualization } from '@/components/occupancy/FloorLayoutVisualization';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 import { useSupabaseOccupancy } from '@/hooks/occupancy/useSupabaseOccupancy';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { OccupancyFloorSelector } from '@/components/occupancy/OccupancyFloorSelector';
+import { OccupancyVisualizer } from '@/components/occupancy/visualization/OccupancyVisualizer';
+import { OccupancyVisualizationProvider } from '@/components/occupancy/visualization/OccupancyVisualizationContext';
 
 const Occupancy = () => {
   const {
@@ -66,16 +67,18 @@ const Occupancy = () => {
         )}
       </div>
 
-      {/* Floor Layout Visualization Chart */}
+      {/* Visualization using the new module */}
       <div className="mb-6">
         {isLoading ? (
           <Skeleton className="h-[400px]" />
         ) : (
-          <FloorLayoutVisualization 
-            rooms={rooms} 
-            workStations={workStations}
-            currentFloor={currentFloor}
-          />
+          <OccupancyVisualizationProvider>
+            <OccupancyVisualizer 
+              rooms={rooms} 
+              workStations={workStations}
+              currentFloor={currentFloor}
+            />
+          </OccupancyVisualizationProvider>
         )}
       </div>
 
