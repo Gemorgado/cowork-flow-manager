@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,26 +8,23 @@ import { toast } from 'sonner';
 import { seedDatabase } from '@/utils/seedDatabase';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
 const Login = () => {
   const [email, setEmail] = useState('admin@cowork.com');
   const [password, setPassword] = useState('senha123');
   const [isLoading, setIsLoading] = useState(false);
   const [isSeeding, setIsSeeding] = useState(false);
   const [showConfirmationAlert, setShowConfirmationAlert] = useState(false);
-  const { login } = useAuth();
+  const {
+    login
+  } = useAuth();
   const navigate = useNavigate();
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!email || !password) {
       toast.error('Por favor, preencha todos os campos.');
       return;
     }
-    
     setIsLoading(true);
-    
     try {
       await login(email, password);
       toast.success('Login realizado com sucesso!');
@@ -37,7 +33,7 @@ const Login = () => {
       console.error('Login error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro durante o login.';
       toast.error(errorMessage);
-      
+
       // Check if the error is about email confirmation
       if (errorMessage.includes('email not confirmed') || errorMessage.includes('Email not confirmed')) {
         setShowConfirmationAlert(true);
@@ -48,7 +44,6 @@ const Login = () => {
       setIsLoading(false);
     }
   };
-
   const handleSeedDatabase = async () => {
     setIsSeeding(true);
     try {
@@ -72,9 +67,7 @@ const Login = () => {
       setIsSeeding(false);
     }
   };
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cowork-50 to-cowork-100">
+  return <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cowork-50 to-cowork-100">
       <div className="w-full max-w-md px-4">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-cowork-800">CoWork Flow</h1>
@@ -89,8 +82,7 @@ const Login = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {showConfirmationAlert && (
-              <Alert variant="default" className="mb-4 bg-amber-50 border-amber-200">
+            {showConfirmationAlert && <Alert variant="default" className="mb-4 bg-amber-50 border-amber-200">
                 <AlertCircle className="h-4 w-4 text-amber-600" />
                 <AlertTitle className="text-amber-800">Email não confirmado</AlertTitle>
                 <AlertDescription className="text-amber-700">
@@ -100,67 +92,31 @@ const Login = () => {
                     <li>Ou desative a confirmação de email no painel de controle do Supabase em Authentication &gt; Email Templates &gt; Desabilitar confirmação.</li>
                   </ol>
                 </AlertDescription>
-              </Alert>
-            )}
+              </Alert>}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium text-gray-700">
                   Email
                 </label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full"
-                />
+                <Input id="email" type="email" placeholder="seu@email.com" value={email} onChange={e => setEmail(e.target.value)} required className="w-full" />
               </div>
               <div className="space-y-2">
                 <label htmlFor="password" className="text-sm font-medium text-gray-700">
                   Senha
                 </label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full"
-                />
+                <Input id="password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required className="w-full" />
               </div>
-              <Button 
-                type="submit" 
-                className="w-full mt-6 bg-cowork-600 hover:bg-cowork-700" 
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
+              <Button type="submit" className="w-full mt-6 bg-cowork-600 hover:bg-cowork-700" disabled={isLoading}>
+                {isLoading ? <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Entrando...
-                  </>
-                ) : 'Entrar'}
+                  </> : 'Entrar'}
               </Button>
             </form>
             
             <div className="mt-6">
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={handleSeedDatabase}
-                disabled={isSeeding}
-              >
-                {isSeeding ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Criando conta...
-                  </>
-                ) : 'Criar conta de administrador'}
-              </Button>
+              
             </div>
           </CardContent>
           <CardFooter className="flex flex-col justify-center items-center">
@@ -169,14 +125,10 @@ const Login = () => {
               <p><strong>Email:</strong> admin@cowork.com</p>
               <p><strong>Senha:</strong> senha123</p>
             </div>
-            <p className="text-xs text-gray-500 mt-4 text-center">
-              Clique em "Criar conta de administrador" antes de tentar fazer login pela primeira vez.
-            </p>
+            
           </CardFooter>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Login;
