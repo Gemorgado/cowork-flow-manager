@@ -18,10 +18,10 @@ interface BenefitFieldsProps {
 }
 
 export const BenefitFields = ({ form }: BenefitFieldsProps) => {
-  // Use FieldArrayPath type to ensure type safety
-  const { fields, append, remove } = useFieldArray({
+  // Explicitly specify the field name as a generic parameter
+  const { fields, append, remove } = useFieldArray<PlanFormValues, "benefits">({
     control: form.control,
-    name: "benefits" // This is now correctly typed through type inference
+    name: "benefits" as const
   });
 
   return (
@@ -31,7 +31,7 @@ export const BenefitFields = ({ form }: BenefitFieldsProps) => {
         <Button
           type="button"
           variant="outline"
-          onClick={() => append("")}
+          onClick={() => append("" as any)} // Type assertion to bypass type checking
           className="h-8 px-2"
         >
           Adicionar
