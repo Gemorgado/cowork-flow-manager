@@ -66,7 +66,7 @@ export async function seedSupabaseOccupancy() {
     
     console.log("Deleted existing data");
     
-    // Insert room data - note we're using insertMany which expects an array
+    // Insert room data
     const { data: roomsInserted, error: roomsError } = await supabase
       .from('rooms')
       .insert(roomsData);
@@ -78,7 +78,7 @@ export async function seedSupabaseOccupancy() {
     
     console.log(`Successfully inserted rooms`);
     
-    // Insert workstation data - again using insertMany
+    // Insert workstation data
     const { data: workstationsInserted, error: workstationsError } = await supabase
       .from('workstations')
       .insert(workstationsData);

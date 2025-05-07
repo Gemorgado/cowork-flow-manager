@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { OccupancyStats } from '@/components/occupancy/OccupancyStats';
 import { StatusLegend } from '@/components/occupancy/StatusLegend';
@@ -14,10 +13,11 @@ import { seedSupabaseOccupancy } from '@/utils/seedSupabaseOccupancy';
 import { toast } from '@/components/ui/use-toast';
 
 const Occupancy = () => {
-  const [currentFloor, setCurrentFloor] = useState<string>("1");
   const [isSeeding, setIsSeeding] = useState(false);
   
   const {
+    currentFloor,
+    setCurrentFloor,
     rooms,
     workStations,
     roomOccupancy,
