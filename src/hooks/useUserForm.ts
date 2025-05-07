@@ -42,10 +42,6 @@ const useUserForm = ({ users, setUsers }: UseUserFormProps) => {
     setSelectedUser,
   });
 
-  const addUser = () => handleAddUser(formData);
-  const editUser = () => handleEditUser(formData, selectedUser);
-  const deleteUser = () => handleDeleteUser(selectedUser);
-
   return {
     formData,
     permissionOptions,
@@ -58,9 +54,9 @@ const useUserForm = ({ users, setUsers }: UseUserFormProps) => {
     setIsDeleteUserOpen,
     handleInputChange,
     handlePermissionChange,
-    handleAddUser: addUser,
-    handleEditUser: editUser,
-    handleDeleteUser: deleteUser,
+    handleAddUser: () => handleAddUser(formData),
+    handleEditUser: () => handleEditUser(formData, selectedUser),
+    handleDeleteUser: () => handleDeleteUser(selectedUser),
     openEditDialog,
     openDeleteDialog,
   };
