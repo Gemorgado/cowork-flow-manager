@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Room, WorkStation } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
