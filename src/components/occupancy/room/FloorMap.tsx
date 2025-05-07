@@ -63,10 +63,13 @@ export function FloorMap() {
 
   const isLoading = isLoadingRooms || isLoadingStations;
 
+  // Debugging logs to identify why data isn't showing
+  console.log("Floor data:", { floor, rooms, workStations, isLoading });
+
   return (
-    <section className="py-10">
+    <section className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-        <FloorSelector value={floor} onChange={setFloor} />
+        <FloorSelector value={floor} onChange={(val) => setFloor(val)} />
         
         <Tabs value={activeView} onValueChange={(val) => setActiveView(val as any)}>
           <TabsList className="bg-white/5 backdrop-blur-sm">
@@ -84,21 +87,29 @@ export function FloorMap() {
           ))}
         </div>
       ) : (
-        <div>
-          {(activeView === 'unified' || activeView === 'rooms') && (
+        <div className="space-y-8">
+          {(activeView === 'unified' || activeView === 'rooms') && rooms && rooms.length > 0 ? (
             <div className={activeView === 'unified' ? 'mb-10' : ''}>
               <h3 className="text-lg font-medium mb-4">Salas</h3>
-              <RoomGrid rooms={rooms || []} />
+              <RoomGrid rooms={rooms} />
+            </div>
+          ) : (activeView === 'unified' || activeView === 'rooms') && (
+            <div className="text-center py-8 text-muted-foreground">
+              Nenhuma sala encontrada para este andar
             </div>
           )}
           
-          {(activeView === 'unified' || activeView === 'stations') && (
+          {(activeView === 'unified' || activeView === 'stations') && workStations && workStations.length > 0 ? (
             <div>
               <h3 className="text-lg font-medium mb-4">Estações de Trabalho</h3>
               <WorkStationGrid 
-                workStations={workStations || []} 
+                workStations={workStations} 
                 currentFloor={floor} 
               />
+            </div>
+          ) : (activeView === 'unified' || activeView === 'stations') && (
+            <div className="text-center py-8 text-muted-foreground">
+              Nenhuma estação encontrada para este andar
             </div>
           )}
         </div>

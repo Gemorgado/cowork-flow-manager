@@ -1,11 +1,12 @@
 
 import React, { useState } from 'react';
 import { Room } from '@/types';
-import { useForm, FieldValues } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { RoomEditDialog, ClientLinkDialog, RoomDetailsDialogContent } from './room/RoomDialogs';
+import { RoomEditDialog, ClientLinkDialog } from './room/RoomDialogs';
 import { StandardFloorLayout, Floor2Layout } from './room/FloorLayouts';
 import { getClientInfo, mockClients } from './room/RoomUtils';
+import { RoomGrid } from './room/RoomGrid';
 
 interface RoomMapProps {
   rooms: Room[];
@@ -67,10 +68,18 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
     // For now, we'll just close the dialog
     setIsClientLinkDialogOpen(false);
   };
+
+  console.log("RoomMap rendering with rooms:", floorRooms);
   
   return (
     <TooltipProvider>
-      {parseInt(currentFloor) === 2 ? (
+      <div className="mb-8">
+        {/* Use the RoomGrid component to display rooms in a grid layout */}
+        <RoomGrid rooms={floorRooms} />
+      </div>
+
+      {/* Specialized floor layouts if needed */}
+      {false && (parseInt(currentFloor) === 2 ? (
         <Floor2Layout 
           rooms={rooms}
           floorRooms={floorRooms}
@@ -86,7 +95,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
           setHoveredRoomId={setHoveredRoomId}
           getClientInfo={getClientInfo}
         />
-      )}
+      ))}
       
       {/* Room edit dialog */}
       {selectedRoom && (

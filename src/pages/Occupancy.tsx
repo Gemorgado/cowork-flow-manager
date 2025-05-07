@@ -25,6 +25,12 @@ const Occupancy = () => {
     handleConvertFlexToFixed,
   } = useSupabaseOccupancy();
 
+  console.log("Occupancy page data:", { 
+    roomsCount: rooms.length, 
+    workStationsCount: workStations.length,
+    currentFloor 
+  });
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
