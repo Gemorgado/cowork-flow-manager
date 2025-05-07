@@ -7,6 +7,8 @@ import { RoomEditDialog, ClientLinkDialog } from './room/RoomDialogs';
 import { StandardFloorLayout, Floor2Layout } from './room/FloorLayouts';
 import { getClientInfo, mockClients } from './room/RoomUtils';
 import { RoomGrid } from './room/RoomGrid';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 interface RoomMapProps {
   rooms: Room[];
@@ -70,6 +72,22 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
   };
 
   console.log("RoomMap rendering with rooms:", floorRooms);
+  
+  // If there are no rooms for this floor, show a message
+  if (floorRooms.length === 0) {
+    return (
+      <div className="p-6 text-center">
+        <Alert variant="default" className="justify-center">
+          <AlertCircle className="h-4 w-4 mr-2" />
+          <AlertDescription>
+            Nenhuma sala encontrada para o {currentFloor}º andar.
+            <br/>
+            Use o botão "Popular Dados" para criar salas de exemplo.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
   
   return (
     <TooltipProvider>

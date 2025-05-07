@@ -1,0 +1,107 @@
+
+import { supabase } from "@/integrations/supabase/client";
+import { v4 as uuidv4 } from 'uuid';
+
+/**
+ * Seeds the Supabase database with initial room and workstation data
+ */
+export async function seedSupabaseOccupancy() {
+  try {
+    // Generate room data for floors 1-3
+    const roomsData = [
+      // Floor 1 rooms
+      ...['101','102','103','104','105','106','107'].map(code => ({
+        id: uuidv4(),
+        number: code,
+        floor: "1", // Supabase expects string values for the floor enum
+        status: "available",
+        area: Math.floor(Math.random() * 30) + 10, // Random area between 10-40m²
+        capacity: Math.floor(Math.random() * 8) + 2, // Random capacity between 2-10
+      })),
+      // Floor 2 rooms
+      ...Array.from({ length: 19 }, (_, i) => ({
+        id: uuidv4(),
+        number: `${201+i}`,
+        floor: "2",
+        status: "available",
+        area: Math.floor(Math.random() * 30) + 10,
+        capacity: Math.floor(Math.random() * 8) + 2,
+      })),
+      // Floor 3 rooms
+      ...Array.from({ length: 14 }, (_, i) => ({
+        id: uuidv4(),
+        number: `${301+i}`,
+        floor: "3",
+        status: "available",
+        area: Math.floor(Math.random() * 30) + 10,
+        capacity: Math.floor(Math.random() * 8) + 2,
+      }))
+    ];
+
+    // Generate workstation data for floors 1-2
+    const workstationsData = [
+      // Floor 1 workstations
+      ...Array.from({ length: 26 }, (_, i) => ({
+        id: uuidv4(),
+        number: `WS-${(i+1).toString().padStart(2,'0')}`,
+        floor: "1",
+        type: Math.random() > 0.7 ? "flex" : "fixed", // 30% chance of flex, 70% fixed
+        status: "available"
+      })),
+      // Floor 2 workstations
+      ...Array.from({ length: 38 }, (_, i) => ({
+        id: uuidv4(),
+        number: `WS-${(i+27).toString().padStart(2,'0')}`,
+        floor: "2",
+        type: Math.random() > 0.7 ? "flex" : "fixed",
+        status: "available"
+      }))
+    ];
+
+    console.log("Starting seed process...");
+    
+    // Clear existing data first (careful with this in production!)
+    await supabase.from('rooms').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    await supabase.from('workstations').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    
+    console.log("Deleted existing data");
+    
+    // Insert room data
+    const { data: roomsInserted, error: roomsError } = await supabase
+      .from('rooms')
+      .insert(roomsData)
+      .select();
+      
+    if (roomsError) {
+      console.error("Error inserting rooms:", roomsError);
+      throw roomsError;
+    }
+    
+    console.log(`Successfully inserted ${roomsInserted?.length} rooms`);
+    
+    // Insert workstation data
+    const { data: workstationsInserted, error: workstationsError } = await supabase
+      .from('workstations')
+      .insert(workstationsData)
+      .select();
+      
+    if (workstationsError) {
+      console.error("Error inserting workstations:", workstationsError);
+      throw workstationsError;
+    }
+    
+    console.log(`Successfully inserted ${workstationsInserted?.length} workstations`);
+    
+    return {
+      success: true,
+      roomsCount: roomsInserted?.length || 0,
+      workstationsCount: workstationsInserted?.length || 0
+    };
+  } catch (error) {
+    console.error("Seed failed:", error);
+    return {
+      success: false,
+      error
+    };
+  }
+}
