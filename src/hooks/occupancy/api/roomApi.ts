@@ -2,6 +2,24 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Room, LocationStatus } from '@/types';
 import { toast } from '@/components/ui/use-toast';
+import { Database } from '@/integrations/supabase/types';
+
+type RoomRow = Database['public']['Tables']['rooms']['Row'];
+type RoomInsert = Database['public']['Tables']['rooms']['Insert'];
+type RoomUpdate = Database['public']['Tables']['rooms']['Update'];
+
+/**
+ * Transforms a Supabase room row into a Room type
+ */
+const transformRoomRow = (row: RoomRow): Room => ({
+  id: row.id,
+  number: row.number,
+  floor: parseInt(row.floor) as Room['floor'],
+  status: row.status,
+  clientId: row.client_id || undefined,
+  area: row.area,
+  capacity: row.capacity
+});
 
 /**
  * Fetches all rooms from Supabase
@@ -16,15 +34,7 @@ export async function fetchRooms(): Promise<Room[]> {
       throw error;
     }
 
-    return data?.map(room => ({
-      id: room.id,
-      number: room.number,
-      floor: parseInt(room.floor) as any,
-      status: room.status,
-      clientId: room.client_id || undefined,
-      area: room.area,
-      capacity: room.capacity
-    })) || [];
+    return data?.map(transformRoomRow) || [];
   } catch (error: any) {
     console.error('Error fetching rooms:', error);
     toast({
@@ -45,7 +55,8 @@ export async function updateRoomStatus(
   clientId?: string
 ): Promise<boolean> {
   try {
-    const updateData: any = { status };
+    // Type-safe update data
+    const updateData: RoomUpdate = { status };
     if (clientId !== undefined) {
       updateData.client_id = clientId || null;
     }
@@ -59,8 +70,13 @@ export async function updateRoomStatus(
       throw error;
     }
     return true;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating room:', error);
+    toast({
+      title: 'Error',
+      description: `Failed to update room status: ${error.message || 'Unknown error'}`,
+      variant: 'destructive',
+    });
     return false;
   }
 }
@@ -73,17 +89,33 @@ export async function updateRoomDetails(
   data: { area?: number, priceClosed?: number }
 ): Promise<boolean> {
   try {
+    // Type-safe update data
+    const updateData: RoomUpdate = {};
+    if (data.area !== undefined) {
+      updateData.area = data.area;
+    }
+
+    // Validate the data before sending to the database
+    if (Object.keys(updateData).length === 0) {
+      throw new Error('No valid room details provided for update');
+    }
+
     const { error } = await supabase
       .from('rooms')
-      .update(data)
+      .update(updateData)
       .eq('id', roomId);
 
     if (error) {
       throw error;
     }
     return true;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating room details:', error);
+    toast({
+      title: 'Error',
+      description: `Failed to update room details: ${error.message || 'Unknown error'}`,
+      variant: 'destructive',
+    });
     return false;
   }
 }
@@ -96,20 +128,31 @@ export async function linkClientToRoom(
   clientId: string
 ): Promise<boolean> {
   try {
+    if (!roomId || !clientId) {
+      throw new Error('Room ID and Client ID are required');
+    }
+
+    const updateData: RoomUpdate = { 
+      status: 'occupied',
+      client_id: clientId 
+    };
+
     const { error } = await supabase
       .from('rooms')
-      .update({ 
-        status: 'occupied',
-        client_id: clientId 
-      })
+      .update(updateData)
       .eq('id', roomId);
 
     if (error) {
       throw error;
     }
     return true;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error linking client to room:', error);
+    toast({
+      title: 'Error',
+      description: `Failed to link client to room: ${error.message || 'Unknown error'}`,
+      variant: 'destructive',
+    });
     return false;
   }
 }
