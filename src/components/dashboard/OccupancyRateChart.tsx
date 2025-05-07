@@ -15,12 +15,13 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  LabelList,
 } from 'recharts';
 import { OccupancyRate } from '@/types';
 
 interface OccupancyData {
   name: string;
-  ocupado: number;
+  occupied: number;
   total: number;
   taxa: number;
 }
@@ -29,32 +30,34 @@ interface OccupancyRateChartProps {
   rooms: OccupancyRate;
   fixedStations: OccupancyRate;
   flexStations: OccupancyRate;
+  isLoading?: boolean;
 }
 
 const OccupancyRateChart: React.FC<OccupancyRateChartProps> = ({
   rooms,
   fixedStations,
   flexStations,
+  isLoading = false,
 }) => {
   // Prepare data for the chart
   const occupancyData: OccupancyData[] = [
     {
       name: 'Salas',
-      ocupado: rooms.occupied,
-      total: rooms.total,
-      taxa: rooms.rate,
+      ocupado: rooms?.occupied || 0,
+      total: rooms?.total || 0,
+      taxa: rooms?.rate || 0,
     },
     {
       name: 'Estações Fixas',
-      ocupado: fixedStations.occupied,
-      total: fixedStations.total,
-      taxa: fixedStations.rate,
+      ocupado: fixedStations?.occupied || 0,
+      total: fixedStations?.total || 0,
+      taxa: fixedStations?.rate || 0,
     },
     {
       name: 'Estações Flex',
-      ocupado: flexStations.occupied,
-      total: flexStations.total,
-      taxa: flexStations.rate,
+      ocupado: flexStations?.occupied || 0,
+      total: flexStations?.total || 0,
+      taxa: flexStations?.rate || 0,
     },
   ];
 
@@ -72,12 +75,14 @@ const OccupancyRateChart: React.FC<OccupancyRateChartProps> = ({
             <BarChart data={occupancyData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
-              <YAxis unit="%" />
+              <YAxis unit="%" domain={[0, 100]} />
               <Tooltip 
                 formatter={(value) => [`${value}%`, 'Taxa de Ocupação']}
                 labelFormatter={(name) => `Espaço: ${name}`}
               />
-              <Bar dataKey="taxa" fill="#0f90db" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="taxa" fill="#0f90db" radius={[4, 4, 0, 0]}>
+                <LabelList dataKey="taxa" position="top" formatter={(value: number) => `${value}%`} />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
