@@ -50,6 +50,9 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({ dashboardData }) => {
               rooms={occupancyStats.rooms}
               fixedStations={occupancyStats.fixedStations}
               flexStations={occupancyStats.flexStations}
+              floorRooms={occupancyStats.floorRooms}
+              floorFixedStations={occupancyStats.floorFixedStations}
+              floorFlexStations={occupancyStats.floorFlexStations}
             />
           </>
         )}

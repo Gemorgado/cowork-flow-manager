@@ -4,6 +4,7 @@ import { OccupancyStats } from '@/components/occupancy/OccupancyStats';
 import { StatusLegend } from '@/components/occupancy/StatusLegend';
 import { OccupancyTabs } from '@/components/occupancy/OccupancyTabs';
 import { OccupancySummary } from '@/components/occupancy/OccupancySummary';
+import { FloorLayoutVisualization } from '@/components/occupancy/FloorLayoutVisualization';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 import { useSupabaseOccupancy } from '@/hooks/occupancy/useSupabaseOccupancy';
@@ -62,6 +63,19 @@ const Occupancy = () => {
             />
             <StatusLegend />
           </>
+        )}
+      </div>
+
+      {/* Floor Layout Visualization Chart */}
+      <div className="mb-6">
+        {isLoading ? (
+          <Skeleton className="h-[400px]" />
+        ) : (
+          <FloorLayoutVisualization 
+            rooms={rooms} 
+            workStations={workStations}
+            currentFloor={currentFloor}
+          />
         )}
       </div>
 
