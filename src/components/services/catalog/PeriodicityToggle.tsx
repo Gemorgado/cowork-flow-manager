@@ -22,7 +22,7 @@ const PeriodicityToggle = ({ items, value, onValueChange }: PeriodicityTogglePro
       onValueChange={(val) => {
         if (val) onValueChange(val);
       }}
-      className="flex justify-start bg-white/5 dark:bg-neutral-900/60 rounded-full p-1 backdrop-blur-sm"
+      className="flex justify-start bg-white/10 rounded-full p-1 backdrop-blur-sm"
       aria-label="Selecione a periodicidade"
     >
       {items.map((period) => (
@@ -30,7 +30,7 @@ const PeriodicityToggle = ({ items, value, onValueChange }: PeriodicityTogglePro
           key={period.key}
           value={period.key}
           aria-label={period.label}
-          className="text-xs px-3 py-1 data-[state=on]:bg-primary data-[state=on]:text-white rounded-full transition-all"
+          className="text-xs px-3 py-1 data-[state=on]:bg-white data-[state=on]:text-cowork-800 data-[state=off]:text-white rounded-full transition-all"
         >
           {period.label}
         </ToggleGroupItem>

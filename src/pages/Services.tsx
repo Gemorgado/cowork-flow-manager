@@ -106,10 +106,10 @@ const Services = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-neutral-950 dark:bg-white text-white dark:text-neutral-950">
+    <div className="min-h-screen bg-gradient-to-br from-cowork-50 to-cowork-100 dark:from-cowork-950 dark:to-cowork-900">
       {loading ? (
         <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <Loader2 className="h-12 w-12 animate-spin text-cowork-600" />
         </div>
       ) : (
         <PlanCatalog services={services} />
