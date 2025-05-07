@@ -1,4 +1,3 @@
-
 import { toast } from 'sonner';
 import { Client } from '@/types';
 import { services } from '@/mock/services';
@@ -7,7 +6,7 @@ import {
   addClient as addClientToSupabase, 
   updateClient as updateClientInSupabase,
   deleteClient as deleteClientFromSupabase
-} from '@/utils/supabaseClients';
+} from '@/utils/clients';
 
 interface UseClientOperationsProps {
   clients: Client[];
