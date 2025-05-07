@@ -31,8 +31,8 @@ export const ServiceCard = ({ service }: ServiceCardProps) => {
   // Find the selected price details
   const selectedPrice = service.prices.find(p => p.period === selectedPeriodicity) || service.prices[0];
   
-  // Extract benefit descriptions
-  const benefitDescriptions = service.benefits.map(benefit => benefit.name);
+  // Convert benefit descriptions to the new format expected by BenefitsAccordion
+  const benefitTexts = service.benefits.map(benefit => benefit.name);
 
   // Convert service data to the format expected by PlanEditDialog
   const planForDialog: PlanDialogData = {
@@ -40,7 +40,10 @@ export const ServiceCard = ({ service }: ServiceCardProps) => {
     name: service.name,
     description: service.description,
     periodicities: periodicities,
-    benefits: benefitDescriptions
+    benefits: service.benefits.map(benefit => ({
+      id: benefit.id,
+      text: benefit.name
+    }))
   };
 
   return (
@@ -84,7 +87,7 @@ export const ServiceCard = ({ service }: ServiceCardProps) => {
           )}
         </div>
         
-        <BenefitsAccordion benefits={benefitDescriptions} />
+        <BenefitsAccordion benefits={benefitTexts} />
         
         {canEditPlans && (
           <PlanEditDialog 

@@ -13,12 +13,17 @@ interface Periodicity {
   times?: number;
 }
 
+interface Benefit {
+  id?: string;
+  text: string;
+}
+
 interface Plan {
   id: string;
   name: string;
   description: string;
   periodicities: Periodicity[];
-  benefits: string[];
+  benefits: Benefit[];
 }
 
 interface PlanCardProps {
@@ -31,6 +36,9 @@ const PlanCard = ({ plan }: PlanCardProps) => {
   const { hasPermission } = useAuth();
 
   const canEditPlans = hasPermission('plans');
+
+  // Extract just the text from benefits for the accordion
+  const benefitTexts = plan.benefits.map(benefit => benefit.text);
 
   return (
     <article className="relative rounded-2xl bg-white/5 dark:bg-neutral-100/60 backdrop-blur-sm shadow-md shadow-black/10 p-6 flex flex-col gap-4 transition hover:shadow-lg/20 hover:-translate-y-1">
@@ -71,7 +79,7 @@ const PlanCard = ({ plan }: PlanCardProps) => {
         )}
       </div>
 
-      <BenefitsAccordion benefits={plan.benefits} />
+      <BenefitsAccordion benefits={benefitTexts} />
       {canEditPlans && <PlanEditDialog open={open} onOpenChange={setOpen} plan={plan} />}
     </article>
   );
