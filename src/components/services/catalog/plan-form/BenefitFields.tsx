@@ -18,10 +18,10 @@ interface BenefitFieldsProps {
 }
 
 export const BenefitFields = ({ form }: BenefitFieldsProps) => {
-  // Corrigindo a tipagem do useFieldArray para aceitar 'benefits'
-  const { fields, append, remove } = useFieldArray<PlanFormValues, 'benefits'>({
+  // Use FieldArrayPath type to ensure type safety
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: 'benefits', // Agora TypeScript sabe que este é um campo válido
+    name: "benefits" // This is now correctly typed through type inference
   });
 
   return (
@@ -31,7 +31,7 @@ export const BenefitFields = ({ form }: BenefitFieldsProps) => {
         <Button
           type="button"
           variant="outline"
-          onClick={() => append("")} // Agora pode adicionar uma string diretamente
+          onClick={() => append("")}
           className="h-8 px-2"
         >
           Adicionar
