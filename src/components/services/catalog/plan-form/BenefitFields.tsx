@@ -18,10 +18,10 @@ interface BenefitFieldsProps {
 }
 
 export const BenefitFields = ({ form }: BenefitFieldsProps) => {
-  // Use the correct typing for the useFieldArray hook with proper name property
-  const { fields, append, remove } = useFieldArray({
+  // Fix the typing issues by using proper TypeScript generics
+  const { fields, append, remove } = useFieldArray<PlanFormValues>({
     control: form.control,
-    name: "benefits",
+    name: "benefits" as "benefits", // Type assertion to help TypeScript understand this is a valid field
   });
 
   return (
@@ -31,7 +31,7 @@ export const BenefitFields = ({ form }: BenefitFieldsProps) => {
         <Button
           type="button"
           variant="outline"
-          onClick={() => append("")}
+          onClick={() => append("" as any)} // Type assertion to resolve incompatible types
           className="h-8 px-2"
         >
           Adicionar
