@@ -15,6 +15,7 @@ import {
   handleUpdateRoomDetails, 
   handleLinkClientToRoom 
 } from './operations/roomOperations';
+import { seedSupabaseOccupancy } from '@/utils/seedSupabaseOccupancy';
 
 export function useSupabaseOccupancy() {
   const { currentFloor, setCurrentFloor } = useFloorSelection('1');
@@ -22,9 +23,37 @@ export function useSupabaseOccupancy() {
   const [workStations, setWorkStations] = useState<WorkStation[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [dataInitialized, setDataInitialized] = useState<boolean>(false);
+
+  // Check if we need to initialize data
+  const checkAndSeedData = useCallback(async () => {
+    try {
+      // Check if we have data
+      const { data: roomsCheck, error: roomsError } = await supabase
+        .from('rooms')
+        .select('id')
+        .limit(1);
+      
+      if (roomsError) throw roomsError;
+      
+      // If no rooms found, seed the data
+      if (!roomsCheck || roomsCheck.length === 0) {
+        await seedSupabaseOccupancy();
+      }
+
+      setDataInitialized(true);
+    } catch (error) {
+      console.error('Error checking or seeding data:', error);
+      setDataInitialized(true); // Set to true anyway to proceed with the app
+    }
+  }, []);
 
   // Fetch all data
   const fetchData = useCallback(async () => {
+    if (!dataInitialized) {
+      await checkAndSeedData();
+    }
+
     setIsLoading(true);
     const [fetchedRooms, fetchedWorkstations] = await Promise.all([
       fetchRooms(),
@@ -34,7 +63,7 @@ export function useSupabaseOccupancy() {
     setRooms(fetchedRooms);
     setWorkStations(fetchedWorkstations);
     setIsLoading(false);
-  }, []);
+  }, [dataInitialized, checkAndSeedData]);
 
   // Initial data fetch
   useEffect(() => {

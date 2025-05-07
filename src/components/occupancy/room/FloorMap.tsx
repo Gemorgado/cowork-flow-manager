@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { FloorSelector } from './FloorSelector';
 import { RoomGrid } from './RoomGrid';
@@ -10,12 +10,40 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { seedSupabaseOccupancy } from '@/utils/seedSupabaseOccupancy';
 
 export function FloorMap() {
   const [floor, setFloor] = useState<"1" | "2" | "3">("1");
   const [activeView, setActiveView] = useState<'unified' | 'rooms' | 'stations'>('unified');
+  const [hasCheckedData, setHasCheckedData] = useState(false);
+  
+  // Check if data exists on initial load
+  useEffect(() => {
+    const checkForData = async () => {
+      try {
+        // Check if rooms exist
+        const { data: roomsCheck, error: roomsError } = await supabase
+          .from('rooms')
+          .select('id')
+          .limit(1);
+          
+        if (roomsError) throw roomsError;
+        
+        // If no rooms, seed the data
+        if (!roomsCheck || roomsCheck.length === 0) {
+          await seedSupabaseOccupancy();
+        }
+      } catch (error) {
+        console.error('Error checking for data:', error);
+      } finally {
+        setHasCheckedData(true);
+      }
+    };
+    
+    checkForData();
+  }, []);
 
-  const { data: rooms, isLoading: isLoadingRooms, error: roomsError } = useQuery({
+  const { data: rooms, isLoading: isLoadingRooms, error: roomsError, refetch: refetchRooms } = useQuery({
     queryKey: ['rooms', floor],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -28,8 +56,6 @@ export function FloorMap() {
         throw error;
       }
       
-      console.log(`Fetched ${data?.length || 0} rooms for floor ${floor}`);
-      
       // Transform the response to match the Room type
       return (data || []).map(room => ({
         id: room.id,
@@ -41,9 +67,10 @@ export function FloorMap() {
         capacity: room.capacity
       })) as Room[];
     },
+    enabled: hasCheckedData,
   });
 
-  const { data: workStations, isLoading: isLoadingStations, error: stationsError } = useQuery({
+  const { data: workStations, isLoading: isLoadingStations, error: stationsError, refetch: refetchStations } = useQuery({
     queryKey: ['workstations', floor],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -56,8 +83,6 @@ export function FloorMap() {
         throw error;
       }
       
-      console.log(`Fetched ${data?.length || 0} workstations for floor ${floor}`);
-      
       return (data || []).map(station => ({
         id: station.id,
         number: station.number,
@@ -67,13 +92,32 @@ export function FloorMap() {
         clientId: station.client_id || undefined
       })) as WorkStation[];
     },
+    enabled: hasCheckedData,
   });
 
-  const isLoading = isLoadingRooms || isLoadingStations;
-  const hasError = roomsError || stationsError;
+  // If we have no data after checking, try to seed
+  useEffect(() => {
+    const seedDataIfNeeded = async () => {
+      if (hasCheckedData && (
+        (!rooms || rooms.length === 0) && 
+        (!workStations || workStations.length === 0)
+      )) {
+        try {
+          await seedSupabaseOccupancy();
+          // Refetch data after seeding
+          refetchRooms();
+          refetchStations();
+        } catch (error) {
+          console.error('Error seeding data:', error);
+        }
+      }
+    };
+    
+    seedDataIfNeeded();
+  }, [hasCheckedData, rooms, workStations, refetchRooms, refetchStations]);
 
-  // Debugging logs to identify why data isn't showing
-  console.log("Floor data:", { floor, rooms, workStations, isLoading });
+  const isLoading = isLoadingRooms || isLoadingStations || !hasCheckedData;
+  const hasError = roomsError || stationsError;
 
   return (
     <section className="space-y-6">
@@ -94,14 +138,14 @@ export function FloorMap() {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Erro</AlertTitle>
           <AlertDescription>
-            Falha ao carregar dados de ocupação. Tente novamente ou verifique o banco de dados.
+            Falha ao carregar dados de ocupação.
           </AlertDescription>
         </Alert>
       )}
       
       {isLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 lg:grid-cols-10 gap-2 sm:gap-4 p-2 sm:p-8">
-          {Array.from({ length: floor === "1" ? 7 : floor === "2" ? 19 : 14 }).map((_, i) => (
+          {Array.from({ length: floor === "1" ? 7 : floor === "2" ? 19 : 10 }).map((_, i) => (
             <Skeleton key={i} className="h-20 w-full rounded-xl" />
           ))}
         </div>
@@ -114,11 +158,7 @@ export function FloorMap() {
             </div>
           ) : (activeView === 'unified' || activeView === 'rooms') && (
             <div className="text-center py-8 text-muted-foreground">
-              {rooms && rooms.length === 0 ? (
-                <p>Nenhuma sala encontrada para este andar. Utilize o botão "Popular Dados" para criar salas de exemplo.</p>
-              ) : (
-                <p>Carregando salas...</p>
-              )}
+              <p>Carregando salas...</p>
             </div>
           )}
           
@@ -132,11 +172,7 @@ export function FloorMap() {
             </div>
           ) : (activeView === 'unified' || activeView === 'stations') && (
             <div className="text-center py-8 text-muted-foreground">
-              {workStations && workStations.length === 0 ? (
-                <p>Nenhuma estação encontrada para este andar. Utilize o botão "Popular Dados" para criar estações de exemplo.</p>
-              ) : (
-                <p>Carregando estações...</p>
-              )}
+              <p>Carregando estações...</p>
             </div>
           )}
         </div>
