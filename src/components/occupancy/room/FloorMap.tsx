@@ -11,11 +11,45 @@ import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { seedSupabaseOccupancy } from '@/utils/seedSupabaseOccupancy';
 import { supabase } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/use-toast';
 
 export function FloorMap() {
   const [floor, setFloor] = useState<"1" | "2" | "3">("1");
   const [activeView, setActiveView] = useState<'unified' | 'rooms' | 'stations'>('unified');
   const [hasCheckedData, setHasCheckedData] = useState(false);
+  const [isSeedingData, setIsSeedingData] = useState(false);
+  
+  // Função para popular dados manualmente
+  const handlePopulateData = async () => {
+    try {
+      setIsSeedingData(true);
+      toast({
+        title: "Populando dados",
+        description: "Criando salas e estações de exemplo..."
+      });
+      
+      await seedSupabaseOccupancy();
+      
+      // Refetching após seeding
+      await refetchRooms();
+      await refetchStations();
+      
+      toast({
+        title: "Sucesso",
+        description: "Dados de exemplo criados com sucesso!"
+      });
+    } catch (error) {
+      console.error('Erro ao popular dados:', error);
+      toast({
+        title: "Erro",
+        description: "Falha ao popular dados de exemplo.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSeedingData(false);
+    }
+  };
   
   // Check if data exists on initial load
   useEffect(() => {
@@ -95,42 +129,34 @@ export function FloorMap() {
     enabled: hasCheckedData,
   });
 
-  // If we have no data after checking, try to seed
-  useEffect(() => {
-    const seedDataIfNeeded = async () => {
-      if (hasCheckedData && (
-        (!rooms || rooms.length === 0) && 
-        (!workStations || workStations.length === 0)
-      )) {
-        try {
-          await seedSupabaseOccupancy();
-          // Refetch data after seeding
-          refetchRooms();
-          refetchStations();
-        } catch (error) {
-          console.error('Error seeding data:', error);
-        }
-      }
-    };
-    
-    seedDataIfNeeded();
-  }, [hasCheckedData, rooms, workStations, refetchRooms, refetchStations]);
-
   const isLoading = isLoadingRooms || isLoadingStations || !hasCheckedData;
   const hasError = roomsError || stationsError;
+  const hasNoData = (!rooms || rooms.length === 0) && (!workStations || workStations.length === 0);
 
   return (
     <section className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <FloorSelector value={floor} onChange={(val) => setFloor(val)} />
         
-        <Tabs value={activeView} onValueChange={(val) => setActiveView(val as any)}>
-          <TabsList className="bg-white/5 backdrop-blur-sm">
-            <TabsTrigger value="unified">Unificado</TabsTrigger>
-            <TabsTrigger value="rooms">Salas</TabsTrigger>
-            <TabsTrigger value="stations">Estações</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handlePopulateData} 
+            disabled={isSeedingData}
+            className="text-xs"
+          >
+            {isSeedingData ? 'Populando...' : 'Popular Dados'}
+          </Button>
+          
+          <Tabs value={activeView} onValueChange={(val) => setActiveView(val as any)}>
+            <TabsList className="bg-white/5 backdrop-blur-sm">
+              <TabsTrigger value="unified">Unificado</TabsTrigger>
+              <TabsTrigger value="rooms">Salas</TabsTrigger>
+              <TabsTrigger value="stations">Estações</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
       
       {hasError && (
@@ -138,7 +164,7 @@ export function FloorMap() {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Erro</AlertTitle>
           <AlertDescription>
-            Falha ao carregar dados de ocupação.
+            Falha ao carregar dados de ocupação. Tente usar o botão "Popular Dados".
           </AlertDescription>
         </Alert>
       )}
@@ -149,6 +175,16 @@ export function FloorMap() {
             <Skeleton key={i} className="h-20 w-full rounded-xl" />
           ))}
         </div>
+      ) : hasNoData ? (
+        <div className="text-center py-12">
+          <Alert className="max-w-md mx-auto">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Nenhum dado encontrado para o {floor}º andar. 
+              Use o botão "Popular Dados" para criar salas e estações de exemplo.
+            </AlertDescription>
+          </Alert>
+        </div>
       ) : (
         <div className="space-y-8">
           {(activeView === 'unified' || activeView === 'rooms') && rooms && rooms.length > 0 ? (
@@ -156,11 +192,7 @@ export function FloorMap() {
               <h3 className="text-lg font-medium mb-4">Salas</h3>
               <RoomGrid rooms={rooms} />
             </div>
-          ) : (activeView === 'unified' || activeView === 'rooms') && (
-            <div className="text-center py-8 text-muted-foreground">
-              <p>Carregando salas...</p>
-            </div>
-          )}
+          ) : null}
           
           {(activeView === 'unified' || activeView === 'stations') && workStations && workStations.length > 0 ? (
             <div>
@@ -170,11 +202,7 @@ export function FloorMap() {
                 currentFloor={floor} 
               />
             </div>
-          ) : (activeView === 'unified' || activeView === 'stations') && (
-            <div className="text-center py-8 text-muted-foreground">
-              <p>Carregando estações...</p>
-            </div>
-          )}
+          ) : null}
         </div>
       )}
     </section>
