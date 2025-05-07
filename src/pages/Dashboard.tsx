@@ -47,7 +47,7 @@ const Dashboard = () => {
       <KpiSection data={dashboardData} />
 
       {/* Charts */}
-      <ChartsSection data={dashboardData} />
+      <ChartsSection dashboardData={dashboardData} />
 
       {/* Contratos a Vencer */}
       <ExpiringContractsTable contracts={dashboardData.expiringContracts} />

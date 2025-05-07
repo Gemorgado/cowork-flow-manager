@@ -43,19 +43,19 @@ const OccupancyRateChart: React.FC<OccupancyRateChartProps> = ({
   const occupancyData: OccupancyData[] = [
     {
       name: 'Salas',
-      ocupado: rooms?.occupied || 0,
+      occupied: rooms?.occupied || 0,
       total: rooms?.total || 0,
       taxa: rooms?.rate || 0,
     },
     {
       name: 'Estações Fixas',
-      ocupado: fixedStations?.occupied || 0,
+      occupied: fixedStations?.occupied || 0,
       total: fixedStations?.total || 0,
       taxa: fixedStations?.rate || 0,
     },
     {
       name: 'Estações Flex',
-      ocupado: flexStations?.occupied || 0,
+      occupied: flexStations?.occupied || 0,
       total: flexStations?.total || 0,
       taxa: flexStations?.rate || 0,
     },
