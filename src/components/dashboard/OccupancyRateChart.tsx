@@ -13,7 +13,7 @@ import {
   OccupancyBarChart,
   useOccupancyChartData 
 } from './occupancy';
-import { ChartsSkeleton } from './ChartsSkeleton';
+import ChartsSkeleton from './ChartsSkeleton';
 
 interface OccupancyRateChartProps {
   rooms: OccupancyRate;

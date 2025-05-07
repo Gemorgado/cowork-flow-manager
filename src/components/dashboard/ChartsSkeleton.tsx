@@ -4,10 +4,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const ChartsSkeleton: React.FC = () => {
   return (
-    <>
-      <Skeleton className="h-[350px]" />
-      <Skeleton className="h-[350px]" />
-    </>
+    <div className="space-y-4">
+      <Skeleton className="h-[300px]" />
+    </div>
   );
 };
 
