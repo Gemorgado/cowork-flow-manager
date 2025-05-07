@@ -11,6 +11,7 @@ interface ClientFormContentProps {
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleDateChange: (field: 'startDate' | 'endDate', date: Date | undefined) => void;
   handleServiceChange: (serviceId: string, locationIds: string[]) => void;
+  isEditing?: boolean;
 }
 
 const ClientFormContent = ({
@@ -19,6 +20,7 @@ const ClientFormContent = ({
   handleInputChange,
   handleDateChange,
   handleServiceChange,
+  isEditing = false,
 }: ClientFormContentProps) => {
   return (
     <div className="grid gap-4 py-4">

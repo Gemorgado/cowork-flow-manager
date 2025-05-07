@@ -52,5 +52,6 @@ export const useClientDialogs = () => {
     resetForm,
     openEditDialog,
     openDeleteDialog,
+    setFormData,
   };
 };
