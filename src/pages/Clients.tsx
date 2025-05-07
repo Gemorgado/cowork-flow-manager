@@ -25,10 +25,12 @@ const EMPTY_CLIENT = {
   phone: '',
   address: '',
   startDate: new Date(),
-  endDate: new Date(),
-  loyaltyMonths: 0,
+  endDate: new Date(new Date().setMonth(new Date().getMonth() + 12)),
+  loyaltyMonths: 12,
   value: 0,
-  dueDay: 1,
+  dueDay: 15,
+  selectedServiceId: '',
+  locationIds: [],
   services: []
 };
 
@@ -54,6 +56,7 @@ const Clients = () => {
     openEditDialog,
     openDeleteDialog,
     resetForm,
+    setFormData,
   } = useClientForm({ clients, setClients });
 
   // Load clients from Supabase when component mounts
@@ -76,27 +79,10 @@ const Clients = () => {
 
   // Reset form data when opening the add client dialog
   const handleOpenAddDialog = () => {
-    // Reset form to empty state
-    const resetFormData = {
-      ...EMPTY_CLIENT,
-      id: '', // Clear the ID to indicate it's a new client
-    };
-    
-    // Update formData state with empty values
-    Object.keys(formData).forEach(key => {
-      if (key in resetFormData) {
-        handleInputChange({
-          target: { name: key, value: resetFormData[key as keyof typeof resetFormData] }
-        } as React.ChangeEvent<HTMLInputElement>);
-      }
+    // Completely reset the form data with empty values
+    setFormData({
+      ...EMPTY_CLIENT
     });
-    
-    // Reset date fields
-    handleDateChange('startDate', new Date());
-    handleDateChange('endDate', new Date());
-    
-    // Reset services
-    handleServiceChange('', []);
     
     // Open the dialog
     setIsAddClientOpen(true);
@@ -145,7 +131,6 @@ const Clients = () => {
         handleServiceChange={handleServiceChange}
         handleAddClient={() => {
           handleAddClient();
-          toast.success("Cliente adicionado com sucesso!");
         }}
       />
 
@@ -159,7 +144,6 @@ const Clients = () => {
         handleServiceChange={handleServiceChange}
         handleEditClient={() => {
           handleEditClient();
-          toast.success("Cliente atualizado com sucesso!");
         }}
       />
 
@@ -170,7 +154,6 @@ const Clients = () => {
         selectedClient={selectedClient}
         onDelete={() => {
           handleDeleteClient();
-          toast.success("Cliente removido com sucesso!");
         }}
       />
     </div>

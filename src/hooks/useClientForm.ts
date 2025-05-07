@@ -26,6 +26,7 @@ const useClientForm = ({ clients, setClients }: UseClientFormProps) => {
     resetForm,
     openEditDialog: openEditDialogBase,
     openDeleteDialog: openDeleteDialogBase,
+    setFormData,
   } = useClientDialogs();
 
   const {
@@ -48,7 +49,6 @@ const useClientForm = ({ clients, setClients }: UseClientFormProps) => {
     setSelectedClient(client);
     
     // Update the form with client data using setFormData from useClientDialogs
-    // instead of directly calling resetForm with an argument
     openEditDialogBase(client);
   };
   
@@ -80,6 +80,7 @@ const useClientForm = ({ clients, setClients }: UseClientFormProps) => {
     openEditDialog,
     openDeleteDialog,
     resetForm,
+    setFormData,
   };
 };
 

@@ -27,6 +27,7 @@ const ClientForm = ({
       handleInputChange={handleInputChange}
       handleDateChange={handleDateChange}
       handleServiceChange={handleServiceChange}
+      isEditing={isEditing}
     />
   );
 };
