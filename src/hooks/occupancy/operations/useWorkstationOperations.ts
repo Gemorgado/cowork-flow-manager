@@ -10,7 +10,7 @@ import { fetchWorkstations } from '../api/workstationApi';
 
 export function useWorkstationOperations(
   workStations: WorkStation[], 
-  setWorkStations: (stations: WorkStation[]) => void
+  setWorkStations: React.Dispatch<React.SetStateAction<WorkStation[]>>
 ) {
   // Handler for allocating flex stations
   const handleAllocateFlexStations = useCallback(async (quantity: number) => {
@@ -21,7 +21,7 @@ export function useWorkstationOperations(
     );
     
     if (success) {
-      setWorkStations(prev => 
+      setWorkStations((prev): WorkStation[] => 
         prev.map(station => 
           prev.slice(0, quantity).some(s => s.id === station.id && s.status === 'available')
             ? { ...station, status: 'flex' } 
@@ -34,7 +34,7 @@ export function useWorkstationOperations(
   // Handler for converting flex to fixed
   const handleConvertFlexToFixedWorkstation = useCallback(async (stationId: string, clientId: string) => {
     // Update local state optimistically
-    setWorkStations(prevStations => convertFlexToFixed(prevStations, stationId, clientId));
+    setWorkStations((prevStations): WorkStation[] => convertFlexToFixed(prevStations, stationId, clientId));
     
     // Make API call
     const success = await handleConvertFlexToFixed(

@@ -1,17 +1,21 @@
 
 import { useCallback } from 'react';
-import { Room } from '@/types';
+import { Room, LocationStatus } from '@/types';
 import { 
   handleUpdateRoomStatus, 
   handleUpdateRoomDetails, 
   handleLinkClientToRoom 
 } from './roomOperations';
 
-export function useRoomOperations(rooms: Room[], setRooms: (rooms: Room[]) => void, fetchRooms: () => Promise<Room[]>) {
+export function useRoomOperations(
+  rooms: Room[], 
+  setRooms: React.Dispatch<React.SetStateAction<Room[]>>, 
+  fetchRooms: () => Promise<Room[]>
+) {
   // Handler for updating room status
-  const updateRoomStatus = useCallback(async (roomId: string, status: any, clientId?: string) => {
+  const updateRoomStatus = useCallback(async (roomId: string, status: LocationStatus, clientId?: string) => {
     // Update local state optimistically
-    setRooms(prevRooms => 
+    setRooms((prevRooms): Room[] => 
       prevRooms.map(room => 
         room.id === roomId ? { ...room, status, clientId } : room
       )
@@ -31,7 +35,7 @@ export function useRoomOperations(rooms: Room[], setRooms: (rooms: Room[]) => vo
   // Handler for updating room details
   const updateRoomDetails = useCallback(async (roomId: string, data: { area?: number, priceClosed?: number }) => {
     // Update local state optimistically
-    setRooms(prevRooms => 
+    setRooms((prevRooms): Room[] => 
       prevRooms.map(room => 
         room.id === roomId 
           ? { ...room, area: data.area || room.area } 
@@ -53,7 +57,7 @@ export function useRoomOperations(rooms: Room[], setRooms: (rooms: Room[]) => vo
   // Handler for linking a client to a room
   const linkClientToRoom = useCallback(async (roomId: string, clientId: string) => {
     // Update local state optimistically
-    setRooms(prevRooms => 
+    setRooms((prevRooms): Room[] => 
       prevRooms.map(room => 
         room.id === roomId 
           ? { ...room, clientId, status: 'occupied' } 

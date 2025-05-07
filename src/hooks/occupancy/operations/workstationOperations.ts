@@ -1,3 +1,4 @@
+
 import { WorkStation } from '@/types';
 import { toast } from '@/components/ui/use-toast';
 import { 
@@ -12,7 +13,7 @@ import {
 export async function allocateFlexStations(
   workStations: WorkStation[],
   quantity: number,
-  onSuccess: () => void
+  onSuccess: () => Promise<WorkStation[]>
 ): Promise<boolean> {
   try {
     // Validate if there are enough available stations
@@ -36,7 +37,7 @@ export async function allocateFlexStations(
         title: 'Sucesso',
         description: `${quantity} estações alocadas como FLEX`,
       });
-      onSuccess();
+      await onSuccess();
       return true;
     } else {
       throw new Error('Algumas atualizações falharam');
