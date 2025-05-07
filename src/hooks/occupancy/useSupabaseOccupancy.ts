@@ -3,8 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Room, WorkStation, LocationStatus } from '@/types';
 import { toast } from '@/components/ui/use-toast';
-import { calculateOccupancyRate } from '@/components/occupancy/OccupancyStats';
-import { convertFlexToFixed } from '@/components/occupancy/utils/occupancyUtils';
+import { calculateOccupancyRate, convertFlexToFixed } from '@/components/occupancy/utils/occupancyUtils';
 
 export function useSupabaseOccupancy() {
   const [currentFloor, setCurrentFloor] = useState<string>('1');
@@ -94,6 +93,53 @@ export function useSupabaseOccupancy() {
   const roomOccupancy = calculateOccupancyRate(floorRooms);
   const stationOccupancy = calculateOccupancyRate(floorStations);
 
+  const allocateFlexStations = useCallback(async (quantity: number) => {
+    try {
+      // First update the local state for immediate UI feedback
+      const availableStations = workStations.filter(station => station.status === 'available');
+      
+      if (availableStations.length < quantity) {
+        throw new Error(`Só existem ${availableStations.length} estações disponíveis`);
+      }
+      
+      // Randomly select stations to convert to FLEX
+      const stationsToUpdate = availableStations.slice(0, quantity);
+      
+      setWorkStations(prev => 
+        prev.map(station => 
+          stationsToUpdate.some(s => s.id === station.id) 
+            ? { ...station, status: 'flex' } 
+            : station
+        )
+      );
+      
+      // Then update the database
+      const { error } = await supabase
+        .from('workstations')
+        .update({ status: 'flex' })
+        .in('id', stationsToUpdate.map(s => s.id));
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: 'Sucesso',
+        description: `${quantity} estações alocadas como FLEX`,
+      });
+      
+    } catch (error: any) {
+      console.error('Error allocating flex stations:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Falha ao alocar estações FLEX',
+        variant: 'destructive',
+      });
+      // Revert local state on error
+      fetchWorkstations();
+    }
+  }, [workStations, fetchWorkstations]);
+
   const updateRoomStatus = useCallback(async (roomId: string, status: LocationStatus, clientId?: string) => {
     try {
       // First update the local state for immediate UI feedback
@@ -119,14 +165,51 @@ export function useSupabaseOccupancy() {
       }
 
       toast({
-        title: 'Success',
-        description: 'Room status updated',
+        title: 'Sucesso',
+        description: 'Status da sala atualizado',
       });
     } catch (error: any) {
       console.error('Error updating room:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to update room status',
+        title: 'Erro',
+        description: 'Falha ao atualizar status da sala',
+        variant: 'destructive',
+      });
+      // Revert local state on error
+      fetchRooms();
+    }
+  }, [fetchRooms]);
+
+  const updateRoomDetails = useCallback(async (roomId: string, data: { area?: number, priceClosed?: number }) => {
+    try {
+      // First update the local state for immediate UI feedback
+      setRooms(prevRooms => 
+        prevRooms.map(room => 
+          room.id === roomId 
+            ? { ...room, area: data.area || room.area } 
+            : room
+        )
+      );
+      
+      // Then update the database
+      const { error } = await supabase
+        .from('rooms')
+        .update(data)
+        .eq('id', roomId);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: 'Sucesso',
+        description: 'Detalhes da sala atualizados',
+      });
+    } catch (error: any) {
+      console.error('Error updating room details:', error);
+      toast({
+        title: 'Erro',
+        description: 'Falha ao atualizar detalhes da sala',
         variant: 'destructive',
       });
       // Revert local state on error
@@ -136,6 +219,13 @@ export function useSupabaseOccupancy() {
 
   const handleConvertFlexToFixed = useCallback(async (stationId: string, clientId: string) => {
     try {
+      // Get a reference to the station being converted
+      const stationToConvert = workStations.find(s => s.id === stationId);
+      
+      if (!stationToConvert || stationToConvert.status !== 'flex') {
+        throw new Error('Estação não está marcada como FLEX');
+      }
+      
       // First update the local state for immediate UI feedback
       setWorkStations(prevStations => convertFlexToFixed(prevStations, stationId, clientId));
       
@@ -152,22 +242,83 @@ export function useSupabaseOccupancy() {
       if (error) {
         throw error;
       }
+      
+      // Find a free workstation to convert to FLEX (to maintain the total number of FLEX stations)
+      const availableStation = workStations.find(s => s.status === 'available');
+      
+      if (availableStation) {
+        // Update local state
+        setWorkStations(prev => 
+          prev.map(station => 
+            station.id === availableStation.id 
+              ? { ...station, status: 'flex' } 
+              : station
+          )
+        );
+        
+        // Update database
+        await supabase
+          .from('workstations')
+          .update({ status: 'flex' })
+          .eq('id', availableStation.id);
+      }
 
       toast({
-        title: 'Success',
-        description: 'Workstation status updated',
+        title: 'Sucesso',
+        description: 'Estação FLEX convertida para FIXA',
       });
     } catch (error: any) {
       console.error('Error updating workstation:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to update workstation',
+        title: 'Erro',
+        description: error.message || 'Falha ao converter estação FLEX',
         variant: 'destructive',
       });
       // Revert local state on error
       fetchWorkstations();
     }
-  }, [fetchWorkstations]);
+  }, [workStations, fetchWorkstations]);
+
+  const linkClientToRoom = useCallback(async (roomId: string, clientId: string) => {
+    try {
+      // First update the local state for immediate UI feedback
+      setRooms(prevRooms => 
+        prevRooms.map(room => 
+          room.id === roomId 
+            ? { ...room, clientId, status: 'occupied' } 
+            : room
+        )
+      );
+      
+      // Then update the database - we'll need to create an entry in the ClientRoom junction table
+      // and also update the room status
+      const { error: roomUpdateError } = await supabase
+        .from('rooms')
+        .update({ 
+          status: 'occupied',
+          client_id: clientId 
+        })
+        .eq('id', roomId);
+
+      if (roomUpdateError) {
+        throw roomUpdateError;
+      }
+
+      toast({
+        title: 'Sucesso',
+        description: 'Cliente vinculado à sala',
+      });
+    } catch (error: any) {
+      console.error('Error linking client to room:', error);
+      toast({
+        title: 'Erro',
+        description: 'Falha ao vincular cliente à sala',
+        variant: 'destructive',
+      });
+      // Revert local state on error
+      fetchRooms();
+    }
+  }, [fetchRooms]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -187,7 +338,10 @@ export function useSupabaseOccupancy() {
     isLoading,
     isRefreshing,
     handleRefresh,
+    allocateFlexStations,
     handleConvertFlexToFixed,
     updateRoomStatus,
+    updateRoomDetails,
+    linkClientToRoom,
   };
 }

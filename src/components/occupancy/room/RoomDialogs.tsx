@@ -1,264 +1,255 @@
-import React from 'react';
+
+import React, { useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import { Room } from '@/types';
-import { cn } from '@/lib/utils';
-import { statusColors, statusLabels } from '../StatusLegend';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogFooter 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { Form, FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { UseFormReturn } from 'react-hook-form';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
-// Define the RoomFormValues type for better type safety
-interface RoomFormValues {
-  status: string;
-  area: number;
-  capacity: number;
+export interface RoomDetailsDialogContentProps {
+  room: Room;
+  getClientInfo: (clientId?: string) => string;
+  onClose?: () => void;
 }
 
-interface RoomEditDialogProps {
+export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> = ({
+  room,
+  getClientInfo,
+  onClose,
+}) => {
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    defaultValues: {
+      area: room.area?.toString() || '',
+      price: '0.00',
+    },
+  });
+
+  const onSubmit = (data: any) => {
+    console.log('Room update data:', data);
+    // Here you would call an API to update the room
+    if (onClose) onClose();
+  };
+
+  const statusLabels: Record<string, string> = {
+    'available': 'Livre',
+    'occupied': 'Ocupada',
+    'reserved': 'Reservada',
+    'maintenance': 'Manutenção',
+  };
+
+  return (
+    <>
+      <DialogHeader>
+        <DialogTitle>Sala {room.number}</DialogTitle>
+        <DialogDescription>
+          Detalhes e informações da sala.
+        </DialogDescription>
+      </DialogHeader>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-sm font-medium mb-1">Status</p>
+            <p>{statusLabels[room.status] || room.status}</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium mb-1">Cliente</p>
+            <p>{getClientInfo(room.clientId)}</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium mb-1">Andar</p>
+            <p>{room.floor}º</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium mb-1">Capacidade</p>
+            <p>{room.capacity} pessoas</p>
+          </div>
+        </div>
+
+        <div className="space-y-4 mt-4 pt-4 border-t">
+          <div>
+            <Label htmlFor="area">Área (m²)</Label>
+            <Input 
+              id="area" 
+              type="number" 
+              step="0.01"
+              placeholder="Área em m²" 
+              {...register('area', { min: 0 })} 
+            />
+            {errors.area && (
+              <p className="text-sm text-red-500">Área deve ser maior que zero</p>
+            )}
+          </div>
+          
+          <div>
+            <Label htmlFor="price">Valor (R$)</Label>
+            <Input 
+              id="price" 
+              type="number" 
+              step="0.01"
+              placeholder="Valor mensal" 
+              {...register('price', { min: 0 })} 
+            />
+            {errors.price && (
+              <p className="text-sm text-red-500">Valor deve ser maior que zero</p>
+            )}
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button type="submit">Salvar</Button>
+        </DialogFooter>
+      </form>
+    </>
+  );
+};
+
+export const RoomEditDialog: React.FC<{
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  selectedRoom: Room | null;
-  roomForm: UseFormReturn<RoomFormValues>;
-  handleRoomUpdate: (data: RoomFormValues) => void;
-}
-
-export const RoomEditDialog: React.FC<RoomEditDialogProps> = ({
-  isOpen,
-  onOpenChange,
-  selectedRoom,
-  roomForm,
-  handleRoomUpdate
-}) => {
-  if (!selectedRoom) return null;
-  
+  selectedRoom: Room;
+  roomForm: any;
+  handleRoomUpdate: (data: any) => void;
+}> = ({ isOpen, onOpenChange, selectedRoom, roomForm, handleRoomUpdate }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="backdrop-blur-md bg-white/5 border border-white/10">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-lg font-medium">Editar Sala {selectedRoom?.number}</DialogTitle>
+          <DialogTitle>Editar Sala {selectedRoom.number}</DialogTitle>
+          <DialogDescription>
+            Atualize as informações da sala.
+          </DialogDescription>
         </DialogHeader>
-        <Form {...roomForm}>
-          <form onSubmit={roomForm.handleSubmit(handleRoomUpdate)} className="space-y-4">
-            <FormField
-              control={roomForm.control}
+        <form 
+          onSubmit={roomForm.handleSubmit(handleRoomUpdate)}
+          className="space-y-4 py-4"
+        >
+          <div>
+            <Label htmlFor="status">Status</Label>
+            <Controller
               name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Status</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="bg-black/20 border-white/10">
-                        <SelectValue placeholder="Selecione o status" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="bg-black/80 backdrop-blur-md border-white/10">
-                      <SelectItem value="available">Livre</SelectItem>
-                      <SelectItem value="occupied">Ocupado</SelectItem>
-                      <SelectItem value="reserved">Reservado</SelectItem>
-                      <SelectItem value="maintenance">Manutenção</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            />
-            <FormField
               control={roomForm.control}
-              name="area"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Área (m²)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      {...field} 
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                      className="bg-black/20 border-white/10"
-                    />
-                  </FormControl>
-                </FormItem>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="available">Livre</SelectItem>
+                    <SelectItem value="occupied">Ocupado</SelectItem>
+                    <SelectItem value="reserved">Reservado</SelectItem>
+                    <SelectItem value="maintenance">Manutenção</SelectItem>
+                  </SelectContent>
+                </Select>
               )}
             />
-            <FormField
-              control={roomForm.control}
-              name="capacity"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">Capacidade</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      {...field} 
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                      className="bg-black/20 border-white/10"
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
+          </div>
+          <div>
+            <Label htmlFor="area">Área (m²)</Label>
+            <Input
+              id="area"
+              type="number"
+              step="0.01"
+              {...roomForm.register("area", { 
+                valueAsNumber: true,
+                min: 0
+              })}
             />
-            <DialogFooter>
-              <Button 
-                type="submit"
-                className="hover:brightness-110"
-              >
-                Salvar
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+          </div>
+          <div>
+            <Label htmlFor="capacity">Capacidade</Label>
+            <Input
+              id="capacity"
+              type="number"
+              {...roomForm.register("capacity", { 
+                valueAsNumber: true,
+                min: 0
+              })}
+            />
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancelar
+            </Button>
+            <Button type="submit">Salvar</Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
 };
 
-interface ClientLinkDialogProps {
+export const ClientLinkDialog: React.FC<{
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  selectedRoom: Room | null;
+  selectedRoom: Room;
   selectedClientId: string;
   setSelectedClientId: (id: string) => void;
-  mockClients: { id: string, name: string }[];
+  mockClients: { id: string; name: string }[];
   handleClientLink: () => void;
-}
-
-export const ClientLinkDialog: React.FC<ClientLinkDialogProps> = ({
+}> = ({
   isOpen,
   onOpenChange,
   selectedRoom,
   selectedClientId,
   setSelectedClientId,
   mockClients,
-  handleClientLink
+  handleClientLink,
 }) => {
-  if (!selectedRoom) return null;
-  
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="backdrop-blur-md bg-white/5 border border-white/10">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-lg font-medium">Vincular Cliente à Sala {selectedRoom?.number}</DialogTitle>
+          <DialogTitle>Vincular Cliente à Sala {selectedRoom.number}</DialogTitle>
+          <DialogDescription>
+            Selecione um cliente para vincular a esta sala.
+          </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 py-4">
-          <FormItem>
-            <FormLabel className="text-sm font-medium">Cliente</FormLabel>
-            <Select 
-              onValueChange={setSelectedClientId} 
-              value={selectedClientId}
-            >
-              <FormControl>
-                <SelectTrigger className="bg-black/20 border-white/10">
-                  <SelectValue placeholder="Selecione um cliente" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent className="bg-black/80 backdrop-blur-md border-white/10">
-                {mockClients.map(client => (
-                  <SelectItem key={client.id} value={client.id}>
-                    {client.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FormItem>
-          <DialogFooter>
-            <Button 
-              onClick={handleClientLink} 
-              disabled={!selectedClientId}
-              className="hover:brightness-110"
-            >
-              Vincular
-            </Button>
-          </DialogFooter>
+        <div className="py-4">
+          <Label htmlFor="client">Cliente</Label>
+          <Select 
+            value={selectedClientId} 
+            onValueChange={setSelectedClientId}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione um cliente" />
+            </SelectTrigger>
+            <SelectContent>
+              {mockClients.map((client) => (
+                <SelectItem key={client.id} value={client.id}>
+                  {client.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
+        <DialogFooter>
+          <Button 
+            onClick={handleClientLink} 
+            disabled={!selectedClientId}
+          >
+            Vincular
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-};
-
-interface RoomDetailsDialogContentProps {
-  room: Room;
-  getClientInfo: (clientId?: string) => string;
-  handleOpenEditDialog: (room: Room) => void;
-  onLinkClient: (room: Room) => void;
-}
-
-export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> = ({
-  room,
-  getClientInfo,
-  handleOpenEditDialog,
-  onLinkClient
-}) => {
-  return (
-    <DialogContent className="backdrop-blur-md bg-white/5 border border-white/10">
-      <DialogHeader>
-        <DialogTitle className="text-lg font-medium">Sala {room.number}</DialogTitle>
-      </DialogHeader>
-      <div className="space-y-4 py-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm font-medium mb-1">Status</p>
-            <Badge className={cn(
-              "px-2 py-1",
-              statusColors[room.status].replace('bg-', 'bg-opacity-90 text-').replace('-100', '-800')
-            )}>
-              {statusLabels[room.status]}
-            </Badge>
-          </div>
-          <div>
-            <p className="text-sm font-medium mb-1">Área</p>
-            <p>{room.area} m²</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium mb-1">Capacidade</p>
-            <p>{room.capacity} pessoas</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium mb-1">Cliente</p>
-            <p>{getClientInfo(room.clientId)}</p>
-          </div>
-        </div>
-        
-        <div className="pt-4">
-          <p className="text-sm font-medium mb-2">Ações</p>
-          <div className="flex gap-2">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => handleOpenEditDialog(room)}
-              className="hover:bg-white/10"
-            >
-              Editar
-            </Button>
-            <Button 
-              variant="default" 
-              size="sm" 
-              onClick={() => onLinkClient(room)}
-              className="hover:brightness-110"
-            >
-              Vincular Cliente
-            </Button>
-            {room.clientId && (
-              <Button variant="destructive" size="sm">Desvincular</Button>
-            )}
-          </div>
-        </div>
-      </div>
-    </DialogContent>
   );
 };

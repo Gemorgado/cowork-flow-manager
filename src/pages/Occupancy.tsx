@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { OccupancyStats } from '@/components/occupancy/OccupancyStats';
 import { StatusLegend } from '@/components/occupancy/StatusLegend';
 import { OccupancyTabs } from '@/components/occupancy/OccupancyTabs';
@@ -9,8 +9,11 @@ import { RefreshCw } from 'lucide-react';
 import { useSupabaseOccupancy } from '@/hooks/occupancy/useSupabaseOccupancy';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { OccupancyFloorSelector } from '@/components/occupancy/OccupancyFloorSelector';
 
 const Occupancy = () => {
+  const [currentFloor, setCurrentFloor] = useState<string>("1");
+  
   const {
     rooms,
     workStations,
@@ -27,6 +30,10 @@ const Occupancy = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-medium">Mapa de Ocupação</h1>
         <div className="flex items-center gap-2">
+          <OccupancyFloorSelector 
+            currentFloor={currentFloor} 
+            setCurrentFloor={setCurrentFloor} 
+          />
           <Button 
             variant="outline" 
             size="sm" 
@@ -60,16 +67,15 @@ const Occupancy = () => {
       <OccupancyTabs 
         rooms={rooms} 
         workStations={workStations} 
-        currentFloor="1"
+        currentFloor={currentFloor}
         isLoading={isLoading}
         onAllocateFlexToFixed={handleConvertFlexToFixed}
       />
       
-      {/* Summary section */}
       {!isLoading ? (
         <OccupancySummary 
-          rooms={rooms}
-          workStations={workStations}
+          rooms={rooms.filter(room => room.floor === parseInt(currentFloor) as any)}
+          workStations={workStations.filter(station => station.floor === parseInt(currentFloor) as any)}
         />
       ) : (
         <Skeleton className="h-32" />

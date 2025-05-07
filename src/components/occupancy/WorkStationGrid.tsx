@@ -5,6 +5,8 @@ import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { StationDialogContent } from './workstation/StationDialogContent';
 import { getClientInfo } from './workstation/StationUtils';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+import { Users, User } from 'lucide-react';
 
 interface WorkStationGridProps {
   workStations: WorkStation[];
@@ -29,38 +31,61 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
     }
   };
 
+  // Get status-based styling
+  const getStationStatusStyles = (status: string, type: string) => {
+    if (status === 'flex') return 'bg-yellow-300 hover:bg-yellow-400 text-yellow-900';
+    if (status === 'occupied') return 'bg-green-500 hover:bg-green-600 text-white';
+    if (status === 'reserved') return 'bg-yellow-500 hover:bg-yellow-600 text-white';
+    if (status === 'maintenance') return 'bg-red-500 hover:bg-red-600 text-white';
+    return 'bg-gray-200 hover:bg-gray-300 text-gray-800';
+  };
+
+  // Group stations by rows for better layout
+  const stationRows = [];
+  const stationsPerRow = 8;
+  
+  for (let i = 0; i < floorStations.length; i += stationsPerRow) {
+    stationRows.push(floorStations.slice(i, i + stationsPerRow));
+  }
+
   return (
-    <div className="mb-8">
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
-        {floorStations.map(station => (
-          <Dialog key={station.id}>
-            <div className="flex flex-col items-center">
-              <DialogTrigger asChild>
-                <button
-                  className={cn(
-                    "w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center",
-                    station.status === 'available' ? 'bg-gray-200' : 
-                    station.status === 'occupied' ? 'bg-green-500' :
-                    station.status === 'flex' ? 'bg-yellow-300' :
-                    station.status === 'maintenance' ? 'bg-red-500' :
-                    station.status === 'reserved' ? 'bg-yellow-500' : '',
-                    "hover:opacity-90 transition-opacity"
-                  )}
-                  aria-label={`Estação ${station.number}`}
+    <div className="mb-8 overflow-x-auto">
+      {stationRows.map((row, rowIndex) => (
+        <div key={rowIndex} className="flex gap-4 mb-4 justify-center">
+          {row.map(station => (
+            <Dialog key={station.id}>
+              <div className="flex flex-col items-center">
+                <DialogTrigger asChild>
+                  <button
+                    className={cn(
+                      "w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center relative",
+                      getStationStatusStyles(station.status, station.type),
+                      "transition-all duration-200 hover:scale-105"
+                    )}
+                    aria-label={`Estação ${station.number}`}
+                  >
+                    {station.clientId && (
+                      <span className="absolute -top-1 -right-1">
+                        <Badge variant="secondary" className="h-5 w-5 p-0 flex items-center justify-center rounded-full">
+                          <User className="h-3 w-3" />
+                        </Badge>
+                      </span>
+                    )}
+                  </button>
+                </DialogTrigger>
+                <span className="mt-1 text-xs md:text-sm">{station.number}</span>
+              </div>
+              <DialogContent className="sm:max-w-md">
+                <StationDialogContent
+                  station={station}
+                  getClientInfo={getClientInfo}
+                  onAllocate={() => handleAllocateFlexToFixed(station.id)}
                 />
-              </DialogTrigger>
-              <span className="mt-1 text-xs md:text-sm">{station.number}</span>
-            </div>
-            <DialogContent className="sm:max-w-md">
-              <StationDialogContent
-                station={station}
-                getClientInfo={getClientInfo}
-                onAllocate={() => handleAllocateFlexToFixed(station.id)}
-              />
-            </DialogContent>
-          </Dialog>
-        ))}
-      </div>
+              </DialogContent>
+            </Dialog>
+          ))}
+        </div>
+      ))}
     </div>
   );
 };

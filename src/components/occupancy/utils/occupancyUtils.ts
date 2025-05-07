@@ -1,46 +1,71 @@
 
-import { WorkStation, LocationStatus } from '@/types';
-import { toast } from 'sonner';
+import { Room, WorkStation } from '@/types';
 
-// Helper function to find a random available workstation
-export const findRandomAvailableStation = (workStations: WorkStation[]): WorkStation | null => {
-  const availableStations = workStations.filter(
-    station => station.status === 'available'
-  );
-  
-  if (availableStations.length === 0) return null;
-  
-  const randomIndex = Math.floor(Math.random() * availableStations.length);
-  return availableStations[randomIndex];
-};
+export function convertFlexToFixed(
+  workStations: WorkStation[],
+  stationId: string,
+  clientId: string
+): WorkStation[] {
+  return workStations.map((station) => {
+    if (station.id === stationId) {
+      return {
+        ...station,
+        type: 'fixed',
+        status: 'occupied',
+        clientId,
+      };
+    }
+    return station;
+  });
+}
 
-// Function to convert a flex station to fixed
-export const convertFlexToFixed = (workStations: WorkStation[], stationId: string, clientId: string): WorkStation[] => {
-  const newStations = [...workStations];
-  
-  // Find the station to convert
-  const stationIndex = newStations.findIndex(s => s.id === stationId);
-  if (stationIndex === -1 || newStations[stationIndex].status !== 'flex') {
-    toast.error("Esta estação não está marcada como Flex!");
-    return workStations;
+export function calculateOccupancyRate(items: Room[] | WorkStation[]): {
+  occupied: number;
+  total: number;
+  rate: number;
+} {
+  if (!items || !items.length) {
+    return { occupied: 0, total: 0, rate: 0 };
   }
+
+  const total = items.length;
+  let occupied = 0;
+
+  items.forEach((item) => {
+    if (item.status === 'occupied') {
+      occupied += 1;
+    }
+  });
+
+  const rate = Math.round((occupied / total) * 100);
   
-  // Mark the station as occupied
-  newStations[stationIndex] = { 
-    ...newStations[stationIndex], 
-    status: 'occupied',
-    clientId 
+  return {
+    occupied,
+    total,
+    rate,
   };
-  
-  // Find a random available station to mark as flex
-  const replacement = findRandomAvailableStation(newStations);
-  if (replacement) {
-    const replacementIndex = newStations.findIndex(s => s.id === replacement.id);
-    newStations[replacementIndex] = { ...newStations[replacementIndex], status: 'flex' };
-    toast.success(`Estação ${newStations[stationIndex].number} convertida para Fixa. Uma nova estação Flex foi alocada automaticamente.`);
-  } else {
-    toast.warning(`Estação ${newStations[stationIndex].number} convertida para Fixa. Não há mais estações disponíveis para alocação Flex.`);
+}
+
+export function getFlexStationsCount(workStations: WorkStation[]): {
+  flex: number;
+  totalFlex: number;
+  flexRate: number;
+} {
+  if (!workStations || !workStations.length) {
+    return { flex: 0, totalFlex: 0, flexRate: 0 };
   }
+
+  const flex = workStations.filter(station => station.status === 'flex').length;
+  const totalFlex = flex + workStations.filter(station => station.status === 'available').length;
+  const flexRate = totalFlex > 0 ? Math.round((flex / totalFlex) * 100) : 0;
   
-  return newStations;
-};
+  return {
+    flex,
+    totalFlex,
+    flexRate,
+  };
+}
+
+export function calculateTotalArea(rooms: Room[]): number {
+  return rooms.reduce((total, room) => total + (room.area || 0), 0);
+}
