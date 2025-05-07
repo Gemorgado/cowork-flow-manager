@@ -1,11 +1,10 @@
-
 import { Room, LocationStatus } from '@/types';
 import { toast } from '@/components/ui/use-toast';
 import { 
   updateRoomStatus as updateRoomStatusApi,
   updateRoomDetails as updateRoomDetailsApi,
   linkClientToRoom as linkClientToRoomApi
-} from '../api/occupancyApi';
+} from '../api/roomApi';
 
 /**
  * Handler for updating a room's status

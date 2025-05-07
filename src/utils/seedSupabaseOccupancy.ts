@@ -13,7 +13,7 @@ export async function seedSupabaseOccupancy() {
       ...['101','102','103','104','105','106','107'].map(code => ({
         id: uuidv4(),
         number: code,
-        floor: "1", // Supabase expects string values for the floor enum
+        floor: "1" as "1" | "2" | "3", // Cast to the expected union type
         status: "available",
         area: Math.floor(Math.random() * 30) + 10, // Random area between 10-40m²
         capacity: Math.floor(Math.random() * 8) + 2, // Random capacity between 2-10
@@ -22,7 +22,7 @@ export async function seedSupabaseOccupancy() {
       ...Array.from({ length: 19 }, (_, i) => ({
         id: uuidv4(),
         number: `${201+i}`,
-        floor: "2",
+        floor: "2" as "1" | "2" | "3",
         status: "available",
         area: Math.floor(Math.random() * 30) + 10,
         capacity: Math.floor(Math.random() * 8) + 2,
@@ -31,7 +31,7 @@ export async function seedSupabaseOccupancy() {
       ...Array.from({ length: 14 }, (_, i) => ({
         id: uuidv4(),
         number: `${301+i}`,
-        floor: "3",
+        floor: "3" as "1" | "2" | "3",
         status: "available",
         area: Math.floor(Math.random() * 30) + 10,
         capacity: Math.floor(Math.random() * 8) + 2,
@@ -44,7 +44,7 @@ export async function seedSupabaseOccupancy() {
       ...Array.from({ length: 26 }, (_, i) => ({
         id: uuidv4(),
         number: `WS-${(i+1).toString().padStart(2,'0')}`,
-        floor: "1",
+        floor: "1" as "1" | "2" | "3",
         type: Math.random() > 0.7 ? "flex" : "fixed", // 30% chance of flex, 70% fixed
         status: "available"
       })),
@@ -52,7 +52,7 @@ export async function seedSupabaseOccupancy() {
       ...Array.from({ length: 38 }, (_, i) => ({
         id: uuidv4(),
         number: `WS-${(i+27).toString().padStart(2,'0')}`,
-        floor: "2",
+        floor: "2" as "1" | "2" | "3",
         type: Math.random() > 0.7 ? "flex" : "fixed",
         status: "available"
       }))

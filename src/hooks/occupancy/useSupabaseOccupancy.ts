@@ -3,7 +3,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Room, WorkStation } from '@/types';
 import { toast } from '@/components/ui/use-toast';
 import { calculateOccupancyRate, convertFlexToFixed } from '@/components/occupancy/utils/occupancyUtils';
-import { fetchRooms, fetchWorkstations } from './api/occupancyApi';
+import { fetchRooms } from './api/roomApi';
+import { fetchWorkstations } from './api/workstationApi';
 import { useFloorSelection } from './useFloorSelection';
 import { 
   allocateFlexStations, 

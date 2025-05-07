@@ -1,11 +1,10 @@
-
 import { WorkStation } from '@/types';
 import { toast } from '@/components/ui/use-toast';
 import { 
   allocateFlexStation,
   convertFlexToFixed as convertFlexToFixedApi,
   updateStationToFlex
-} from '../api/occupancyApi';
+} from '../api/workstationApi';
 
 /**
  * Handler for allocating multiple flex stations
