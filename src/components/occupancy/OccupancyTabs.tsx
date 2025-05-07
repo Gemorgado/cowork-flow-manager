@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Room, WorkStation } from '@/types';
 import { RoomsTab } from './tabs/RoomsTab';
 import { WorkStationsTab } from './tabs/WorkStationsTab';
-import { FloorMap } from './room/FloorMap';
+import { FloorMap } from './floor-map';
 
 interface OccupancyTabsProps {
   rooms: Room[];
