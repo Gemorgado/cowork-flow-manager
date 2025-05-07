@@ -66,36 +66,34 @@ export async function seedSupabaseOccupancy() {
     
     console.log("Deleted existing data");
     
-    // Insert room data
+    // Insert room data - note we're using insertMany which expects an array
     const { data: roomsInserted, error: roomsError } = await supabase
       .from('rooms')
-      .insert(roomsData)
-      .select();
+      .insert(roomsData);
       
     if (roomsError) {
       console.error("Error inserting rooms:", roomsError);
       throw roomsError;
     }
     
-    console.log(`Successfully inserted ${roomsInserted?.length} rooms`);
+    console.log(`Successfully inserted rooms`);
     
-    // Insert workstation data
+    // Insert workstation data - again using insertMany
     const { data: workstationsInserted, error: workstationsError } = await supabase
       .from('workstations')
-      .insert(workstationsData)
-      .select();
+      .insert(workstationsData);
       
     if (workstationsError) {
       console.error("Error inserting workstations:", workstationsError);
       throw workstationsError;
     }
     
-    console.log(`Successfully inserted ${workstationsInserted?.length} workstations`);
+    console.log(`Successfully inserted workstations`);
     
     return {
       success: true,
-      roomsCount: roomsInserted?.length || 0,
-      workstationsCount: workstationsInserted?.length || 0
+      roomsCount: roomsData.length,
+      workstationsCount: workstationsData.length
     };
   } catch (error) {
     console.error("Seed failed:", error);
