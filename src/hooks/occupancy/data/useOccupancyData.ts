@@ -1,180 +1,33 @@
 
-import { useState, useCallback, useEffect } from 'react';
-import { Room, WorkStation, OccupancyRate } from '@/types';
-import { supabase } from '@/lib/supabase';
-import { fetchRooms } from '../api/roomApi';
-import { fetchWorkstations } from '../api/workstationApi';
-import { seedSupabaseOccupancy } from '@/utils/seedSupabaseOccupancy';
-import { toast } from '@/components/ui/use-toast';
+import { useEffect } from 'react';
+import { useOccupancyInitialization } from './useOccupancyInitialization';
+import { useOccupancyFetch } from './useOccupancyFetch';
+import { useOccupancyStats } from './useOccupancyStats';
 
 export function useOccupancyData() {
-  const [rooms, setRooms] = useState<Room[]>([]);
-  const [workStations, setWorkStations] = useState<WorkStation[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  const [dataInitialized, setDataInitialized] = useState<boolean>(false);
-  const [isSeeding, setIsSeeding] = useState<boolean>(false);
+  const {
+    dataInitialized,
+    isSeeding,
+    checkAndSeedData,
+    seedData
+  } = useOccupancyInitialization();
 
-  // Calculate occupancy rates for charts
-  const calculateOccupancyStats = useCallback(() => {
-    // For all rooms
-    const roomsTotal = rooms.length;
-    const roomsOccupied = rooms.filter(room => room.status === 'occupied').length;
-    const roomsRate = roomsTotal > 0 ? Math.round((roomsOccupied / roomsTotal) * 100) : 0;
+  const {
+    rooms,
+    setRooms,
+    workStations,
+    setWorkStations,
+    isLoading,
+    isRefreshing,
+    fetchData,
+    handleRefresh
+  } = useOccupancyFetch(dataInitialized, checkAndSeedData);
 
-    // For fixed stations
-    const fixedStations = workStations.filter(station => station.type === 'fixed');
-    const fixedTotal = fixedStations.length;
-    const fixedOccupied = fixedStations.filter(station => station.status === 'occupied').length;
-    const fixedRate = fixedTotal > 0 ? Math.round((fixedOccupied / fixedTotal) * 100) : 0;
-
-    // For flex stations
-    const flexStations = workStations.filter(station => station.type === 'flex');
-    const flexTotal = flexStations.length;
-    const flexOccupied = flexStations.filter(station => station.status === 'occupied' || station.status === 'flex').length;
-    const flexRate = flexTotal > 0 ? Math.round((flexOccupied / flexTotal) * 100) : 0;
-
-    // Overall occupancy
-    const totalSpaces = roomsTotal + fixedTotal + flexTotal;
-    const totalOccupied = roomsOccupied + fixedOccupied + flexOccupied;
-    const overallRate = totalSpaces > 0 ? Math.round((totalOccupied / totalSpaces) * 100) : 0;
-
-    // Calculate occupancy rates by floor
-    const floorRooms: Record<string, OccupancyRate> = {};
-    const floorFixedStations: Record<string, OccupancyRate> = {};
-    const floorFlexStations: Record<string, OccupancyRate> = {};
-    
-    // For each floor (1, 2, 3)
-    ['1', '2', '3'].forEach(floor => {
-      const floorNumber = parseInt(floor);
-      
-      // Rooms by floor
-      const floorRoomsData = rooms.filter(room => room.floor === floorNumber);
-      const floorRoomsTotal = floorRoomsData.length;
-      const floorRoomsOccupied = floorRoomsData.filter(room => room.status === 'occupied').length;
-      const floorRoomsRate = floorRoomsTotal > 0 ? Math.round((floorRoomsOccupied / floorRoomsTotal) * 100) : 0;
-      floorRooms[floor] = { total: floorRoomsTotal, occupied: floorRoomsOccupied, rate: floorRoomsRate };
-      
-      // Fixed stations by floor
-      const floorFixedStationsData = fixedStations.filter(station => station.floor === floorNumber);
-      const floorFixedTotal = floorFixedStationsData.length;
-      const floorFixedOccupied = floorFixedStationsData.filter(station => station.status === 'occupied').length;
-      const floorFixedRate = floorFixedTotal > 0 ? Math.round((floorFixedOccupied / floorFixedTotal) * 100) : 0;
-      floorFixedStations[floor] = { total: floorFixedTotal, occupied: floorFixedOccupied, rate: floorFixedRate };
-      
-      // Flex stations by floor
-      const floorFlexStationsData = flexStations.filter(station => station.floor === floorNumber);
-      const floorFlexTotal = floorFlexStationsData.length;
-      const floorFlexOccupied = floorFlexStationsData.filter(station => station.status === 'occupied' || station.status === 'flex').length;
-      const floorFlexRate = floorFlexTotal > 0 ? Math.round((floorFlexOccupied / floorFlexTotal) * 100) : 0;
-      floorFlexStations[floor] = { total: floorFlexTotal, occupied: floorFlexOccupied, rate: floorFlexRate };
-    });
-
-    return {
-      rooms: { total: roomsTotal, occupied: roomsOccupied, rate: roomsRate },
-      fixedStations: { total: fixedTotal, occupied: fixedOccupied, rate: fixedRate },
-      flexStations: { total: flexTotal, occupied: flexOccupied, rate: flexRate },
-      overall: { total: totalSpaces, occupied: totalOccupied, rate: overallRate },
-      floorRooms,
-      floorFixedStations,
-      floorFlexStations
-    };
-  }, [rooms, workStations]);
-
-  // Check if we need to initialize data
-  const checkAndSeedData = useCallback(async () => {
-    try {
-      // Check if we have data
-      const { data: roomsCheck, error: roomsError } = await supabase
-        .from('rooms')
-        .select('id')
-        .limit(1);
-      
-      if (roomsError) {
-        console.error('Error checking rooms data:', roomsError);
-        toast({
-          title: 'Erro',
-          description: 'Falha ao verificar dados existentes.',
-          variant: 'destructive',
-        });
-        throw roomsError;
-      }
-      
-      // If no rooms found, set flag but don't automatically seed
-      if (!roomsCheck || roomsCheck.length === 0) {
-        toast({
-          title: 'Dados não encontrados',
-          description: 'Use o botão "Atualizar" para popular dados de exemplo.',
-        });
-      }
-
-      setDataInitialized(true);
-    } catch (error) {
-      console.error('Error checking or seeding data:', error);
-      setDataInitialized(true); // Set to true anyway to proceed with the app
-    }
-  }, []);
-
-  // Function to seed data manually
-  const seedData = useCallback(async () => {
-    try {
-      setIsSeeding(true);
-      await seedSupabaseOccupancy();
-      toast({
-        title: 'Sucesso',
-        description: 'Dados de exemplo criados com sucesso!',
-      });
-      return true;
-    } catch (error) {
-      console.error('Error seeding data:', error);
-      toast({
-        title: 'Erro',
-        description: 'Falha ao popular dados de exemplo.',
-        variant: 'destructive',
-      });
-      return false;
-    } finally {
-      setIsSeeding(false);
-    }
-  }, []);
-
-  // Fetch all data
-  const fetchData = useCallback(async () => {
-    if (!dataInitialized) {
-      await checkAndSeedData();
-    }
-
-    setIsLoading(true);
-    try {
-      const [fetchedRooms, fetchedWorkstations] = await Promise.all([
-        fetchRooms(),
-        fetchWorkstations()
-      ]);
-      
-      setRooms(fetchedRooms);
-      setWorkStations(fetchedWorkstations);
-    } catch (error) {
-      console.error('Error fetching occupancy data:', error);
-      toast({
-        title: 'Erro',
-        description: 'Falha ao carregar dados de ocupação.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [dataInitialized, checkAndSeedData]);
+  const calculateOccupancyStats = useOccupancyStats(rooms, workStations);
 
   // Initial data fetch
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
-
-  // Handler for refresh button
-  const handleRefresh = useCallback(async () => {
-    setIsRefreshing(true);
-    await fetchData();
-    setIsRefreshing(false);
   }, [fetchData]);
 
   // Get occupancy stats for charts

@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Room, WorkStation, FloorNumber } from '@/types';
 import { supabase } from '@/lib/supabase';
 
-export function useFloorMapData(floor: string, hasCheckedData: boolean) {
+export function useFloorMapData(floor: "1" | "2" | "3", hasCheckedData: boolean) {
   const { data: rooms, isLoading: isLoadingRooms, error: roomsError, refetch: refetchRooms } = useQuery({
     queryKey: ['rooms', floor],
     queryFn: async () => {
