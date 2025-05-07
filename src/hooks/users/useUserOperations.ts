@@ -1,12 +1,12 @@
-
 import { User } from '@/types';
 import { toast } from 'sonner';
 import { FormData } from './useUserFormState';
 import { 
   addUser as addUserToSupabase,
   updateUser as updateUserInSupabase,
-  deleteUser as deleteUserFromSupabase
-} from '@/utils/supabaseUsers';
+  deleteUser as deleteUserFromSupabase,
+  fetchUsers
+} from '@/utils/users';
 
 interface UseUserOperationsProps {
   users: User[];

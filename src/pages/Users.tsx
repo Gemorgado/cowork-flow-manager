@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Card,
@@ -13,7 +12,7 @@ import EditUserDialog from '@/components/users/EditUserDialog';
 import DeleteUserDialog from '@/components/users/DeleteUserDialog';
 import UsersTable from '@/components/users/UsersTable';
 import useUserForm from '@/hooks/useUserForm';
-import { fetchUsers } from '@/utils/supabaseUsers';
+import { fetchUsers } from '@/utils/users';
 
 interface UsersProps {
   isTab?: boolean;
