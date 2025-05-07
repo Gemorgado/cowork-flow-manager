@@ -16,6 +16,7 @@ import {
   handleLinkClientToRoom 
 } from './operations/roomOperations';
 import { seedSupabaseOccupancy } from '@/utils/seedSupabaseOccupancy';
+import { supabase } from '@/lib/supabase';
 
 export function useSupabaseOccupancy() {
   const { currentFloor, setCurrentFloor } = useFloorSelection('1');

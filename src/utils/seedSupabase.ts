@@ -1,5 +1,5 @@
 
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { generateRooms, generateWorkStations } from '@/mock/locations';
 import { Database } from "@/integrations/supabase/types";
 
@@ -60,12 +60,3 @@ export async function seedSupabaseWithOccupancyData() {
     return { success: false, error };
   }
 }
-
-// To seed the database, uncomment the following and run it once from a component:
-/*
-useEffect(() => {
-  seedSupabaseWithOccupancyData().then(result => {
-    console.log('Seed result:', result);
-  });
-}, []);
-*/

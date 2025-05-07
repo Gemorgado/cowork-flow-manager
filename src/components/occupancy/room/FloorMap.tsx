@@ -6,11 +6,11 @@ import { RoomGrid } from './RoomGrid';
 import { WorkStationGrid } from '../WorkStationGrid';
 import { Room, FloorNumber, WorkStation } from '@/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { seedSupabaseOccupancy } from '@/utils/seedSupabaseOccupancy';
+import { supabase } from '@/lib/supabase';
 
 export function FloorMap() {
   const [floor, setFloor] = useState<"1" | "2" | "3">("1");
