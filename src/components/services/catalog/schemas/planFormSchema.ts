@@ -20,8 +20,11 @@ export const planFormSchema = z.object({
     message: 'Adicione pelo menos uma periodicidade.',
   }),
   benefits: z.array(
-    z.string().min(3, {
-      message: 'O benefício deve ter pelo menos 3 caracteres.',
+    z.object({
+      id: z.string().optional(),
+      text: z.string().min(3, {
+        message: 'O benefício deve ter pelo menos 3 caracteres.',
+      }),
     })
   ).min(1, {
     message: 'Adicione pelo menos um benefício.',
@@ -40,5 +43,8 @@ export interface PlanDialogData {
     price: number;
     times?: number;
   }>;
-  benefits: string[];
+  benefits: Array<{
+    id?: string;
+    text: string;
+  }>;
 }

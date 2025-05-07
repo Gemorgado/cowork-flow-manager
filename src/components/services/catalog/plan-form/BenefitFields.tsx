@@ -18,10 +18,9 @@ interface BenefitFieldsProps {
 }
 
 export const BenefitFields = ({ form }: BenefitFieldsProps) => {
-  // Explicitly specify the field name as a generic parameter
   const { fields, append, remove } = useFieldArray<PlanFormValues, "benefits">({
     control: form.control,
-    name: "benefits" as const
+    name: "benefits"
   });
 
   return (
@@ -31,7 +30,7 @@ export const BenefitFields = ({ form }: BenefitFieldsProps) => {
         <Button
           type="button"
           variant="outline"
-          onClick={() => append("" as any)} // Type assertion to bypass type checking
+          onClick={() => append({ text: "" })}
           className="h-8 px-2"
         >
           Adicionar
@@ -42,7 +41,7 @@ export const BenefitFields = ({ form }: BenefitFieldsProps) => {
         <div key={field.id} className="flex items-center gap-2">
           <FormField
             control={form.control}
-            name={`benefits.${index}`}
+            name={`benefits.${index}.text`}
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormControl>
