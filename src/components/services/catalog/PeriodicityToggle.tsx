@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface PeriodItem {
   label: string;
@@ -15,27 +15,29 @@ interface PeriodicityToggleProps {
 }
 
 const PeriodicityToggle = ({ items, value, onValueChange }: PeriodicityToggleProps) => {
+  // Se não houver items ou apenas um, não mostramos o seletor
+  if (!items.length || items.length === 1) {
+    return null;
+  }
+
   return (
-    <ToggleGroup
-      type="single"
+    <Select
       value={value}
-      onValueChange={(val) => {
-        if (val) onValueChange(val);
-      }}
-      className="flex justify-start bg-white/10 rounded-full p-1 backdrop-blur-sm"
-      aria-label="Selecione a periodicidade"
+      onValueChange={onValueChange}
     >
-      {items.map((period) => (
-        <ToggleGroupItem
-          key={period.key}
-          value={period.key}
-          aria-label={period.label}
-          className="text-xs px-3 py-1 data-[state=on]:bg-white data-[state=on]:text-cowork-800 data-[state=off]:text-white rounded-full transition-all"
-        >
-          {period.label}
-        </ToggleGroupItem>
-      ))}
-    </ToggleGroup>
+      <SelectTrigger 
+        className="w-full bg-white/10 backdrop-blur-sm border-0 text-white focus:ring-white/30 focus:ring-offset-0"
+      >
+        <SelectValue placeholder="Selecione a periodicidade" />
+      </SelectTrigger>
+      <SelectContent>
+        {items.map((period) => (
+          <SelectItem key={period.key} value={period.key}>
+            {period.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 };
 
