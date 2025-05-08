@@ -173,7 +173,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({
           selectedClientId={selectedClientId}
           setSelectedClientId={setSelectedClientId}
           mockClients={mockClients}
-          handleClientLink={handleLinkClient}
+          handleClientLink={() => handleLinkClient(selectedRoom.id, selectedClientId)}
         />
       )}
     </TooltipProvider>

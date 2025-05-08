@@ -10,7 +10,7 @@ import {
   DialogTrigger 
 } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { RoomDetailsDialogContent } from './RoomDialogs';
+import { RoomDetailsDialogContent } from './dialogs';
 import { mockClients } from './RoomUtils';
 
 interface RoomCardProps {
