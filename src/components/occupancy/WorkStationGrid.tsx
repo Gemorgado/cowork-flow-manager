@@ -42,6 +42,8 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
     return 'bg-gray-200 hover:bg-gray-300 text-gray-800';
   };
   
+  console.log("WorkStationGrid rendering with floor stations:", floorStations);
+  
   // If floor 3, show a message that no workstations are available on this floor
   if (currentFloor === '3') {
     return (

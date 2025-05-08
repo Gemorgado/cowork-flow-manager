@@ -17,7 +17,17 @@ export function FloorMapContent({
   workStations,
   floor 
 }: FloorMapContentProps) {
-  if (!rooms && !workStations) return null;
+  console.log("FloorMapContent rendering:", { 
+    activeView, 
+    rooms: rooms?.length, 
+    workStations: workStations?.length, 
+    floor 
+  });
+  
+  if (!rooms && !workStations) {
+    console.log("No rooms or workstations available");
+    return null;
+  }
   
   const hasRooms = rooms && rooms.length > 0;
   const hasWorkstations = workStations && workStations.length > 0;
@@ -38,7 +48,7 @@ export function FloorMapContent({
   
   return (
     <div className="space-y-8">
-      {(activeView === 'unified' || activeView === 'rooms') && hasRooms && (
+      {(activeView === 'unified' || activeView === 'rooms') && rooms && (
         <div className={activeView === 'unified' ? 'mb-10' : ''}>
           <h3 className="text-lg font-medium mb-4">
             Salas {floor}º Andar 
@@ -50,7 +60,7 @@ export function FloorMapContent({
         </div>
       )}
       
-      {(activeView === 'unified' || activeView === 'stations') && hasWorkstations && (
+      {(activeView === 'unified' || activeView === 'stations') && workStations && (
         <div>
           <h3 className="text-lg font-medium mb-4">
             Estações de Trabalho {floor}º Andar
