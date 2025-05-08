@@ -26,13 +26,6 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
     (station) => station.floor === parseInt(currentFloor) as any
   );
   
-  // Constants for workstation counts per floor (official inventory)
-  const totalWorkstationsPerFloor = {
-    '1': 26, // WS-01 to WS-26
-    '2': 38, // WS-27 to WS-64
-    '3': 0   // No workstations on floor 3
-  };
-  
   // Handle allocating a flex station to a fixed client
   const handleAllocateFlexToFixed = (stationId: string) => {
     if (onAllocateFlexToFixed) {
@@ -48,12 +41,6 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
     if (status === 'maintenance') return 'bg-red-500 hover:bg-red-600 text-white';
     return 'bg-gray-200 hover:bg-gray-300 text-gray-800';
   };
-
-  console.log("WorkStationGrid rendering:", { 
-    floorStations, 
-    totalStations: workStations.length,
-    expectedForFloor: totalWorkstationsPerFloor[currentFloor]
-  });
   
   // If floor 3, show a message that no workstations are available on this floor
   if (currentFloor === '3') {

@@ -94,8 +94,8 @@ export async function seedSupabaseOccupancy() {
     
     return {
       success: true,
-      roomsCount: roomsData.length,  // Updated: should be 36
-      workstationsCount: workstationsData.length  // Updated: should be 64
+      roomsCount: roomsData.length,  // Should be 36
+      workstationsCount: workstationsData.length  // Should be 64
     };
   } catch (error) {
     console.error("Seed failed:", error);
