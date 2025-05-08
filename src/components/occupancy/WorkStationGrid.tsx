@@ -26,6 +26,13 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
     (station) => station.floor === parseInt(currentFloor) as any
   );
   
+  // Constants for workstation counts per floor (official inventory)
+  const totalWorkstationsPerFloor = {
+    '1': 26, // WS-01 to WS-26
+    '2': 38, // WS-27 to WS-64
+    '3': 0   // No workstations on floor 3
+  };
+  
   // Handle allocating a flex station to a fixed client
   const handleAllocateFlexToFixed = (stationId: string) => {
     if (onAllocateFlexToFixed) {
@@ -44,8 +51,23 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
 
   console.log("WorkStationGrid rendering:", { 
     floorStations, 
-    totalStations: workStations.length 
+    totalStations: workStations.length,
+    expectedForFloor: totalWorkstationsPerFloor[currentFloor]
   });
+  
+  // If floor 3, show a message that no workstations are available on this floor
+  if (currentFloor === '3') {
+    return (
+      <div className="p-6 text-center">
+        <Alert variant="default" className="justify-center">
+          <AlertTriangle className="h-4 w-4 mr-2" />
+          <AlertDescription>
+            O 3º andar não possui estações de trabalho.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
   
   // If there are no stations for this floor, show a message
   if (floorStations.length === 0) {
@@ -122,4 +144,4 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
       ))}
     </div>
   );
-};
+}

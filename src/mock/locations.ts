@@ -5,11 +5,11 @@ import { Room, WorkStation, LocationStatus } from '../types';
 export const generateRooms = (): Room[] => {
   const rooms: Room[] = [];
   
-  // Pavimento 1: Salas 101-107
-  for (let i = 1; i <= 7; i++) {
+  // Pavimento 1: Salas 101-107 (7 rooms)
+  for (let i = 0; i <= 6; i++) {
     rooms.push({
       id: `r1${i.toString().padStart(2, '0')}`,
-      number: `10${i}`,
+      number: `10${i+1}`,
       floor: 1,
       status: Math.random() > 0.3 ? 'occupied' : 'available',
       clientId: Math.random() > 0.3 ? `client${Math.floor(Math.random() * 5) + 1}` : undefined,
@@ -18,9 +18,9 @@ export const generateRooms = (): Room[] => {
     });
   }
   
-  // Pavimento 2: Salas 201-219
-  for (let i = 1; i <= 19; i++) {
-    const roomNumber = i < 10 ? `20${i}` : `2${i}`;
+  // Pavimento 2: Salas 201-219 (19 rooms)
+  for (let i = 0; i < 19; i++) {
+    const roomNumber = `${201 + i}`;
     rooms.push({
       id: `r2${i.toString().padStart(2, '0')}`,
       number: roomNumber,
@@ -32,11 +32,11 @@ export const generateRooms = (): Room[] => {
     });
   }
   
-  // Pavimento 3: Salas 301-310
-  for (let i = 1; i <= 10; i++) {
+  // Pavimento 3: Salas 301-310 (10 rooms)
+  for (let i = 0; i < 10; i++) {
     rooms.push({
       id: `r3${i.toString().padStart(2, '0')}`,
-      number: `30${i}`,
+      number: `30${i+1}`,
       floor: 3,
       status: Math.random() > 0.7 ? 'occupied' : 'available',
       clientId: Math.random() > 0.7 ? `client${Math.floor(Math.random() * 5) + 1}` : undefined,
@@ -78,7 +78,7 @@ export const generateRooms = (): Room[] => {
 export const generateWorkStations = (): WorkStation[] => {
   const stations: WorkStation[] = [];
   
-  // Pavimento 1: 26 estações (mix de flex e fixas)
+  // Pavimento 1: 26 estações (WS-01 to WS-26)
   for (let i = 1; i <= 26; i++) {
     // First 13 are fixed, rest are flex type
     const type = i <= 13 ? 'fixed' : 'flex';
@@ -95,7 +95,7 @@ export const generateWorkStations = (): WorkStation[] => {
     
     stations.push({
       id: `s1${i.toString().padStart(2, '0')}`,
-      number: `F1-${i}`,
+      number: `WS-${i.toString().padStart(2, '0')}`,
       floor: 1,
       type,
       status,
@@ -103,10 +103,10 @@ export const generateWorkStations = (): WorkStation[] => {
     });
   }
   
-  // Pavimento 2: 38 estações (mix de flex e fixas)
-  for (let i = 1; i <= 38; i++) {
-    // First 19 are fixed, rest are flex type
-    const type = i <= 19 ? 'fixed' : 'flex';
+  // Pavimento 2: 38 estações (WS-27 to WS-64)
+  for (let i = 27; i <= 64; i++) {
+    // First half are fixed, rest are flex type
+    const type = i <= 45 ? 'fixed' : 'flex';
     
     // Determine status based on type
     let status: LocationStatus;
@@ -118,8 +118,8 @@ export const generateWorkStations = (): WorkStation[] => {
     }
     
     stations.push({
-      id: `s2${i.toString().padStart(2, '0')}`,
-      number: `F2-${i}`,
+      id: `s2${(i-26).toString().padStart(2, '0')}`,
+      number: `WS-${i.toString().padStart(2, '0')}`,
       floor: 2,
       type,
       status,
