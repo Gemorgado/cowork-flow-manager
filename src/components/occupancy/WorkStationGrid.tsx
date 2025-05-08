@@ -34,7 +34,7 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
   };
 
   // Get status-based styling
-  const getStationStatusStyles = (status: string, type: string) => {
+  const getStationStatusStyles = (status: string) => {
     if (status === 'flex') return 'bg-yellow-300 hover:bg-yellow-400 text-yellow-900';
     if (status === 'occupied') return 'bg-green-500 hover:bg-green-600 text-white';
     if (status === 'reserved') return 'bg-yellow-500 hover:bg-yellow-600 text-white';
@@ -42,7 +42,7 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
     return 'bg-gray-200 hover:bg-gray-300 text-gray-800';
   };
   
-  console.log("WorkStationGrid rendering with floor stations:", floorStations);
+  console.log("WorkStationGrid rendering with", floorStations.length, "stations for floor", currentFloor);
   
   // If floor 3, show a message that no workstations are available on this floor
   if (currentFloor === '3') {
@@ -74,9 +74,9 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
     );
   }
 
-  // Group stations by rows for better layout
+  // Group stations into rows for better display
+  const stationsPerRow = currentFloor === '1' ? 7 : 8;
   const stationRows = [];
-  const stationsPerRow = 8;
   
   for (let i = 0; i < floorStations.length; i += stationsPerRow) {
     stationRows.push(floorStations.slice(i, i + stationsPerRow));
@@ -95,7 +95,7 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
                       <button
                         className={cn(
                           "w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center relative",
-                          getStationStatusStyles(station.status, station.type),
+                          getStationStatusStyles(station.status),
                           "transition-all duration-200 hover:scale-105"
                         )}
                         aria-label={`Estação ${station.number}`}

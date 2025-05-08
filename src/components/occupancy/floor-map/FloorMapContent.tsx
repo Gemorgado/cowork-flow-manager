@@ -29,8 +29,13 @@ export function FloorMapContent({
     return null;
   }
   
-  const hasRooms = rooms && rooms.length > 0;
-  const hasWorkstations = workStations && workStations.length > 0;
+  const floorRooms = rooms?.filter(room => room.floor === parseInt(floor) as any) || [];
+  const floorWorkstations = workStations?.filter(ws => ws.floor === parseInt(floor) as any) || [];
+  
+  console.log(`Filtered data for floor ${floor}:`, { 
+    floorRooms: floorRooms.length, 
+    floorWorkstations: floorWorkstations.length 
+  });
   
   // Constants for room counts per floor based on official inventory
   const totalRooms = {
@@ -53,10 +58,10 @@ export function FloorMapContent({
           <h3 className="text-lg font-medium mb-4">
             Salas {floor}º Andar 
             <span className="text-sm text-muted-foreground ml-2">
-              ({rooms.length}/{totalRooms[floor as keyof typeof totalRooms]})
+              ({floorRooms.length}/{totalRooms[floor as keyof typeof totalRooms]})
             </span>
           </h3>
-          <RoomGrid rooms={rooms} />
+          <RoomGrid rooms={floorRooms} />
         </div>
       )}
       
@@ -65,7 +70,7 @@ export function FloorMapContent({
           <h3 className="text-lg font-medium mb-4">
             Estações de Trabalho {floor}º Andar
             <span className="text-sm text-muted-foreground ml-2">
-              ({workStations.length}/{totalWorkstations[floor as keyof typeof totalWorkstations]})
+              ({floorWorkstations.length}/{totalWorkstations[floor as keyof typeof totalWorkstations]})
             </span>
           </h3>
           <WorkStationGrid 

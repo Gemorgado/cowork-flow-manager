@@ -14,9 +14,19 @@ type WorkstationInsert = Database['public']['Tables']['workstations']['Insert'];
  */
 export async function seedSupabaseOccupancy() {
   try {
+    console.log('Starting to seed Supabase occupancy data...');
+    
     // Clear existing data first
-    await supabase.from('rooms').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('workstations').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    console.log('Clearing existing rooms and workstations...');
+    const { error: deleteRoomsError } = await supabase.from('rooms').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    if (deleteRoomsError) {
+      console.error('Error deleting rooms:', deleteRoomsError);
+    }
+    
+    const { error: deleteWorkstationsError } = await supabase.from('workstations').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    if (deleteWorkstationsError) {
+      console.error('Error deleting workstations:', deleteWorkstationsError);
+    }
     
     // Specific room numbers for each floor based on official inventory
     const roomsData: RoomInsert[] = [
@@ -51,6 +61,8 @@ export async function seedSupabaseOccupancy() {
       }))
     ];
 
+    console.log(`Prepared ${roomsData.length} rooms for insertion`);
+
     // Generate workstation data for floors 1-2 with updated numbering
     const workstationsData: WorkstationInsert[] = [
       // Pavimento 1: 26 estações (WS-01 to WS-26)
@@ -72,30 +84,40 @@ export async function seedSupabaseOccupancy() {
       }))
     ];
     
+    console.log(`Prepared ${workstationsData.length} workstations for insertion`);
+    
     // Insert room data
-    const { error: roomsError } = await supabase
+    console.log('Inserting rooms...');
+    const { data: insertedRooms, error: roomsError } = await supabase
       .from('rooms')
-      .insert(roomsData);
+      .insert(roomsData)
+      .select();
       
     if (roomsError) {
       console.error("Error inserting rooms:", roomsError);
       throw roomsError;
     }
     
+    console.log(`Successfully inserted ${insertedRooms?.length || 0} rooms`);
+    
     // Insert workstation data
-    const { error: workstationsError } = await supabase
+    console.log('Inserting workstations...');
+    const { data: insertedWorkstations, error: workstationsError } = await supabase
       .from('workstations')
-      .insert(workstationsData);
+      .insert(workstationsData)
+      .select();
       
     if (workstationsError) {
       console.error("Error inserting workstations:", workstationsError);
       throw workstationsError;
     }
     
+    console.log(`Successfully inserted ${insertedWorkstations?.length || 0} workstations`);
+    
     return {
       success: true,
-      roomsCount: roomsData.length,  // Should be 36
-      workstationsCount: workstationsData.length  // Should be 64
+      roomsCount: insertedRooms?.length || 0,
+      workstationsCount: insertedWorkstations?.length || 0
     };
   } catch (error) {
     console.error("Seed failed:", error);

@@ -3,10 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import { Room, WorkStation, FloorNumber } from '@/types';
 import { supabase } from '@/lib/supabase';
 
-export function useFloorMapData(floor: "1" | "2" | "3", hasCheckedData: boolean) {
+export function useFloorMapData(floor: "1" | "2" | "3", hasCheckedData: boolean, refreshKey: number = 0) {
   const { data: rooms, isLoading: isLoadingRooms, error: roomsError, refetch: refetchRooms } = useQuery({
-    queryKey: ['rooms', floor],
+    queryKey: ['rooms', floor, refreshKey],
     queryFn: async () => {
+      console.log(`Fetching rooms for floor ${floor}`);
       const { data, error } = await supabase
         .from('rooms')
         .select('*')
@@ -16,6 +17,8 @@ export function useFloorMapData(floor: "1" | "2" | "3", hasCheckedData: boolean)
         console.error("Error fetching rooms:", error);
         throw error;
       }
+      
+      console.log(`Fetched ${data?.length || 0} rooms for floor ${floor}`);
       
       // Transform the response to match the Room type
       return (data || []).map(room => ({
@@ -32,8 +35,9 @@ export function useFloorMapData(floor: "1" | "2" | "3", hasCheckedData: boolean)
   });
 
   const { data: workStations, isLoading: isLoadingStations, error: stationsError, refetch: refetchStations } = useQuery({
-    queryKey: ['workstations', floor],
+    queryKey: ['workstations', floor, refreshKey],
     queryFn: async () => {
+      console.log(`Fetching workstations for floor ${floor}`);
       const { data, error } = await supabase
         .from('workstations')
         .select('*')
@@ -43,6 +47,8 @@ export function useFloorMapData(floor: "1" | "2" | "3", hasCheckedData: boolean)
         console.error("Error fetching workstations:", error);
         throw error;
       }
+      
+      console.log(`Fetched ${data?.length || 0} workstations for floor ${floor}`);
       
       return (data || []).map(station => ({
         id: station.id,
