@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { WorkStation } from '@/types';
+import { WorkStation, LocationStatus } from '@/types';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { StationDialogContent } from './workstation/StationDialogContent';
 import { getClientInfo } from './workstation/StationUtils';
@@ -9,30 +9,28 @@ import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, User } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { mockClients } from './room/RoomUtils';
 
 interface WorkStationGridProps {
   workStations: WorkStation[];
   currentFloor: string;
   onAllocateFlexToFixed?: (stationId: string, clientId: string) => void;
+  onUpdateStatus?: (stationId: string, status: LocationStatus) => void;
+  onLinkClient?: (stationId: string, clientId: string) => void;
 }
 
 export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
   workStations,
   currentFloor,
   onAllocateFlexToFixed,
+  onUpdateStatus,
+  onLinkClient
 }) => {
   // Filter stations by floor
   const floorStations = workStations.filter(
     (station) => station.floor === parseInt(currentFloor) as any
   );
   
-  // Handle allocating a flex station to a fixed client
-  const handleAllocateFlexToFixed = (stationId: string) => {
-    if (onAllocateFlexToFixed) {
-      onAllocateFlexToFixed(stationId, 'client1');
-    }
-  };
-
   // Get status-based styling
   const getStationStatusStyles = (status: string) => {
     if (status === 'flex') return 'bg-yellow-300 hover:bg-yellow-400 text-yellow-900';
@@ -124,7 +122,10 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
                 <StationDialogContent
                   station={station}
                   getClientInfo={getClientInfo}
-                  onAllocate={() => handleAllocateFlexToFixed(station.id)}
+                  onAllocate={() => onAllocateFlexToFixed && onAllocateFlexToFixed(station.id, 'client1')}
+                  onUpdateStatus={onUpdateStatus ? (status) => onUpdateStatus(station.id, status) : undefined}
+                  onLinkClient={onLinkClient ? (clientId) => onLinkClient(station.id, clientId) : undefined}
+                  availableClients={mockClients}
                 />
               </DialogContent>
             </Dialog>

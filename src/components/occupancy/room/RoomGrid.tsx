@@ -5,9 +5,15 @@ import { RoomCard } from './RoomCard';
 
 interface RoomGridProps {
   rooms: Room[];
+  onUpdateStatus?: (roomId: string, status: Room['status']) => void;
+  onLinkClient?: (roomId: string, clientId: string) => void;
 }
 
-export function RoomGrid({ rooms }: RoomGridProps) {
+export function RoomGrid({ 
+  rooms, 
+  onUpdateStatus,
+  onLinkClient
+}: RoomGridProps) {
   // Get the floor from the first room to determine layout
   const floor = rooms.length > 0 ? rooms[0].floor : 1;
   
@@ -33,7 +39,14 @@ export function RoomGrid({ rooms }: RoomGridProps) {
 
   return (
     <div className={`mt-6 grid ${getGridClasses()} gap-3 sm:gap-4 p-2 sm:p-4`}>
-      {rooms.map(room => <RoomCard key={room.id} room={room} />)}
+      {rooms.map(room => (
+        <RoomCard 
+          key={room.id} 
+          room={room} 
+          onUpdateStatus={onUpdateStatus}
+          onLinkClient={onLinkClient}
+        />
+      ))}
     </div>
   );
 }

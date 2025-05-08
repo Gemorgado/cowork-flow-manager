@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { Room } from '@/types';
+import { Room, LocationStatus } from '@/types';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { toast } from '@/components/ui/use-toast';
 import {
   Select,
   SelectContent,
@@ -25,13 +25,22 @@ export interface RoomDetailsDialogContentProps {
   room: Room;
   getClientInfo: (clientId?: string) => string;
   onClose?: () => void;
+  onUpdateStatus?: (roomId: string, status: LocationStatus) => void;
+  onLinkClient?: (roomId: string, clientId: string) => void;
+  availableClients?: {id: string, name: string}[];
 }
 
 export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> = ({
   room,
   getClientInfo,
   onClose,
+  onUpdateStatus,
+  onLinkClient,
+  availableClients = []
 }) => {
+  const [selectedClientId, setSelectedClientId] = useState<string>('');
+  const [selectedStatus, setSelectedStatus] = useState<LocationStatus>(room.status);
+  
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
       area: room.area?.toString() || '',
@@ -43,6 +52,27 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
     console.log('Room update data:', data);
     // Here you would call an API to update the room
     if (onClose) onClose();
+  };
+
+  const handleStatusChange = (status: LocationStatus) => {
+    setSelectedStatus(status);
+    if (onUpdateStatus) {
+      onUpdateStatus(room.id, status);
+      toast({
+        title: 'Status atualizado',
+        description: `Sala ${room.number} agora está ${statusLabels[status]}.`,
+      });
+    }
+  };
+
+  const handleLinkClient = () => {
+    if (onLinkClient && selectedClientId) {
+      onLinkClient(room.id, selectedClientId);
+      toast({
+        title: 'Cliente vinculado',
+        description: `Cliente vinculado à sala ${room.number}.`,
+      });
+    }
   };
 
   const statusLabels: Record<string, string> = {
@@ -61,15 +91,28 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
         </DialogDescription>
       </DialogHeader>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
+      <div className="space-y-4 py-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm font-medium mb-1">Status</p>
-            <p>{statusLabels[room.status] || room.status}</p>
+            <Select 
+              value={selectedStatus} 
+              onValueChange={(value) => handleStatusChange(value as LocationStatus)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={statusLabels[room.status] || room.status} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="available">Livre</SelectItem>
+                <SelectItem value="occupied">Ocupada</SelectItem>
+                <SelectItem value="reserved">Reservada</SelectItem>
+                <SelectItem value="maintenance">Manutenção</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <p className="text-sm font-medium mb-1">Cliente</p>
-            <p>{getClientInfo(room.clientId)}</p>
+            <p>{getClientInfo(room.clientId) || 'Nenhum'}</p>
           </div>
           <div>
             <p className="text-sm font-medium mb-1">Andar</p>
@@ -79,42 +122,64 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
             <p className="text-sm font-medium mb-1">Capacidade</p>
             <p>{room.capacity} pessoas</p>
           </div>
-        </div>
-
-        <div className="space-y-4 mt-4 pt-4 border-t">
           <div>
-            <Label htmlFor="area">Área (m²)</Label>
-            <Input 
-              id="area" 
-              type="number" 
-              step="0.01"
-              placeholder="Área em m²" 
-              {...register('area', { min: 0 })} 
-            />
-            {errors.area && (
-              <p className="text-sm text-red-500">Área deve ser maior que zero</p>
-            )}
-          </div>
-          
-          <div>
-            <Label htmlFor="price">Valor (R$)</Label>
-            <Input 
-              id="price" 
-              type="number" 
-              step="0.01"
-              placeholder="Valor mensal" 
-              {...register('price', { min: 0 })} 
-            />
-            {errors.price && (
-              <p className="text-sm text-red-500">Valor deve ser maior que zero</p>
-            )}
+            <p className="text-sm font-medium mb-1">Área</p>
+            <p>{room.area} m²</p>
           </div>
         </div>
 
-        <DialogFooter>
-          <Button type="submit">Salvar</Button>
-        </DialogFooter>
-      </form>
+        {/* Client linking section */}
+        {!room.clientId && availableClients.length > 0 && (
+          <div className="space-y-4 mt-4 pt-4 border-t">
+            <div>
+              <Label htmlFor="client">Vincular Cliente</Label>
+              <Select 
+                value={selectedClientId} 
+                onValueChange={setSelectedClientId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um cliente" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableClients.map((client) => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button 
+                onClick={handleLinkClient}
+                className="mt-2 w-full"
+                disabled={!selectedClientId}
+              >
+                Vincular Cliente
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Action buttons for occupied rooms */}
+        {room.clientId && (
+          <div className="pt-4 border-t">
+            <Button 
+              variant="destructive" 
+              size="sm"
+              onClick={() => {
+                if (onUpdateStatus) {
+                  onUpdateStatus(room.id, 'available');
+                  toast({
+                    title: 'Cliente desvinculado',
+                    description: `Cliente desvinculado da sala ${room.number}.`,
+                  });
+                }
+              }}
+            >
+              Desvincular Cliente
+            </Button>
+          </div>
+        )}
+      </div>
     </>
   );
 };

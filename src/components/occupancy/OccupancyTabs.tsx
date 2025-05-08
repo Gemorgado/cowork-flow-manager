@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Room, WorkStation } from '@/types';
@@ -11,6 +12,7 @@ interface OccupancyTabsProps {
   currentFloor: string;
   isLoading: boolean;
   onAllocateFlexToFixed: (stationId: string, clientId: string) => void;
+  onDataChange?: () => void;
 }
 
 export const OccupancyTabs: React.FC<OccupancyTabsProps> = ({
@@ -18,7 +20,8 @@ export const OccupancyTabs: React.FC<OccupancyTabsProps> = ({
   workStations,
   currentFloor,
   isLoading,
-  onAllocateFlexToFixed
+  onAllocateFlexToFixed,
+  onDataChange
 }) => {
   return (
     <Tabs defaultValue="floor-map">
@@ -37,6 +40,7 @@ export const OccupancyTabs: React.FC<OccupancyTabsProps> = ({
           rooms={rooms.filter(room => room.floor === parseInt(currentFloor) as any)} 
           isLoading={isLoading}
           currentFloor={currentFloor}
+          onDataChange={onDataChange}
         />
       </TabsContent>
       
@@ -46,6 +50,7 @@ export const OccupancyTabs: React.FC<OccupancyTabsProps> = ({
           isLoading={isLoading}
           onAllocateFlexToFixed={onAllocateFlexToFixed}
           currentFloor={currentFloor}
+          onDataChange={onDataChange}
         />
       </TabsContent>
     </Tabs>

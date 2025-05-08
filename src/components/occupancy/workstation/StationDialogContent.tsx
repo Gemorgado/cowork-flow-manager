@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { WorkStation } from '@/types';
+import { WorkStation, LocationStatus } from '@/types';
 import { 
   Select, 
   SelectContent, 
@@ -19,6 +19,7 @@ interface StationDialogContentProps {
   onAllocate?: () => void;
   allocatingFlexToFixed?: boolean;
   onLinkClient?: (clientId: string) => void;
+  onUpdateStatus?: (status: LocationStatus) => void;
   availableClients?: {id: string, name: string}[];
 }
 
@@ -28,9 +29,11 @@ export const StationDialogContent: React.FC<StationDialogContentProps> = ({
   onAllocate,
   allocatingFlexToFixed = false,
   onLinkClient,
+  onUpdateStatus,
   availableClients = [],
 }) => {
   const [selectedClientId, setSelectedClientId] = useState<string>('');
+  const [selectedStatus, setSelectedStatus] = useState<LocationStatus>(station.status);
   const isFixedType = station.type === 'fixed';
   const statusLabels: Record<string, string> = {
     'available': 'Livre',
@@ -49,6 +52,13 @@ export const StationDialogContent: React.FC<StationDialogContentProps> = ({
   const handleLinkClient = () => {
     if (onLinkClient && selectedClientId) {
       onLinkClient(selectedClientId);
+    }
+  };
+
+  const handleStatusChange = (status: LocationStatus) => {
+    setSelectedStatus(status);
+    if (onUpdateStatus) {
+      onUpdateStatus(status);
     }
   };
 
@@ -74,7 +84,25 @@ export const StationDialogContent: React.FC<StationDialogContentProps> = ({
           </div>
           <div>
             <p className="text-sm font-medium mb-1">Status</p>
-            <p>{statusLabels[station.status] || station.status}</p>
+            {onUpdateStatus ? (
+              <Select 
+                value={selectedStatus} 
+                onValueChange={(value) => handleStatusChange(value as LocationStatus)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={statusLabels[station.status] || station.status} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="available">Livre</SelectItem>
+                  <SelectItem value="occupied">Ocupado</SelectItem>
+                  <SelectItem value="flex">Flex</SelectItem>
+                  <SelectItem value="reserved">Reservado</SelectItem>
+                  <SelectItem value="maintenance">Manutenção</SelectItem>
+                </SelectContent>
+              </Select>
+            ) : (
+              <p>{statusLabels[station.status] || station.status}</p>
+            )}
           </div>
           <div>
             <p className="text-sm font-medium mb-1">Cliente</p>
@@ -130,6 +158,7 @@ export const StationDialogContent: React.FC<StationDialogContentProps> = ({
           </div>
         )}
         
+        {/* Actions for different station types/states */}
         <DialogFooter className="pt-4">
           {station.status === 'flex' ? (
             <Button 
@@ -140,12 +169,19 @@ export const StationDialogContent: React.FC<StationDialogContentProps> = ({
             </Button>
           ) : (
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">Editar</Button>
-              {!station.clientId && onLinkClient && !availableClients.length && (
+              {/* Only show for fixed stations that aren't linked to clients */}
+              {isFixedType && !station.clientId && onLinkClient && !availableClients.length && (
                 <Button variant="default" size="sm">Vincular Cliente</Button>
               )}
-              {station.clientId && (
-                <Button variant="destructive" size="sm">Desvincular</Button>
+              {/* Only show for stations linked to clients */}
+              {station.clientId && onUpdateStatus && (
+                <Button 
+                  variant="destructive" 
+                  size="sm"
+                  onClick={() => handleStatusChange('available')}
+                >
+                  Desvincular
+                </Button>
               )}
             </div>
           )}

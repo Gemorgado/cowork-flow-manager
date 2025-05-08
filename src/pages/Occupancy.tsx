@@ -88,6 +88,7 @@ const Occupancy = () => {
         currentFloor={currentFloor}
         isLoading={isLoading}
         onAllocateFlexToFixed={handleConvertFlexToFixed}
+        onDataChange={handleRefresh}
       />
       
       {!isLoading ? (

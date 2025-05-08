@@ -1,22 +1,27 @@
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { CardContent } from '@/components/ui/card';
-import { WorkStation } from '@/types';
+import { WorkStation, LocationStatus } from '@/types';
 import { WorkStationGrid } from '../WorkStationGrid';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from '@/components/ui/use-toast';
+import { updateStationStatus } from '@/hooks/occupancy/api/workstationApi';
+import { convertFlexToFixed } from '@/hooks/occupancy/api/workstationApi';
 
 interface WorkStationsTabProps {
   workStations: WorkStation[];
   currentFloor: string;
   isLoading?: boolean;
   onAllocateFlexToFixed?: (stationId: string, clientId: string) => void;
+  onDataChange?: () => void;
 }
 
 export const WorkStationsTab: React.FC<WorkStationsTabProps> = ({
   workStations,
   currentFloor,
   isLoading = false,
-  onAllocateFlexToFixed
+  onAllocateFlexToFixed,
+  onDataChange
 }) => {
   // Filter stations by floor
   const floorStations = workStations.filter(station => station.floor === parseInt(currentFloor) as any);
@@ -24,6 +29,51 @@ export const WorkStationsTab: React.FC<WorkStationsTabProps> = ({
   // Count fixed and flex stations for display
   const flexStations = floorStations.filter(station => station.type === 'flex');
   const flexCount = flexStations.length;
+  
+  // Handler for updating station status
+  const handleUpdateStatus = useCallback(async (stationId: string, status: LocationStatus) => {
+    try {
+      await updateStationStatus(stationId, status);
+      toast({
+        title: 'Status atualizado',
+        description: `Status da estação atualizado para ${status}.`
+      });
+      if (onDataChange) onDataChange();
+    } catch (error) {
+      console.error("Error updating station status:", error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível atualizar o status da estação.',
+        variant: 'destructive'
+      });
+    }
+  }, [onDataChange]);
+
+  // Handler for linking client to station
+  const handleLinkClient = useCallback(async (stationId: string, clientId: string) => {
+    try {
+      // For workstations, linking a client also changes status to occupied
+      await convertFlexToFixed(stationId, clientId);
+      toast({
+        title: 'Cliente vinculado',
+        description: 'Cliente vinculado à estação com sucesso.'
+      });
+      if (onDataChange) onDataChange();
+    } catch (error) {
+      console.error("Error linking client to station:", error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível vincular o cliente à estação.',
+        variant: 'destructive'
+      });
+    }
+  }, [onDataChange]);
+
+  const handleAllocateFlexToFixed = useCallback(async (stationId: string, clientId: string) => {
+    if (onAllocateFlexToFixed) {
+      onAllocateFlexToFixed(stationId, clientId);
+    }
+  }, [onAllocateFlexToFixed]);
   
   return (
     <CardContent>
@@ -51,7 +101,9 @@ export const WorkStationsTab: React.FC<WorkStationsTabProps> = ({
         <WorkStationGrid 
           workStations={workStations} 
           currentFloor={currentFloor} 
-          onAllocateFlexToFixed={onAllocateFlexToFixed} 
+          onAllocateFlexToFixed={handleAllocateFlexToFixed}
+          onUpdateStatus={handleUpdateStatus}
+          onLinkClient={handleLinkClient}
         />
       )}
     </CardContent>

@@ -6,35 +6,43 @@ import { statusColors, statusLabels } from '../StatusLegend';
 import { Badge } from '@/components/ui/badge';
 import { 
   Dialog, 
+  DialogContent,
   DialogTrigger 
 } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { RoomDetailsDialogContent } from './RoomDialogs';
+import { mockClients } from './RoomUtils';
 
 interface RoomCardProps {
   room: Room;
   hoveredRoomId?: string | null;
   setHoveredRoomId?: (id: string | null) => void;
   getClientInfo?: (clientId?: string) => string;
+  onUpdateStatus?: (roomId: string, status: Room['status']) => void;
+  onLinkClient?: (roomId: string, clientId: string) => void;
 }
 
 export const RoomCard: React.FC<RoomCardProps> = ({
   room,
   hoveredRoomId,
   setHoveredRoomId,
-  getClientInfo
+  getClientInfo = (clientId?: string) => {
+    if (!clientId) return "Nenhum cliente";
+    // In a real app, we would fetch client details here
+    return `Cliente #${clientId.replace('client', '')}`;
+  },
+  onUpdateStatus,
+  onLinkClient
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
   
-  // Get client name for display
-  const getClientName = (clientId?: string) => {
-    if (!clientId) return "Nenhum cliente";
-    if (getClientInfo) return getClientInfo(clientId);
-    // Fallback if getClientInfo is not provided
-    return `Cliente #${clientId.replace('client', '')}`;
+  const handleCloseDialog = () => {
+    setShowDialog(false);
   };
 
   return (
-    <Dialog key={room.id}>
+    <Dialog key={room.id} open={showDialog} onOpenChange={setShowDialog}>
       <Tooltip>
         <TooltipTrigger asChild>
           <DialogTrigger asChild>
@@ -53,6 +61,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
                 setIsHovered(false);
                 setHoveredRoomId && setHoveredRoomId(null);
               }}
+              onClick={() => setShowDialog(true)}
             >
               <span className="text-sm font-medium mb-1 text-muted-foreground">{room.number}</span>
               <Badge 
@@ -66,7 +75,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
               </Badge>
               {room.clientId && (
                 <div className="mt-1 text-[9px] text-muted-foreground truncate">
-                  {getClientName(room.clientId)}
+                  {getClientInfo(room.clientId)}
                 </div>
               )}
             </div>
@@ -78,10 +87,20 @@ export const RoomCard: React.FC<RoomCardProps> = ({
             <div>Status: {statusLabels[room.status]}</div>
             <div>Área: {room.area}m²</div>
             <div>Capacidade: {room.capacity} pessoas</div>
-            {room.clientId && <div>Cliente: {getClientName(room.clientId)}</div>}
+            {room.clientId && <div>Cliente: {getClientInfo(room.clientId)}</div>}
           </div>
         </TooltipContent>
       </Tooltip>
+      <DialogContent>
+        <RoomDetailsDialogContent 
+          room={room} 
+          getClientInfo={getClientInfo} 
+          onClose={handleCloseDialog}
+          onUpdateStatus={onUpdateStatus}
+          onLinkClient={onLinkClient}
+          availableClients={mockClients}
+        />
+      </DialogContent>
     </Dialog>
   );
 };

@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Room } from '@/types';
+import React, { useState, useCallback } from 'react';
+import { Room, LocationStatus } from '@/types';
 import { useForm } from 'react-hook-form';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { RoomEditDialog, ClientLinkDialog } from './room/RoomDialogs';
@@ -9,13 +9,20 @@ import { getClientInfo, mockClients } from './room/RoomUtils';
 import { RoomGrid } from './room/RoomGrid';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
+import { updateRoomStatus, linkClientToRoom } from '@/hooks/occupancy/api';
 
 interface RoomMapProps {
   rooms: Room[];
   currentFloor: string;
+  onRoomsChanged?: () => void;
 }
 
-export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
+export const RoomMap: React.FC<RoomMapProps> = ({ 
+  rooms, 
+  currentFloor,
+  onRoomsChanged
+}) => {
   const floorRooms = rooms.filter((room) => room.floor === parseInt(currentFloor) as any);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -61,16 +68,43 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
     setIsClientLinkDialogOpen(true);
   };
 
-  // Handler for client linking
-  const handleClientLink = () => {
-    if (!selectedRoom || !selectedClientId) return;
-    
-    console.log(`Linking client ${selectedClientId} to room ${selectedRoom.id}`);
-    // Here you would call your API to link the client to the room
-    // For now, we'll just close the dialog
-    setIsClientLinkDialogOpen(false);
-  };
+  // Handler for updating room status
+  const handleUpdateRoomStatus = useCallback(async (roomId: string, status: LocationStatus) => {
+    try {
+      // If status is 'available', we remove client association
+      const clientId = status === 'available' ? null : undefined;
+      
+      const success = await updateRoomStatus(roomId, status, clientId);
+      if (success && onRoomsChanged) {
+        onRoomsChanged();
+      }
+    } catch (error) {
+      console.error("Error updating room status:", error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível atualizar o status da sala.',
+        variant: 'destructive'
+      });
+    }
+  }, [onRoomsChanged]);
 
+  // Handler for client linking
+  const handleLinkClient = useCallback(async (roomId: string, clientId: string) => {
+    try {
+      const success = await linkClientToRoom(roomId, clientId);
+      if (success && onRoomsChanged) {
+        onRoomsChanged();
+      }
+    } catch (error) {
+      console.error("Error linking client to room:", error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível vincular o cliente à sala.',
+        variant: 'destructive'
+      });
+    }
+  }, [onRoomsChanged]);
+  
   console.log("RoomMap rendering with rooms:", floorRooms);
   
   // If there are no rooms for this floor, show a message
@@ -93,7 +127,11 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
     <TooltipProvider>
       <div className="mb-8">
         {/* Use the RoomGrid component to display rooms in a grid layout */}
-        <RoomGrid rooms={floorRooms} />
+        <RoomGrid 
+          rooms={floorRooms} 
+          onUpdateStatus={handleUpdateRoomStatus}
+          onLinkClient={handleLinkClient}
+        />
       </div>
 
       {/* Specialized floor layouts if needed */}
@@ -135,7 +173,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({ rooms, currentFloor }) => {
           selectedClientId={selectedClientId}
           setSelectedClientId={setSelectedClientId}
           mockClients={mockClients}
-          handleClientLink={handleClientLink}
+          handleClientLink={handleLinkClient}
         />
       )}
     </TooltipProvider>
