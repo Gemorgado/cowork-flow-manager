@@ -29,9 +29,9 @@ const useUserForm = ({ users, setUsers }: UseUserFormProps) => {
   } = useUserDialogs();
 
   const {
-    handleAddUser,
-    handleEditUser,
-    handleDeleteUser,
+    handleAddUser: addUser,
+    handleEditUser: editUser,
+    handleDeleteUser: deleteUser,
   } = useUserOperations({
     users,
     setUsers,
@@ -41,6 +41,19 @@ const useUserForm = ({ users, setUsers }: UseUserFormProps) => {
     setIsDeleteUserOpen,
     setSelectedUser,
   });
+
+  // Funções wrapper que garantem que os parâmetros corretos são passados
+  const handleAddUser = () => {
+    return addUser(formData);
+  };
+
+  const handleEditUser = () => {
+    return editUser(formData, selectedUser);
+  };
+
+  const handleDeleteUser = () => {
+    return deleteUser(selectedUser);
+  };
 
   return {
     formData,
@@ -54,9 +67,9 @@ const useUserForm = ({ users, setUsers }: UseUserFormProps) => {
     setIsDeleteUserOpen,
     handleInputChange,
     handlePermissionChange,
-    handleAddUser: () => handleAddUser(formData),
-    handleEditUser: () => handleEditUser(formData, selectedUser),
-    handleDeleteUser: () => handleDeleteUser(selectedUser),
+    handleAddUser,
+    handleEditUser,
+    handleDeleteUser,
     openEditDialog,
     openDeleteDialog,
   };
