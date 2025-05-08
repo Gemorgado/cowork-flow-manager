@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Building } from 'lucide-react';
 
 export interface ClientLinkDialogProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ export interface ClientLinkDialogProps {
   setSelectedClientId: (id: string) => void;
   mockClients: { id: string; name: string }[];
   handleClientLink: () => void;
+  isLinking?: boolean;
 }
 
 export const ClientLinkDialog: React.FC<ClientLinkDialogProps> = ({
@@ -37,12 +39,13 @@ export const ClientLinkDialog: React.FC<ClientLinkDialogProps> = ({
   setSelectedClientId,
   mockClients,
   handleClientLink,
+  isLinking = false,
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Vincular Cliente à Sala {selectedRoom.number}</DialogTitle>
+          <DialogTitle>Vincular Cliente à Sala {selectedRoom?.number}</DialogTitle>
           <DialogDescription>
             Selecione um cliente para vincular a esta sala.
           </DialogDescription>
@@ -68,9 +71,17 @@ export const ClientLinkDialog: React.FC<ClientLinkDialogProps> = ({
         <DialogFooter>
           <Button 
             onClick={handleClientLink} 
-            disabled={!selectedClientId}
+            disabled={!selectedClientId || isLinking}
+            className="w-full"
           >
-            Vincular
+            {isLinking ? (
+              <>Vinculando...</>
+            ) : (
+              <>
+                <Building className="mr-2 h-4 w-4" />
+                Vincular Empresa
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

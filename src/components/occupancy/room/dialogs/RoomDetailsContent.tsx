@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { Building } from 'lucide-react';
 
 export interface RoomDetailsDialogContentProps {
   room: Room;
@@ -25,6 +26,7 @@ export interface RoomDetailsDialogContentProps {
   onUpdateStatus?: (roomId: string, status: LocationStatus) => void;
   onLinkClient?: (roomId: string, clientId: string) => void;
   availableClients?: {id: string, name: string}[];
+  openLinkDialog?: (room: Room) => void;
 }
 
 export const statusLabels: Record<string, string> = {
@@ -40,7 +42,8 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
   onClose,
   onUpdateStatus,
   onLinkClient,
-  availableClients = []
+  availableClients = [],
+  openLinkDialog
 }) => {
   const [selectedClientId, setSelectedClientId] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<LocationStatus>(room.status);
@@ -116,29 +119,42 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
         {!room.clientId && availableClients.length > 0 && (
           <div className="space-y-4 mt-4 pt-4 border-t">
             <div>
-              <Label htmlFor="client">Vincular Cliente</Label>
-              <Select 
-                value={selectedClientId} 
-                onValueChange={setSelectedClientId}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um cliente" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableClients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button 
-                onClick={handleLinkClient}
-                className="mt-2 w-full"
-                disabled={!selectedClientId}
-              >
-                Vincular Cliente
-              </Button>
+              {openLinkDialog ? (
+                <Button 
+                  onClick={() => openLinkDialog(room)}
+                  className="w-full"
+                  variant="outline"
+                >
+                  <Building className="mr-2 h-4 w-4" />
+                  Vincular Empresa
+                </Button>
+              ) : (
+                <>
+                  <Label htmlFor="client">Vincular Cliente</Label>
+                  <Select 
+                    value={selectedClientId} 
+                    onValueChange={setSelectedClientId}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um cliente" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableClients.map((client) => (
+                        <SelectItem key={client.id} value={client.id}>
+                          {client.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button 
+                    onClick={handleLinkClient}
+                    className="mt-2 w-full"
+                    disabled={!selectedClientId}
+                  >
+                    Vincular Cliente
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         )}
