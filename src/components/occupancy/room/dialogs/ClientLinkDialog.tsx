@@ -18,7 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Building } from 'lucide-react';
+import { Building, Loader2 } from 'lucide-react';
+import { ClientOption } from '@/hooks/occupancy/useRoomClientLink';
 
 export interface ClientLinkDialogProps {
   isOpen: boolean;
@@ -26,7 +27,8 @@ export interface ClientLinkDialogProps {
   selectedRoom: Room;
   selectedClientId: string;
   setSelectedClientId: (id: string) => void;
-  mockClients: { id: string; name: string }[];
+  availableClients: ClientOption[];
+  isLoadingClients?: boolean;
   handleClientLink: () => void;
   isLinking?: boolean;
 }
@@ -37,7 +39,8 @@ export const ClientLinkDialog: React.FC<ClientLinkDialogProps> = ({
   selectedRoom,
   selectedClientId,
   setSelectedClientId,
-  mockClients,
+  availableClients,
+  isLoadingClients = false,
   handleClientLink,
   isLinking = false,
 }) => {
@@ -55,27 +58,44 @@ export const ClientLinkDialog: React.FC<ClientLinkDialogProps> = ({
           <Select 
             value={selectedClientId} 
             onValueChange={setSelectedClientId}
+            disabled={isLoadingClients}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Selecione um cliente" />
+              {isLoadingClients ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Carregando clientes...</span>
+                </div>
+              ) : (
+                <SelectValue placeholder="Selecione um cliente" />
+              )}
             </SelectTrigger>
             <SelectContent>
-              {mockClients.map((client) => (
-                <SelectItem key={client.id} value={client.id}>
-                  {client.name}
+              {availableClients.length > 0 ? (
+                availableClients.map((client) => (
+                  <SelectItem key={client.id} value={client.id}>
+                    {client.name}
+                  </SelectItem>
+                ))
+              ) : (
+                <SelectItem value="no-clients" disabled>
+                  Nenhum cliente disponível
                 </SelectItem>
-              ))}
+              )}
             </SelectContent>
           </Select>
         </div>
         <DialogFooter>
           <Button 
             onClick={handleClientLink} 
-            disabled={!selectedClientId || isLinking}
+            disabled={!selectedClientId || isLinking || isLoadingClients}
             className="w-full"
           >
             {isLinking ? (
-              <>Vinculando...</>
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Vinculando...</span>
+              </div>
             ) : (
               <>
                 <Building className="mr-2 h-4 w-4" />

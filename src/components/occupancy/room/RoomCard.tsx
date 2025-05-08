@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { RoomDetailsDialogContent } from './dialogs';
-import { mockClients } from './RoomUtils';
 import { useRoomClientLink } from '@/hooks/occupancy/useRoomClientLink';
 import { ClientLinkDialog } from './dialogs/ClientLinkDialog';
 
@@ -31,7 +30,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
   getClientInfo = (clientId?: string) => {
     if (!clientId) return "Nenhum cliente";
     // In a real app, we would fetch client details here
-    return `Cliente #${clientId.replace('client', '')}`;
+    return `Cliente #${clientId.substring(0, 8)}`;
   },
   onUpdateStatus,
   onLinkClient
@@ -44,6 +43,8 @@ export const RoomCard: React.FC<RoomCardProps> = ({
     isClientLinkDialogOpen,
     selectedClientId,
     isLinking,
+    isLoadingClients,
+    availableClients,
     setSelectedClientId,
     openClientLinkDialog,
     closeClientLinkDialog,
@@ -116,7 +117,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
             onClose={handleCloseDialog}
             onUpdateStatus={onUpdateStatus}
             onLinkClient={onLinkClient}
-            availableClients={mockClients}
+            availableClients={availableClients}
             openLinkDialog={openClientLinkDialog}
           />
         </DialogContent>
@@ -130,7 +131,8 @@ export const RoomCard: React.FC<RoomCardProps> = ({
           selectedRoom={selectedRoom}
           selectedClientId={selectedClientId}
           setSelectedClientId={setSelectedClientId}
-          mockClients={mockClients}
+          availableClients={availableClients}
+          isLoadingClients={isLoadingClients}
           handleClientLink={handleLinkClient}
           isLinking={isLinking}
         />
