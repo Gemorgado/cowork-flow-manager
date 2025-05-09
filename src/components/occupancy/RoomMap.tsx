@@ -5,7 +5,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
-import { updateRoomStatus, linkClientToRoom } from '@/hooks/occupancy/api';
+import { updateRoomStatus, linkClientToRoom, updateRoomDetails } from '@/hooks/occupancy/api';
 import { RoomGrid } from './room/RoomGrid';
 
 interface RoomMapProps {
@@ -57,6 +57,23 @@ export const RoomMap: React.FC<RoomMapProps> = ({
       });
     }
   }, [onRoomsChanged]);
+
+  // Handler for updating room details
+  const handleUpdateRoomDetails = useCallback(async (roomId: string, data: { area?: number, capacity?: number }) => {
+    try {
+      const success = await updateRoomDetails(roomId, data);
+      if (success && onRoomsChanged) {
+        onRoomsChanged();
+      }
+    } catch (error) {
+      console.error("Error updating room details:", error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível atualizar os detalhes da sala.',
+        variant: 'destructive'
+      });
+    }
+  }, [onRoomsChanged]);
   
   // If there are no rooms for this floor, show a message
   if (floorRooms.length === 0) {
@@ -81,6 +98,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({
           rooms={floorRooms} 
           onUpdateStatus={handleUpdateRoomStatus}
           onLinkClient={handleLinkClient}
+          onUpdateRoomDetails={handleUpdateRoomDetails}
         />
       </div>
     </TooltipProvider>

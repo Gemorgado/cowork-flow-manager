@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { OccupancyStats } from '@/components/occupancy/OccupancyStats';
 import { StatusLegend } from '@/components/occupancy/StatusLegend';
@@ -11,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { OccupancyFloorSelector } from '@/components/occupancy/OccupancyFloorSelector';
 import { OccupancyVisualizer } from '@/components/occupancy/visualization/OccupancyVisualizer';
 import { OccupancyVisualizationProvider } from '@/components/occupancy/visualization/OccupancyVisualizationContext';
+
 const Occupancy = () => {
   const {
     currentFloor,
@@ -24,13 +26,21 @@ const Occupancy = () => {
     handleRefresh,
     handleConvertFlexToFixed
   } = useSupabaseOccupancy();
+
   return <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-medium">Mapa de Ocupação</h1>
         <div className="flex items-center gap-2">
           <OccupancyFloorSelector currentFloor={currentFloor} setCurrentFloor={setCurrentFloor} />
-          
-          
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={handleRefresh} 
+            disabled={isRefreshing}
+            className={cn(isRefreshing && "animate-spin")}
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
@@ -56,4 +66,5 @@ const Occupancy = () => {
       {!isLoading ? <OccupancySummary rooms={rooms.filter(room => room.floor === parseInt(currentFloor) as any)} workStations={workStations.filter(station => station.floor === parseInt(currentFloor) as any)} /> : <Skeleton className="h-32" />}
     </div>;
 };
+
 export default Occupancy;

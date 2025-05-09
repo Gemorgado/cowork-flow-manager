@@ -1,3 +1,4 @@
+
 import { Room, LocationStatus } from '@/types';
 import { toast } from '@/components/ui/use-toast';
 import { 
@@ -44,7 +45,7 @@ export async function handleUpdateRoomStatus(
  */
 export async function handleUpdateRoomDetails(
   roomId: string,
-  data: { area?: number, priceClosed?: number },
+  data: { area?: number, capacity?: number },
   onSuccess: () => void
 ): Promise<boolean> {
   try {

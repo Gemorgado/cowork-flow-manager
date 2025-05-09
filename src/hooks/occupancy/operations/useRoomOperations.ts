@@ -33,12 +33,16 @@ export function useRoomOperations(
   }, [setRooms, fetchRooms]);
 
   // Handler for updating room details
-  const updateRoomDetails = useCallback(async (roomId: string, data: { area?: number, priceClosed?: number }) => {
+  const updateRoomDetails = useCallback(async (roomId: string, data: { area?: number, capacity?: number }) => {
     // Update local state optimistically
     setRooms((prevRooms): Room[] => 
       prevRooms.map(room => 
         room.id === roomId 
-          ? { ...room, area: data.area || room.area } 
+          ? { 
+              ...room, 
+              area: data.area !== undefined ? data.area : room.area,
+              capacity: data.capacity !== undefined ? data.capacity : room.capacity
+            } 
           : room
       )
     );

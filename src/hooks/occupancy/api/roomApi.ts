@@ -82,17 +82,20 @@ export async function updateRoomStatus(
 }
 
 /**
- * Updates room details like area and price
+ * Updates room details like area and capacity
  */
 export async function updateRoomDetails(
   roomId: string, 
-  data: { area?: number, priceClosed?: number }
+  data: { area?: number, capacity?: number }
 ): Promise<boolean> {
   try {
     // Type-safe update data
     const updateData: RoomUpdate = {};
     if (data.area !== undefined) {
       updateData.area = data.area;
+    }
+    if (data.capacity !== undefined) {
+      updateData.capacity = data.capacity;
     }
 
     // Validate the data before sending to the database

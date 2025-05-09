@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Room, LocationStatus } from '@/types';
 import {
   DialogHeader,
@@ -17,7 +17,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Building } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Building, Save, Loader2 } from 'lucide-react';
 
 export interface RoomDetailsDialogContentProps {
   room: Room;
@@ -25,6 +26,7 @@ export interface RoomDetailsDialogContentProps {
   onClose?: () => void;
   onUpdateStatus?: (roomId: string, status: LocationStatus) => void;
   onLinkClient?: (roomId: string, clientId: string) => void;
+  onUpdateRoomDetails?: (roomId: string, data: { area?: number, capacity?: number }) => void;
   availableClients?: {id: string, name: string}[];
   openLinkDialog?: (room: Room) => void;
 }
@@ -42,11 +44,24 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
   onClose,
   onUpdateStatus,
   onLinkClient,
+  onUpdateRoomDetails,
   availableClients = [],
   openLinkDialog
 }) => {
   const [selectedClientId, setSelectedClientId] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<LocationStatus>(room.status);
+  const [area, setArea] = useState<number>(room.area);
+  const [capacity, setCapacity] = useState<number>(room.capacity);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Reset form when room changes
+  useEffect(() => {
+    setSelectedStatus(room.status);
+    setArea(room.area);
+    setCapacity(room.capacity);
+    setIsEditing(false);
+  }, [room]);
 
   const handleStatusChange = (status: LocationStatus) => {
     setSelectedStatus(status);
@@ -69,6 +84,31 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
     }
   };
 
+  const handleSaveDetails = async () => {
+    if (!onUpdateRoomDetails) return;
+    
+    setIsSaving(true);
+    try {
+      await onUpdateRoomDetails(room.id, { 
+        area: area,
+        capacity: capacity
+      });
+      setIsEditing(false);
+      toast({
+        title: 'Detalhes atualizados',
+        description: `Informações da sala ${room.number} foram atualizadas.`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível atualizar as informações da sala.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <>
       <DialogHeader>
@@ -81,7 +121,7 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
       <div className="space-y-4 py-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-sm font-medium mb-1">Status</p>
+            <Label htmlFor="status">Status</Label>
             <Select 
               value={selectedStatus} 
               onValueChange={(value) => handleStatusChange(value as LocationStatus)}
@@ -98,25 +138,50 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
             </Select>
           </div>
           <div>
-            <p className="text-sm font-medium mb-1">Cliente</p>
-            <p>{getClientInfo(room.clientId) || 'Nenhum'}</p>
+            <Label htmlFor="client">Cliente</Label>
+            {room.clientId ? (
+              <p className="mt-2">{getClientInfo(room.clientId)}</p>
+            ) : (
+              <p className="text-muted-foreground mt-2">Nenhum cliente vinculado</p>
+            )}
           </div>
           <div>
-            <p className="text-sm font-medium mb-1">Andar</p>
-            <p>{room.floor}º</p>
+            <Label htmlFor="floor">Andar</Label>
+            <p className="mt-2">{room.floor}º</p>
           </div>
           <div>
-            <p className="text-sm font-medium mb-1">Capacidade</p>
-            <p>{room.capacity} pessoas</p>
+            <Label htmlFor="capacity">Capacidade</Label>
+            {isEditing ? (
+              <Input 
+                id="capacity" 
+                type="number" 
+                value={capacity} 
+                onChange={(e) => setCapacity(Number(e.target.value))}
+                className="mt-1"
+              />
+            ) : (
+              <p className="mt-2">{room.capacity} pessoas</p>
+            )}
           </div>
           <div>
-            <p className="text-sm font-medium mb-1">Área</p>
-            <p>{room.area} m²</p>
+            <Label htmlFor="area">Área</Label>
+            {isEditing ? (
+              <Input 
+                id="area" 
+                type="number" 
+                value={area} 
+                onChange={(e) => setArea(Number(e.target.value))}
+                className="mt-1"
+                step="0.01"
+              />
+            ) : (
+              <p className="mt-2">{room.area} m²</p>
+            )}
           </div>
         </div>
 
-        {/* Client linking section */}
-        {!room.clientId && availableClients.length > 0 && (
+        {/* Client selection section */}
+        {!room.clientId && (
           <div className="space-y-4 mt-4 pt-4 border-t">
             <div>
               {openLinkDialog ? (
@@ -129,31 +194,37 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
                   Vincular Empresa
                 </Button>
               ) : (
-                <>
-                  <Label htmlFor="client">Vincular Cliente</Label>
-                  <Select 
-                    value={selectedClientId} 
-                    onValueChange={setSelectedClientId}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione um cliente" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableClients.map((client) => (
-                        <SelectItem key={client.id} value={client.id}>
-                          {client.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button 
-                    onClick={handleLinkClient}
-                    className="mt-2 w-full"
-                    disabled={!selectedClientId}
-                  >
-                    Vincular Cliente
-                  </Button>
-                </>
+                availableClients.length > 0 ? (
+                  <>
+                    <Label htmlFor="client">Vincular Cliente</Label>
+                    <Select 
+                      value={selectedClientId} 
+                      onValueChange={setSelectedClientId}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione um cliente" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableClients.map((client) => (
+                          <SelectItem key={client.id} value={client.id}>
+                            {client.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button 
+                      onClick={handleLinkClient}
+                      className="mt-2 w-full"
+                      disabled={!selectedClientId}
+                    >
+                      Vincular Cliente
+                    </Button>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Nenhum cliente disponível para vincular
+                  </p>
+                )
               )}
             </div>
           </div>
@@ -180,6 +251,37 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
           </div>
         )}
       </div>
+
+      <DialogFooter className="gap-2">
+        {isEditing ? (
+          <>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setArea(room.area);
+                setCapacity(room.capacity);
+                setIsEditing(false);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleSaveDetails}
+              disabled={isSaving}
+            >
+              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Salvar
+            </Button>
+          </>
+        ) : (
+          <Button 
+            onClick={() => setIsEditing(true)}
+            variant="outline"
+          >
+            Editar Informações
+          </Button>
+        )}
+      </DialogFooter>
     </>
   );
 };
