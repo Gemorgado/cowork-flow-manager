@@ -1,10 +1,10 @@
-
 import { useCallback } from 'react';
 import { Room, LocationStatus } from '@/types';
 import { 
   handleUpdateRoomStatus, 
   handleUpdateRoomDetails, 
-  handleLinkClientToRoom 
+  handleLinkClientToRoom,
+  handleUnlinkClientFromRoom
 } from './roomOperations';
 
 export function useRoomOperations(
@@ -88,9 +88,39 @@ export function useRoomOperations(
     }
   }, [setRooms, fetchRooms]);
 
+  // Handler for unlinking a client from a room
+  const unlinkClientFromRoom = useCallback(async (roomId: string) => {
+    console.log(`Unlinking client from room ${roomId}`);
+    
+    // Update local state optimistically 
+    setRooms((prevRooms): Room[] => 
+      prevRooms.map(room => 
+        room.id === roomId 
+          ? { ...room, clientId: undefined, status: 'available' } 
+          : room
+      )
+    );
+    
+    // Make API call
+    const success = await handleUnlinkClientFromRoom(
+      roomId,
+      () => fetchRooms().then(setRooms)
+    );
+    
+    // Revert on failure and refetch to ensure UI is in sync
+    if (!success) {
+      console.log("Failed to unlink client, reverting UI state");
+      fetchRooms().then(setRooms);
+    } else {
+      console.log("Successfully unlinked client, refreshing data");
+      fetchRooms().then(setRooms);
+    }
+  }, [setRooms, fetchRooms]);
+
   return {
     updateRoomStatus,
     updateRoomDetails,
-    linkClientToRoom
+    linkClientToRoom,
+    unlinkClientFromRoom
   };
 }

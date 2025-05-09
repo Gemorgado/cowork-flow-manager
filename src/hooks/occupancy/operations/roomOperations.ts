@@ -1,10 +1,10 @@
-
 import { Room, LocationStatus } from '@/types';
 import { toast } from '@/components/ui/use-toast';
 import { 
   updateRoomStatus as updateRoomStatusApi,
   updateRoomDetails as updateRoomDetailsApi,
-  linkClientToRoom as linkClientToRoomApi
+  linkClientToRoom as linkClientToRoomApi,
+  unlinkClientFromRoom as unlinkClientFromRoomApi
 } from '../api/roomApi';
 
 /**
@@ -102,6 +102,39 @@ export async function handleLinkClientToRoom(
     toast({
       title: 'Erro',
       description: 'Falha ao vincular cliente à sala',
+      variant: 'destructive',
+    });
+    return false;
+  }
+}
+
+/**
+ * Handler for unlinking a client from a room
+ */
+export async function handleUnlinkClientFromRoom(
+  roomId: string,
+  onSuccess: () => void
+): Promise<boolean> {
+  try {
+    console.log(`Unlinking client from room ${roomId}`);
+    const result = await unlinkClientFromRoomApi(roomId);
+    
+    if (result) {
+      toast({
+        title: 'Sucesso',
+        description: 'Cliente desvinculado da sala',
+      });
+      // Ensure we trigger the success callback
+      onSuccess();
+      return true;
+    } else {
+      throw new Error('Falha ao desvincular cliente');
+    }
+  } catch (error: any) {
+    console.error('Error unlinking client from room:', error);
+    toast({
+      title: 'Erro',
+      description: 'Falha ao desvincular cliente da sala',
       variant: 'destructive',
     });
     return false;

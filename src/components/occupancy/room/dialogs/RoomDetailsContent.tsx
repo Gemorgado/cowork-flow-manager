@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Building, Save, Loader2 } from 'lucide-react';
+import { Building, Save, Loader2, Unlink } from 'lucide-react';
 
 export interface RoomDetailsDialogContentProps {
   room: Room;
@@ -26,6 +26,7 @@ export interface RoomDetailsDialogContentProps {
   onClose?: () => void;
   onUpdateStatus?: (roomId: string, status: LocationStatus) => void;
   onLinkClient?: (roomId: string, clientId: string) => void;
+  onUnlinkClient?: (roomId: string) => void;
   onUpdateRoomDetails?: (roomId: string, data: { area?: number, capacity?: number }) => void;
   availableClients?: {id: string, name: string}[];
   openLinkDialog?: (room: Room) => void;
@@ -44,6 +45,7 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
   onClose,
   onUpdateStatus,
   onLinkClient,
+  onUnlinkClient,
   onUpdateRoomDetails,
   availableClients = [],
   openLinkDialog
@@ -54,6 +56,7 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
   const [capacity, setCapacity] = useState<number>(room.capacity);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUnlinking, setIsUnlinking] = useState(false);
 
   // Reset form when room changes
   useEffect(() => {
@@ -81,6 +84,20 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
         title: 'Cliente vinculado',
         description: `Cliente vinculado à sala ${room.number}.`,
       });
+    }
+  };
+
+  const handleUnlinkClient = async () => {
+    if (!onUnlinkClient) return;
+    
+    setIsUnlinking(true);
+    try {
+      await onUnlinkClient(room.id);
+      if (onClose) {
+        onClose();
+      }
+    } finally {
+      setIsUnlinking(false);
     }
   };
 
@@ -236,16 +253,14 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
             <Button 
               variant="destructive" 
               size="sm"
-              onClick={() => {
-                if (onUpdateStatus) {
-                  onUpdateStatus(room.id, 'available');
-                  toast({
-                    title: 'Cliente desvinculado',
-                    description: `Cliente desvinculado da sala ${room.number}.`,
-                  });
-                }
-              }}
+              onClick={handleUnlinkClient}
+              disabled={isUnlinking}
             >
+              {isUnlinking ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Unlink className="mr-2 h-4 w-4" />
+              )}
               Desvincular Cliente
             </Button>
           </div>

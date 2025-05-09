@@ -5,7 +5,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
-import { updateRoomStatus, linkClientToRoom, updateRoomDetails } from '@/hooks/occupancy/api';
+import { updateRoomStatus, linkClientToRoom, unlinkClientFromRoom, updateRoomDetails } from '@/hooks/occupancy/api';
 import { RoomGrid } from './room/RoomGrid';
 
 interface RoomMapProps {
@@ -59,6 +59,24 @@ export const RoomMap: React.FC<RoomMapProps> = ({
     }
   }, [onRoomsChanged]);
 
+  // Handler for client unlinking
+  const handleUnlinkClient = useCallback(async (roomId: string) => {
+    try {
+      const success = await unlinkClientFromRoom(roomId);
+      if (success && onRoomsChanged) {
+        // Ensure UI gets updated after unlinking the client
+        onRoomsChanged();
+      }
+    } catch (error) {
+      console.error("Error unlinking client from room:", error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível desvincular o cliente da sala.',
+        variant: 'destructive'
+      });
+    }
+  }, [onRoomsChanged]);
+
   // Handler for updating room details
   const handleUpdateRoomDetails = useCallback(async (roomId: string, data: { area?: number, capacity?: number }) => {
     try {
@@ -71,7 +89,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({
       toast({
         title: 'Erro',
         description: 'Não foi possível atualizar os detalhes da sala.',
-        variant: 'destructive'
+        variant: 'destructive',
       });
     }
   }, [onRoomsChanged]);
@@ -99,6 +117,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({
           rooms={floorRooms} 
           onUpdateStatus={handleUpdateRoomStatus}
           onLinkClient={handleLinkClient}
+          onUnlinkClient={handleUnlinkClient}
           onUpdateRoomDetails={handleUpdateRoomDetails}
         />
       </div>

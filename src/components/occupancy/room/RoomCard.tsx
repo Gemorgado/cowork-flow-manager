@@ -21,6 +21,7 @@ interface RoomCardProps {
   getClientInfo?: (clientId?: string) => string;
   onUpdateStatus?: (roomId: string, status: Room['status']) => void;
   onLinkClient?: (roomId: string, clientId: string) => void;
+  onUnlinkClient?: (roomId: string) => void;
   onUpdateRoomDetails?: (roomId: string, data: { area?: number, capacity?: number }) => void;
 }
 
@@ -35,6 +36,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
   },
   onUpdateStatus,
   onLinkClient,
+  onUnlinkClient,
   onUpdateRoomDetails
 }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -61,6 +63,14 @@ export const RoomCard: React.FC<RoomCardProps> = ({
 
   const handleCloseDialog = () => {
     setShowDialog(false);
+  };
+
+  const handleUnlinkClient = (roomId: string) => {
+    if (onUnlinkClient) {
+      onUnlinkClient(roomId);
+      // Close the dialog when the operation completes
+      setShowDialog(false);
+    }
   };
 
   return (
@@ -121,6 +131,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
             onClose={handleCloseDialog}
             onUpdateStatus={onUpdateStatus}
             onLinkClient={onLinkClient}
+            onUnlinkClient={handleUnlinkClient}
             onUpdateRoomDetails={onUpdateRoomDetails}
             availableClients={availableClients}
             openLinkDialog={openClientLinkDialog}

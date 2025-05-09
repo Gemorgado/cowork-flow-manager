@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Room, LocationStatus } from '@/types';
 import { toast } from '@/components/ui/use-toast';
@@ -154,6 +153,42 @@ export async function linkClientToRoom(
     toast({
       title: 'Error',
       description: `Failed to link client to room: ${error.message || 'Unknown error'}`,
+      variant: 'destructive',
+    });
+    return false;
+  }
+}
+
+/**
+ * Unlinks a client from a room and sets its status to available
+ */
+export async function unlinkClientFromRoom(
+  roomId: string
+): Promise<boolean> {
+  try {
+    if (!roomId) {
+      throw new Error('Room ID is required');
+    }
+
+    const updateData: RoomUpdate = { 
+      status: 'available',
+      client_id: null 
+    };
+
+    const { error } = await supabase
+      .from('rooms')
+      .update(updateData)
+      .eq('id', roomId);
+
+    if (error) {
+      throw error;
+    }
+    return true;
+  } catch (error: any) {
+    console.error('Error unlinking client from room:', error);
+    toast({
+      title: 'Error',
+      description: `Failed to unlink client from room: ${error.message || 'Unknown error'}`,
       variant: 'destructive',
     });
     return false;
