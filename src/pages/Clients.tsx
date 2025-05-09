@@ -15,7 +15,7 @@ import DeleteClientDialog from '@/components/clients/DeleteClientDialog';
 import useClientForm from '@/hooks/useClientForm';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { fetchClients } from '@/utils/supabaseClients';
+import { fetchClients } from '@/utils/clients';
 
 const EMPTY_CLIENT = {
   companyName: '',
@@ -64,7 +64,9 @@ const Clients = () => {
     const loadClients = async () => {
       setLoading(true);
       try {
+        console.log('Fetching clients from Supabase...');
         const clientsData = await fetchClients();
+        console.log('Clients fetched successfully:', clientsData);
         setClients(clientsData);
       } catch (error) {
         console.error('Error loading clients:', error);
@@ -79,6 +81,7 @@ const Clients = () => {
 
   // Reset form data when opening the add client dialog
   const handleOpenAddDialog = () => {
+    console.log('Opening add client dialog...');
     // Completely reset the form data with empty values
     setFormData({
       ...EMPTY_CLIENT
@@ -129,9 +132,7 @@ const Clients = () => {
         handleInputChange={handleInputChange}
         handleDateChange={handleDateChange}
         handleServiceChange={handleServiceChange}
-        handleAddClient={() => {
-          handleAddClient();
-        }}
+        handleAddClient={handleAddClient}
       />
 
       {/* Edit Client Dialog */}
@@ -142,9 +143,7 @@ const Clients = () => {
         handleInputChange={handleInputChange}
         handleDateChange={handleDateChange}
         handleServiceChange={handleServiceChange}
-        handleEditClient={() => {
-          handleEditClient();
-        }}
+        handleEditClient={handleEditClient}
       />
 
       {/* Delete Client Dialog */}
@@ -152,9 +151,7 @@ const Clients = () => {
         isOpen={isDeleteClientOpen}
         onOpenChange={setIsDeleteClientOpen}
         selectedClient={selectedClient}
-        onDelete={() => {
-          handleDeleteClient();
-        }}
+        onDelete={handleDeleteClient}
       />
     </div>
   );

@@ -45,6 +45,7 @@ const useClientForm = ({ clients, setClients }: UseClientFormProps) => {
 
   // Enhanced open edit dialog function that also sets the form data
   const openEditDialog = (client: Client) => {
+    console.log('Opening edit dialog for client:', client);
     // Set selected client
     setSelectedClient(client);
     
@@ -54,13 +55,26 @@ const useClientForm = ({ clients, setClients }: UseClientFormProps) => {
   
   // Enhanced open delete dialog
   const openDeleteDialog = (client: Client) => {
+    console.log('Opening delete dialog for client:', client);
     setSelectedClient(client);
     openDeleteDialogBase(client);
   };
 
-  const handleAddClient = () => addClient(formData);
-  const handleEditClient = () => editClient(formData, selectedClient);
-  const handleDeleteClient = () => deleteClient(selectedClient);
+  const handleAddClient = () => {
+    console.log('Handling add client with form data:', formData);
+    addClient(formData);
+  };
+
+  const handleEditClient = () => {
+    console.log('Handling edit client with form data:', formData);
+    console.log('Selected client:', selectedClient);
+    editClient(formData, selectedClient);
+  };
+
+  const handleDeleteClient = () => {
+    console.log('Handling delete client:', selectedClient);
+    deleteClient(selectedClient);
+  };
 
   return {
     formData,

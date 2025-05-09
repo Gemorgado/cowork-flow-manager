@@ -9,6 +9,7 @@ import { addClientServices, fetchClientServices, updateClientServices } from './
 // Fetch all clients from Supabase
 export const fetchClients = async (): Promise<Client[]> => {
   try {
+    console.log('Fetching clients from database...');
     const { data: dbClients, error: clientsError } = await supabase
       .from('clients')
       .select('*')
@@ -19,6 +20,8 @@ export const fetchClients = async (): Promise<Client[]> => {
       toast.error('Erro ao carregar clientes');
       return [];
     }
+
+    console.log('Clients fetched successfully:', dbClients);
 
     // Fetch client services with service details
     const { data: dbClientServices, error: servicesError } = await supabase
@@ -35,6 +38,8 @@ export const fetchClients = async (): Promise<Client[]> => {
       toast.error('Erro ao carregar serviços dos clientes');
       return [];
     }
+
+    console.log('Client services fetched successfully:', dbClientServices);
 
     // Group client services by client_id
     const clientServicesMap = dbClientServices?.reduce<Record<string, ClientServiceFromDB[]>>((acc, cs) => {
@@ -59,6 +64,7 @@ export const fetchClients = async (): Promise<Client[]> => {
 // Fetch client by ID
 export const fetchClientById = async (clientId: string): Promise<Client | null> => {
   try {
+    console.log(`Fetching client with ID: ${clientId}`);
     const { data: dbClient, error: clientError } = await supabase
       .from('clients')
       .select('*')
@@ -73,6 +79,7 @@ export const fetchClientById = async (clientId: string): Promise<Client | null> 
 
     // Fetch client services
     const dbClientServices = await fetchClientServices(clientId);
+    console.log(`Client services for ID ${clientId}:`, dbClientServices);
 
     return mapClientFromDB(dbClient as ClientFromDB, dbClientServices as ClientServiceFromDB[]);
   } catch (error) {
@@ -85,6 +92,7 @@ export const fetchClientById = async (clientId: string): Promise<Client | null> 
 // Add a new client to Supabase
 export const addClient = async (client: Omit<Client, 'id'>): Promise<Client | null> => {
   try {
+    console.log('Adding new client to database:', client);
     // Prepare client data for DB
     const dbClient = mapClientToDB({ ...client, id: '' });
     delete (dbClient as any).id; // Remove empty ID for auto-generation
@@ -102,8 +110,11 @@ export const addClient = async (client: Omit<Client, 'id'>): Promise<Client | nu
       return null;
     }
 
+    console.log('Client inserted successfully:', insertedClient);
+
     // If client has services, add them
     if (client.services && client.services.length > 0) {
+      console.log('Adding client services:', client.services);
       await addClientServices(insertedClient.id, client.services);
     }
 
@@ -119,6 +130,7 @@ export const addClient = async (client: Omit<Client, 'id'>): Promise<Client | nu
 // Update existing client
 export const updateClient = async (client: Client): Promise<Client | null> => {
   try {
+    console.log('Updating client in database:', client);
     // Prepare client data for DB
     const dbClient = mapClientToDB(client);
 
@@ -134,8 +146,11 @@ export const updateClient = async (client: Client): Promise<Client | null> => {
       return null;
     }
 
+    console.log('Client updated successfully');
+
     // Update client services
     if (client.services && client.services.length > 0) {
+      console.log('Updating client services:', client.services);
       const success = await updateClientServices(client.id, client.services);
       if (!success) return null;
     }
@@ -152,6 +167,7 @@ export const updateClient = async (client: Client): Promise<Client | null> => {
 // Delete client
 export const deleteClient = async (clientId: string): Promise<boolean> => {
   try {
+    console.log(`Deleting client with ID: ${clientId}`);
     // Delete client - related services will be cascaded due to foreign key constraints
     const { error } = await supabase
       .from('clients')
@@ -164,6 +180,7 @@ export const deleteClient = async (clientId: string): Promise<boolean> => {
       return false;
     }
 
+    console.log('Client deleted successfully');
     return true;
   } catch (error) {
     console.error('Unexpected error deleting client:', error);

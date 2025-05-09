@@ -31,6 +31,11 @@ const EditClientDialog = ({
   handleServiceChange,
   handleEditClient,
 }: EditClientDialogProps) => {
+  const onSubmit = () => {
+    console.log('EditClientDialog: Submitting edit...');
+    handleEditClient();
+  };
+  
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto">
@@ -46,13 +51,13 @@ const EditClientDialog = ({
           handleInputChange={handleInputChange}
           handleDateChange={handleDateChange}
           handleServiceChange={handleServiceChange}
-          isEditing
+          isEditing={true}
         />
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button onClick={handleEditClient}>Salvar</Button>
+          <Button onClick={onSubmit}>Salvar</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

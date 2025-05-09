@@ -10,6 +10,8 @@ interface ClientFormProps {
   handleDateChange: (field: 'startDate' | 'endDate', date: Date | undefined) => void;
   handleServiceChange: (serviceId: string, locationIds: string[]) => void;
   isEditing?: boolean;
+  onSubmit?: () => void;
+  onCancel?: () => void;
 }
 
 const ClientForm = ({
@@ -19,6 +21,8 @@ const ClientForm = ({
   handleDateChange,
   handleServiceChange,
   isEditing = false,
+  onSubmit,
+  onCancel,
 }: ClientFormProps) => {
   return (
     <ClientFormContent
