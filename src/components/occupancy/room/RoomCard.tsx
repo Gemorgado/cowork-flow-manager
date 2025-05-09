@@ -75,7 +75,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
 
   return (
     <>
-      <Dialog key={`room-${room.id}`} open={showDialog} onOpenChange={setShowDialog}>
+      <Dialog key={`room-dialog-${room.id}`} open={showDialog} onOpenChange={setShowDialog}>
         <Tooltip>
           <TooltipTrigger asChild>
             <DialogTrigger asChild>

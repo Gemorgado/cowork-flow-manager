@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Room, LocationStatus } from '@/types';
 import { toast } from '@/components/ui/use-toast';
@@ -166,6 +167,8 @@ export async function unlinkClientFromRoom(
   roomId: string
 ): Promise<boolean> {
   try {
+    console.log('Attempting to unlink client from room:', roomId);
+    
     if (!roomId) {
       throw new Error('Room ID is required');
     }
@@ -175,10 +178,15 @@ export async function unlinkClientFromRoom(
       client_id: null 
     };
 
-    const { error } = await supabase
+    console.log('Sending update to Supabase:', updateData);
+    
+    const { data, error } = await supabase
       .from('rooms')
       .update(updateData)
-      .eq('id', roomId);
+      .eq('id', roomId)
+      .select();
+      
+    console.log('Unlink response:', { data, error });
 
     if (error) {
       throw error;

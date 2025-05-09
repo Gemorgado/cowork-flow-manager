@@ -40,7 +40,7 @@ export const RoomGrid: React.FC<RoomGridProps> = ({
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3">
       {rooms.map((room) => (
         <RoomCard
-          key={`${room.id}-${room.status}-${room.clientId || 'no-client'}`}
+          key={room.id} // Usar apenas o ID para manter a ordem
           room={room}
           hoveredRoomId={hoveredRoomId}
           setHoveredRoomId={setHoveredRoomId}
