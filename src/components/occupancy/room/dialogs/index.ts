@@ -8,3 +8,4 @@ export * from './room-details/RoomBasicInfo';
 export * from './room-details/RoomClientActions';
 export * from './room-details/RoomEditFooter';
 export * from './statusUtils';
+export * from './client-link';
