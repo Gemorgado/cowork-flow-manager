@@ -26,7 +26,7 @@ export function useRoomOperations(
       fetchRooms().then(setRooms);
     });
     
-    // Revert on failure
+    // Revert on failure and refetch to ensure UI is in sync
     if (!success) {
       fetchRooms().then(setRooms);
     }
@@ -52,7 +52,7 @@ export function useRoomOperations(
       fetchRooms().then(setRooms);
     });
     
-    // Revert on failure
+    // Revert on failure and refetch to ensure UI is in sync
     if (!success) {
       fetchRooms().then(setRooms);
     }
@@ -60,7 +60,9 @@ export function useRoomOperations(
 
   // Handler for linking a client to a room
   const linkClientToRoom = useCallback(async (roomId: string, clientId: string) => {
-    // Update local state optimistically
+    console.log(`Linking client ${clientId} to room ${roomId}`);
+    
+    // Update local state optimistically 
     setRooms((prevRooms): Room[] => 
       prevRooms.map(room => 
         room.id === roomId 
@@ -76,8 +78,12 @@ export function useRoomOperations(
       () => fetchRooms().then(setRooms)
     );
     
-    // Revert on failure
+    // Revert on failure and refetch to ensure UI is in sync
     if (!success) {
+      console.log("Failed to link client, reverting UI state");
+      fetchRooms().then(setRooms);
+    } else {
+      console.log("Successfully linked client, refreshing data");
       fetchRooms().then(setRooms);
     }
   }, [setRooms, fetchRooms]);

@@ -17,6 +17,7 @@ export async function handleUpdateRoomStatus(
   onSuccess: () => void
 ): Promise<boolean> {
   try {
+    console.log(`Updating room ${roomId} status to ${status}`);
     const result = await updateRoomStatusApi(roomId, status, clientId);
     
     if (result) {
@@ -49,6 +50,7 @@ export async function handleUpdateRoomDetails(
   onSuccess: () => void
 ): Promise<boolean> {
   try {
+    console.log(`Updating room ${roomId} details:`, data);
     const result = await updateRoomDetailsApi(roomId, data);
     
     if (result) {
@@ -81,6 +83,7 @@ export async function handleLinkClientToRoom(
   onSuccess: () => void
 ): Promise<boolean> {
   try {
+    console.log(`Linking client ${clientId} to room ${roomId}`);
     const result = await linkClientToRoomApi(roomId, clientId);
     
     if (result) {
@@ -88,6 +91,7 @@ export async function handleLinkClientToRoom(
         title: 'Sucesso',
         description: 'Cliente vinculado à sala',
       });
+      // Ensure we trigger the success callback
       onSuccess();
       return true;
     } else {

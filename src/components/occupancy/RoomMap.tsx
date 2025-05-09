@@ -46,6 +46,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({
     try {
       const success = await linkClientToRoom(roomId, clientId);
       if (success && onRoomsChanged) {
+        // Ensure UI gets updated after linking the client
         onRoomsChanged();
       }
     } catch (error) {

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Room } from '@/types';
 import { statusColors, statusLabels } from '../StatusLegend';
@@ -54,6 +54,8 @@ export const RoomCard: React.FC<RoomCardProps> = ({
   } = useRoomClientLink(() => {
     if (onLinkClient && selectedClientId && selectedRoom) {
       onLinkClient(selectedRoom.id, selectedClientId);
+      // Close the dialog when the operation completes
+      setShowDialog(false);
     }
   });
 
@@ -63,7 +65,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
 
   return (
     <>
-      <Dialog key={room.id} open={showDialog} onOpenChange={setShowDialog}>
+      <Dialog key={`room-${room.id}`} open={showDialog} onOpenChange={setShowDialog}>
         <Tooltip>
           <TooltipTrigger asChild>
             <DialogTrigger asChild>

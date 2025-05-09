@@ -20,16 +20,23 @@ export const RoomGrid: React.FC<RoomGridProps> = ({
 }) => {
   const [hoveredRoomId, setHoveredRoomId] = useState<string | null>(null);
 
+  // Function to handle client linking with proper UI update
+  const handleLinkClient = (roomId: string, clientId: string) => {
+    if (onLinkClient) {
+      onLinkClient(roomId, clientId);
+    }
+  };
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3">
       {rooms.map((room) => (
         <RoomCard
-          key={room.id}
+          key={`${room.id}-${room.status}-${room.clientId || 'no-client'}`}
           room={room}
           hoveredRoomId={hoveredRoomId}
           setHoveredRoomId={setHoveredRoomId}
           onUpdateStatus={onUpdateStatus}
-          onLinkClient={onLinkClient}
+          onLinkClient={handleLinkClient}
           onUpdateRoomDetails={onUpdateRoomDetails}
           getClientInfo={getClientInfo}
         />
