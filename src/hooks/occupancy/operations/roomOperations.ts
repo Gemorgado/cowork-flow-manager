@@ -118,6 +118,8 @@ export async function handleUnlinkClientFromRoom(
 ): Promise<boolean> {
   try {
     console.log(`Unlinking client from room ${roomId}`);
+    
+    // Call the API to unlink the client and set room to available
     const result = await unlinkClientFromRoomApi(roomId);
     
     if (result) {
@@ -125,7 +127,9 @@ export async function handleUnlinkClientFromRoom(
         title: 'Sucesso',
         description: 'Cliente desvinculado da sala',
       });
-      // Ensure we trigger the success callback
+      
+      // Important: ensure the success callback is triggered
+      console.log("Unlink successful, calling onSuccess callback");
       onSuccess();
       return true;
     } else {

@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { Room, LocationStatus } from '@/types';
 import { 
@@ -104,15 +105,15 @@ export function useRoomOperations(
     // Make API call
     const success = await handleUnlinkClientFromRoom(
       roomId,
-      () => fetchRooms().then(setRooms)
+      () => {
+        console.log("Successfully unlinked client, refreshing data");
+        fetchRooms().then(setRooms);
+      }
     );
     
     // Revert on failure and refetch to ensure UI is in sync
     if (!success) {
       console.log("Failed to unlink client, reverting UI state");
-      fetchRooms().then(setRooms);
-    } else {
-      console.log("Successfully unlinked client, refreshing data");
       fetchRooms().then(setRooms);
     }
   }, [setRooms, fetchRooms]);

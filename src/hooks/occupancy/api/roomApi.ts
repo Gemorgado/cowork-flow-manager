@@ -173,9 +173,10 @@ export async function unlinkClientFromRoom(
       throw new Error('Room ID is required');
     }
 
+    // Type-safe update data to ensure both status and client_id are correctly set
     const updateData: RoomUpdate = { 
-      status: 'available',
-      client_id: null 
+      status: 'available', // Set status to available
+      client_id: null      // Remove client association
     };
 
     console.log('Sending update to Supabase:', updateData);
@@ -189,8 +190,11 @@ export async function unlinkClientFromRoom(
     console.log('Unlink response:', { data, error });
 
     if (error) {
+      console.error('Supabase error unlinking client:', error);
       throw error;
     }
+    
+    console.log('Unlink successful, room updated:', data);
     return true;
   } catch (error: any) {
     console.error('Error unlinking client from room:', error);
