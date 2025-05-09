@@ -75,6 +75,7 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
   };
 
   const handleUnlinkClient = async () => {
+    console.log("handleUnlinkClient")
     if (!onUnlinkClient) return;
     
     setIsUnlinking(true);
