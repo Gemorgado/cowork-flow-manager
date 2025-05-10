@@ -83,9 +83,9 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
   return (
     <div className="mb-8 overflow-x-auto">
       {stationRows.map((row, rowIndex) => (
-        <div key={rowIndex} className="flex gap-4 mb-4 justify-center">
+        <div key={`row-${rowIndex}-${currentFloor}`} className="flex gap-4 mb-4 justify-center">
           {row.map(station => (
-            <Dialog key={station.id}>
+            <Dialog key={`station-${station.id}`}>
               <div className="flex flex-col items-center">
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -94,7 +94,7 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
                         className={cn(
                           "w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center relative",
                           getStationStatusStyles(station.status),
-                          "transition-all duration-200 hover:scale-105"
+                          "transition-all duration-150 hover:scale-105"
                         )}
                         aria-label={`Estação ${station.number}`}
                       >
