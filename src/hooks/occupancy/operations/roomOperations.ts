@@ -1,3 +1,4 @@
+
 import { Room, LocationStatus } from '@/types';
 import { toast } from '@/components/ui/use-toast';
 import { 
@@ -18,7 +19,11 @@ export async function handleUpdateRoomStatus(
 ): Promise<boolean> {
   try {
     console.log(`Updating room ${roomId} status to ${status}, clientId: ${clientId}`);
-    const result = await updateRoomStatusApi(roomId, status, clientId);
+    
+    // If setting to available, always pass null for clientId to ensure unlinking
+    const effectiveClientId = status === 'available' ? null : clientId;
+    
+    const result = await updateRoomStatusApi(roomId, status, effectiveClientId);
     
     if (result) {
       console.log("Room status update API call succeeded");

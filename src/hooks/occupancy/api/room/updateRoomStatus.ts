@@ -18,8 +18,13 @@ export async function updateRoomStatus(
     // Type-safe update data
     const updateData: RoomUpdate = { status };
     
+    // If setting to available status, automatically unlink client
+    if (status === 'available') {
+      updateData.client_id = null;
+      console.log('Setting room to available, automatically unlinking client');
+    }
     // Only update client_id if it's explicitly provided (including null)
-    if (clientId !== undefined) {
+    else if (clientId !== undefined) {
       updateData.client_id = clientId;
     }
 
