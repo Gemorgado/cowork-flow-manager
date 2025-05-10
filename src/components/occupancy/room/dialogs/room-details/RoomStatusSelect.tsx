@@ -20,14 +20,21 @@ export const RoomStatusSelect: React.FC<RoomStatusSelectProps> = ({
   selectedStatus,
   onStatusChange
 }) => {
+  console.log('RoomStatusSelect rendering with status:', selectedStatus);
+  
+  const handleStatusChange = (value: string) => {
+    console.log('Status changing to:', value);
+    onStatusChange(value as LocationStatus);
+  };
+  
   return (
     <div>
       <Label htmlFor="status">Status</Label>
       <Select 
         value={selectedStatus} 
-        onValueChange={(value) => onStatusChange(value as LocationStatus)}
+        onValueChange={handleStatusChange}
       >
-        <SelectTrigger>
+        <SelectTrigger id="status">
           <SelectValue placeholder={statusLabels[selectedStatus] || selectedStatus} />
         </SelectTrigger>
         <SelectContent>

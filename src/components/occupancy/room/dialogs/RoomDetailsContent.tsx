@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Room, LocationStatus } from '@/types';
 import { toast } from '@/components/ui/use-toast';
@@ -39,6 +40,7 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
 
   // Reset form when room changes
   useEffect(() => {
+    console.log('RoomDetailsContent: Room updated, resetting form state', room);
     setSelectedStatus(room.status);
     setArea(room.area);
     setCapacity(room.capacity);
@@ -50,10 +52,11 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
   const handleStatusChange = async (status: LocationStatus) => {
     if (!onUpdateStatus) return;
     
+    console.log(`RoomDetailsContent: Changing room ${room.id} status from ${selectedStatus} to ${status}`);
     setSelectedStatus(status);
-    console.log(`Changing room ${room.id} status to ${status}`);
     
     try {
+      // Call the update function passed from parent
       await onUpdateStatus(room.id, status);
       toast({
         title: 'Status atualizado',

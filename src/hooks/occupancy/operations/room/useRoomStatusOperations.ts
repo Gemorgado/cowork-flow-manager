@@ -22,7 +22,7 @@ export function useRoomStatusOperations(
       // Update local state optimistically - maintain room order by sorting after update
       setRooms((prevRooms): Room[] => {
         const updatedRooms = prevRooms.map(room => 
-          room.id === roomId ? { ...room, status, clientId } : room
+          room.id === roomId ? { ...room, status, clientId: clientId !== undefined ? clientId : room.clientId } : room
         );
         
         // Sort rooms by floor and then by room number
@@ -56,6 +56,8 @@ export function useRoomStatusOperations(
           setRooms(sortedRooms);
         });
       }
+      
+      return success;
     } catch (error) {
       console.error("Error in updateRoomStatus:", error);
       fetchRooms().then(rooms => {
@@ -65,6 +67,7 @@ export function useRoomStatusOperations(
         });
         setRooms(sortedRooms);
       });
+      return false;
     } finally {
       setIsUpdatingStatus(false);
     }

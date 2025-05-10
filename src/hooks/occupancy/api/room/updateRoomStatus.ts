@@ -34,6 +34,8 @@ export async function updateRoomStatus(
     if (error) {
       throw error;
     }
+    
+    console.log('Room status updated successfully in API');
     return true;
   } catch (error: any) {
     console.error('Error updating room:', error);

@@ -1,4 +1,3 @@
-
 import { Room, LocationStatus } from '@/types';
 import { toast } from '@/components/ui/use-toast';
 import { 
@@ -22,6 +21,7 @@ export async function handleUpdateRoomStatus(
     const result = await updateRoomStatusApi(roomId, status, clientId);
     
     if (result) {
+      console.log("Room status update API call succeeded");
       toast({
         title: 'Sucesso',
         description: 'Status da sala atualizado',

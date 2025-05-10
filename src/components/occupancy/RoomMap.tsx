@@ -1,3 +1,4 @@
+
 import React, { useCallback } from 'react';
 import { Room, LocationStatus } from '@/types';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -25,14 +26,16 @@ export const RoomMap: React.FC<RoomMapProps> = ({
     try {
       console.log(`RoomMap.handleUpdateRoomStatus - roomId: ${roomId}, status: ${status}`);
       
-      // If status is 'available', we remove client association
-      const clientId = status === 'available' ? null : undefined;
+      // Make the API call to update room status
+      const success = await updateRoomStatus(roomId, status);
+      console.log(`RoomMap: Status update API call result: ${success}`);
       
-      const success = await updateRoomStatus(roomId, status, clientId);
       if (success && onRoomsChanged) {
         console.log("Room status updated successfully, refreshing UI");
         onRoomsChanged();
       }
+      
+      return success;
     } catch (error) {
       console.error("Error updating room status:", error);
       toast({
@@ -40,6 +43,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({
         description: 'Não foi possível atualizar o status da sala.',
         variant: 'destructive'
       });
+      return false;
     }
   }, [onRoomsChanged]);
 
@@ -53,6 +57,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({
         console.log("Client linked successfully, refreshing UI");
         onRoomsChanged();
       }
+      return success;
     } catch (error) {
       console.error("Error linking client to room:", error);
       toast({
@@ -60,6 +65,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({
         description: 'Não foi possível vincular o cliente à sala.',
         variant: 'destructive'
       });
+      return false;
     }
   }, [onRoomsChanged]);
 
@@ -75,8 +81,9 @@ export const RoomMap: React.FC<RoomMapProps> = ({
         // Use setTimeout to ensure the database has processed the changes
         setTimeout(() => {
           onRoomsChanged();
-        }, 300);
+        }, 500);
       }
+      return success;
     } catch (error) {
       console.error("Error unlinking client from room:", error);
       toast({
@@ -84,6 +91,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({
         description: 'Não foi possível desvincular o cliente da sala.',
         variant: 'destructive'
       });
+      return false;
     }
   }, [onRoomsChanged]);
 
@@ -96,6 +104,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({
         console.log("Room details updated successfully, refreshing UI");
         onRoomsChanged();
       }
+      return success;
     } catch (error) {
       console.error("Error updating room details:", error);
       toast({
@@ -103,6 +112,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({
         description: 'Não foi possível atualizar os detalhes da sala.',
         variant: 'destructive',
       });
+      return false;
     }
   }, [onRoomsChanged]);
   

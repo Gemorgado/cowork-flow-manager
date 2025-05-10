@@ -92,7 +92,7 @@ export const RoomClientActions: React.FC<RoomClientActionsProps> = ({
           value={selectedClientId} 
           onValueChange={setSelectedClientId}
         >
-          <SelectTrigger>
+          <SelectTrigger id="client">
             <SelectValue placeholder="Selecione um cliente" />
           </SelectTrigger>
           <SelectContent>

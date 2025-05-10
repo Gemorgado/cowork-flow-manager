@@ -61,7 +61,26 @@ export const RoomCard: React.FC<RoomCardProps> = ({
   });
 
   const handleCloseDialog = () => {
+    console.log("RoomCard: Closing dialog");
     setShowDialog(false);
+  };
+
+  const handleUpdateStatus = async (roomId: string, status: Room['status']) => {
+    console.log(`RoomCard.handleUpdateStatus - roomId: ${roomId}, status: ${status}`);
+    if (onUpdateStatus) {
+      try {
+        const success = await onUpdateStatus(roomId, status);
+        if (success) {
+          console.log("Status updated successfully");
+          // Close dialog on success (optional)
+          // setShowDialog(false);
+        }
+      } catch (error) {
+        console.error("Error in handleUpdateStatus:", error);
+      }
+    } else {
+      console.warn("onUpdateStatus callback is not defined");
+    }
   };
 
   const handleUnlinkClient = async (roomId: string) => {
@@ -140,7 +159,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
             room={room} 
             getClientInfo={getClientInfo} 
             onClose={handleCloseDialog}
-            onUpdateStatus={onUpdateStatus}
+            onUpdateStatus={handleUpdateStatus}
             onLinkClient={onLinkClient}
             onUnlinkClient={handleUnlinkClient}
             onUpdateRoomDetails={onUpdateRoomDetails}
