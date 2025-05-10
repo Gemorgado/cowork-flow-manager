@@ -1,3 +1,3 @@
 
-export * from './roomApi';
+export * from './room';
 export * from './workstationApi';
