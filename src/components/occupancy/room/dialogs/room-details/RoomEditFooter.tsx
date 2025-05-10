@@ -25,11 +25,14 @@ export const RoomEditFooter: React.FC<RoomEditFooterProps> = ({
         <Button 
           variant="outline" 
           onClick={onCancel}
+          type="button"
+          disabled={isSaving}
         >
           Cancelar
         </Button>
         <Button 
           onClick={onSave}
+          type="button"
           disabled={isSaving}
         >
           {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -44,6 +47,7 @@ export const RoomEditFooter: React.FC<RoomEditFooterProps> = ({
       <Button 
         onClick={onStartEditing}
         variant="outline"
+        type="button"
       >
         Editar Informações
       </Button>

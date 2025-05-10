@@ -35,6 +35,7 @@ export const RoomBasicInfo: React.FC<RoomBasicInfoProps> = ({
             value={capacity} 
             onChange={(e) => onCapacityChange(Number(e.target.value))}
             className="mt-1"
+            min="0"
           />
         ) : (
           <p className="mt-2">{capacity} pessoas</p>
@@ -50,6 +51,7 @@ export const RoomBasicInfo: React.FC<RoomBasicInfoProps> = ({
             onChange={(e) => onAreaChange(Number(e.target.value))}
             className="mt-1"
             step="0.01"
+            min="0"
           />
         ) : (
           <p className="mt-2">{area} m²</p>
