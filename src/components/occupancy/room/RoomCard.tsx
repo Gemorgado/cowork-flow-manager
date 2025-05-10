@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Room } from '@/types';
 import { statusColors, statusLabels } from '../StatusLegend';
@@ -65,17 +64,25 @@ export const RoomCard: React.FC<RoomCardProps> = ({
     setShowDialog(false);
   };
 
-  const handleUnlinkClient = (roomId: string) => {
+  const handleUnlinkClient = async (roomId: string) => {
+    console.log(`RoomCard.handleUnlinkClient - roomId: ${roomId}`);
     if (onUnlinkClient) {
-      onUnlinkClient(roomId);
-      // Close the dialog when the operation completes
-      setShowDialog(false);
+      try {
+        await onUnlinkClient(roomId);
+        // Close the dialog when the operation completes
+        setShowDialog(false);
+      } catch (error) {
+        console.error("Error in handleUnlinkClient:", error);
+      }
     }
   };
 
+  // Using the room's ID as key keeps component in the same position after updates
+  const dialogKey = `room-dialog-${room.id}`;
+
   return (
     <>
-      <Dialog key={`room-dialog-${room.id}`} open={showDialog} onOpenChange={setShowDialog}>
+      <Dialog key={dialogKey} open={showDialog} onOpenChange={setShowDialog}>
         <Tooltip>
           <TooltipTrigger asChild>
             <DialogTrigger asChild>

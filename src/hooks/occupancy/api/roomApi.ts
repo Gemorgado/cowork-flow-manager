@@ -52,19 +52,26 @@ export async function fetchRooms(): Promise<Room[]> {
 export async function updateRoomStatus(
   roomId: string, 
   status: LocationStatus, 
-  clientId?: string
+  clientId?: string | null
 ): Promise<boolean> {
   try {
+    console.log(`API call: updateRoomStatus - roomId=${roomId}, status=${status}, clientId=${clientId}`);
+    
     // Type-safe update data
     const updateData: RoomUpdate = { status };
+    
+    // Only update client_id if it's explicitly provided (including null)
     if (clientId !== undefined) {
-      updateData.client_id = clientId || null;
+      updateData.client_id = clientId;
     }
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('rooms')
       .update(updateData)
-      .eq('id', roomId);
+      .eq('id', roomId)
+      .select();
+    
+    console.log('Update room status response:', { data, error });
 
     if (error) {
       throw error;
@@ -89,6 +96,8 @@ export async function updateRoomDetails(
   data: { area?: number, capacity?: number }
 ): Promise<boolean> {
   try {
+    console.log(`API call: updateRoomDetails - roomId=${roomId}, data=`, data);
+    
     // Type-safe update data
     const updateData: RoomUpdate = {};
     if (data.area !== undefined) {
@@ -103,10 +112,13 @@ export async function updateRoomDetails(
       throw new Error('No valid room details provided for update');
     }
 
-    const { error } = await supabase
+    const { data: responseData, error } = await supabase
       .from('rooms')
       .update(updateData)
-      .eq('id', roomId);
+      .eq('id', roomId)
+      .select();
+    
+    console.log('Update room details response:', { responseData, error });
 
     if (error) {
       throw error;
@@ -131,6 +143,8 @@ export async function linkClientToRoom(
   clientId: string
 ): Promise<boolean> {
   try {
+    console.log(`API call: linkClientToRoom - roomId=${roomId}, clientId=${clientId}`);
+    
     if (!roomId || !clientId) {
       throw new Error('Room ID and Client ID are required');
     }
@@ -140,10 +154,13 @@ export async function linkClientToRoom(
       client_id: clientId 
     };
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('rooms')
       .update(updateData)
-      .eq('id', roomId);
+      .eq('id', roomId)
+      .select();
+    
+    console.log('Link client to room response:', { data, error });
 
     if (error) {
       throw error;
@@ -167,7 +184,7 @@ export async function unlinkClientFromRoom(
   roomId: string
 ): Promise<boolean> {
   try {
-    console.log('Attempting to unlink client from room:', roomId);
+    console.log(`API call: unlinkClientFromRoom - roomId=${roomId}`);
     
     if (!roomId) {
       throw new Error('Room ID is required');
@@ -175,11 +192,11 @@ export async function unlinkClientFromRoom(
 
     // Type-safe update data to ensure both status and client_id are correctly set
     const updateData: RoomUpdate = { 
-      status: 'available', // Set status to available
-      client_id: null      // Remove client association
+      status: 'available', 
+      client_id: null
     };
 
-    console.log('Sending update to Supabase:', updateData);
+    console.log('Sending unlink update to Supabase:', updateData);
     
     const { data, error } = await supabase
       .from('rooms')
@@ -187,14 +204,12 @@ export async function unlinkClientFromRoom(
       .eq('id', roomId)
       .select();
       
-    console.log('Unlink response:', { data, error });
+    console.log('Unlink client from room response:', { data, error });
 
     if (error) {
-      console.error('Supabase error unlinking client:', error);
       throw error;
     }
     
-    console.log('Unlink successful, room updated:', data);
     return true;
   } catch (error: any) {
     console.error('Error unlinking client from room:', error);

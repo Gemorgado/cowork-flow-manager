@@ -14,11 +14,11 @@ import {
 export async function handleUpdateRoomStatus(
   roomId: string,
   status: LocationStatus,
-  clientId: string | undefined,
+  clientId: string | undefined | null,
   onSuccess: () => void
 ): Promise<boolean> {
   try {
-    console.log(`Updating room ${roomId} status to ${status}`);
+    console.log(`Updating room ${roomId} status to ${status}, clientId: ${clientId}`);
     const result = await updateRoomStatusApi(roomId, status, clientId);
     
     if (result) {
@@ -32,7 +32,7 @@ export async function handleUpdateRoomStatus(
       throw new Error('Falha ao atualizar status');
     }
   } catch (error: any) {
-    console.error('Error updating room:', error);
+    console.error('Error updating room status:', error);
     toast({
       title: 'Erro',
       description: 'Falha ao atualizar status da sala',

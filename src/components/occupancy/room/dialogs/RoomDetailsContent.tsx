@@ -5,7 +5,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from '@/components/ui/dialog';
 import { toast } from '@/components/ui/use-toast';
 import { RoomStatusSelect } from './room-details/RoomStatusSelect';
@@ -51,39 +50,78 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
     setArea(room.area);
     setCapacity(room.capacity);
     setIsEditing(false);
+    setIsSaving(false);
+    setIsUnlinking(false);
   }, [room]);
 
-  const handleStatusChange = (status: LocationStatus) => {
+  const handleStatusChange = async (status: LocationStatus) => {
+    if (!onUpdateStatus) return;
+    
     setSelectedStatus(status);
-    if (onUpdateStatus) {
-      onUpdateStatus(room.id, status);
+    console.log(`Changing room ${room.id} status to ${status}`);
+    
+    try {
+      await onUpdateStatus(room.id, status);
       toast({
         title: 'Status atualizado',
         description: `Sala ${room.number} agora está ${status}.`,
       });
+    } catch (error) {
+      console.error('Error updating room status:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível atualizar o status da sala.',
+        variant: 'destructive',
+      });
+      // Reset to previous status on error
+      setSelectedStatus(room.status);
     }
   };
 
-  const handleLinkClient = () => {
-    if (onLinkClient && selectedClientId) {
-      onLinkClient(room.id, selectedClientId);
+  const handleLinkClient = async () => {
+    if (!onLinkClient || !selectedClientId) return;
+    
+    try {
+      console.log(`Linking client ${selectedClientId} to room ${room.id}`);
+      await onLinkClient(room.id, selectedClientId);
       toast({
         title: 'Cliente vinculado',
         description: `Cliente vinculado à sala ${room.number}.`,
+      });
+      if (onClose) {
+        onClose();
+      }
+    } catch (error) {
+      console.error('Error linking client:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível vincular o cliente à sala.',
+        variant: 'destructive',
       });
     }
   };
 
   const handleUnlinkClient = async () => {
-    console.log("handleUnlinkClient")
     if (!onUnlinkClient) return;
     
     setIsUnlinking(true);
     try {
+      console.log(`Unlinking client from room ${room.id}`);
       await onUnlinkClient(room.id);
+      toast({
+        title: 'Cliente desvinculado',
+        description: `Cliente desvinculado da sala ${room.number}.`,
+      });
       if (onClose) {
         onClose();
       }
+    } catch (error) {
+      console.error('Error unlinking client:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível desvincular o cliente da sala.',
+        variant: 'destructive',
+      });
     } finally {
       setIsUnlinking(false);
     }
@@ -94,16 +132,19 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
     
     setIsSaving(true);
     try {
+      console.log(`Updating room ${room.id} details: area=${area}, capacity=${capacity}`);
       await onUpdateRoomDetails(room.id, { 
-        area: area,
-        capacity: capacity
+        area,
+        capacity
       });
+      
       setIsEditing(false);
       toast({
         title: 'Detalhes atualizados',
         description: `Informações da sala ${room.number} foram atualizadas.`,
       });
     } catch (error) {
+      console.error('Error updating room details:', error);
       toast({
         title: 'Erro',
         description: 'Não foi possível atualizar as informações da sala.',

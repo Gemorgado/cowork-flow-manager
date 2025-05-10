@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { Room, LocationStatus } from '@/types';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -24,6 +24,8 @@ export const RoomMap: React.FC<RoomMapProps> = ({
   // Handler for updating room status
   const handleUpdateRoomStatus = useCallback(async (roomId: string, status: LocationStatus) => {
     try {
+      console.log(`RoomMap.handleUpdateRoomStatus - roomId: ${roomId}, status: ${status}`);
+      
       // If status is 'available', we remove client association
       const clientId = status === 'available' ? null : undefined;
       
@@ -44,6 +46,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({
   // Handler for client linking
   const handleLinkClient = useCallback(async (roomId: string, clientId: string) => {
     try {
+      console.log(`RoomMap.handleLinkClient - roomId: ${roomId}, clientId: ${clientId}`);
       const success = await linkClientToRoom(roomId, clientId);
       if (success && onRoomsChanged) {
         // Ensure UI gets updated after linking the client
@@ -62,8 +65,10 @@ export const RoomMap: React.FC<RoomMapProps> = ({
   // Handler for client unlinking
   const handleUnlinkClient = useCallback(async (roomId: string) => {
     try {
+      console.log(`RoomMap.handleUnlinkClient - roomId: ${roomId}`);
       const success = await unlinkClientFromRoom(roomId);
       if (success && onRoomsChanged) {
+        console.log("Unlink successful, refreshing UI");
         // Ensure UI gets updated after unlinking the client
         onRoomsChanged();
       }
@@ -80,6 +85,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({
   // Handler for updating room details
   const handleUpdateRoomDetails = useCallback(async (roomId: string, data: { area?: number, capacity?: number }) => {
     try {
+      console.log(`RoomMap.handleUpdateRoomDetails - roomId: ${roomId}, data:`, data);
       const success = await updateRoomDetails(roomId, data);
       if (success && onRoomsChanged) {
         onRoomsChanged();

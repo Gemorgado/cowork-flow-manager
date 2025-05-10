@@ -38,13 +38,20 @@ export const RoomClientActions: React.FC<RoomClientActionsProps> = ({
   onUnlinkClient,
   isUnlinking
 }) => {
+  const handleUnlinkClick = () => {
+    console.log("RoomClientActions: Unlink button clicked");
+    if (onUnlinkClient) {
+      onUnlinkClient();
+    }
+  };
+
   if (room.clientId) {
     return (
       <div className="pt-4 border-t">
         <Button 
           variant="destructive" 
           size="sm"
-          onClick={onUnlinkClient}
+          onClick={handleUnlinkClick}
           disabled={isUnlinking}
         >
           {isUnlinking ? (
