@@ -19,7 +19,7 @@ interface RoomCardProps {
   hoveredRoomId?: string | null;
   setHoveredRoomId?: (id: string | null) => void;
   getClientInfo?: (clientId?: string) => string;
-  onUpdateStatus?: (roomId: string, status: Room['status']) => void;
+  onUpdateStatus?: (roomId: string, status: Room['status']) => Promise<boolean>;
   onLinkClient?: (roomId: string, clientId: string) => void;
   onUnlinkClient?: (roomId: string) => void;
   onUpdateRoomDetails?: (roomId: string, data: { area?: number, capacity?: number }) => void;
@@ -70,16 +70,20 @@ export const RoomCard: React.FC<RoomCardProps> = ({
     if (onUpdateStatus) {
       try {
         const success = await onUpdateStatus(roomId, status);
+        console.log("Status update result:", success);
         if (success) {
           console.log("Status updated successfully");
           // Close dialog on success (optional)
           // setShowDialog(false);
         }
+        return success;
       } catch (error) {
         console.error("Error in handleUpdateStatus:", error);
+        return false;
       }
     } else {
       console.warn("onUpdateStatus callback is not defined");
+      return false;
     }
   };
 
@@ -88,7 +92,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
     if (onUnlinkClient) {
       try {
         console.log("Calling onUnlinkClient from RoomCard");
-        await onUnlinkClient(roomId);
+        onUnlinkClient(roomId);
         console.log("onUnlinkClient completed, closing dialog");
         // Close the dialog when the operation completes
         setShowDialog(false);
