@@ -31,6 +31,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({
       
       const success = await updateRoomStatus(roomId, status, clientId);
       if (success && onRoomsChanged) {
+        console.log("Room status updated successfully, refreshing UI");
         onRoomsChanged();
       }
     } catch (error) {
@@ -50,6 +51,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({
       const success = await linkClientToRoom(roomId, clientId);
       if (success && onRoomsChanged) {
         // Ensure UI gets updated after linking the client
+        console.log("Client linked successfully, refreshing UI");
         onRoomsChanged();
       }
     } catch (error) {
@@ -62,21 +64,19 @@ export const RoomMap: React.FC<RoomMapProps> = ({
     }
   }, [onRoomsChanged]);
 
-  // Handler for client unlinking - fixed to ensure proper callbacks
+  // Handler for client unlinking
   const handleUnlinkClient = useCallback(async (roomId: string) => {
     try {
       console.log(`RoomMap.handleUnlinkClient - roomId: ${roomId}`);
-      // Track and log the entire operation
-      console.log("Calling unlinkClientFromRoom API...");
       const success = await unlinkClientFromRoom(roomId);
-      console.log(`API call result: ${success}`);
+      console.log(`API call result for unlinking: ${success}`);
       
       if (success && onRoomsChanged) {
-        console.log("Unlink successful, calling onRoomsChanged callback");
-        // Add a small delay to ensure the DB has processed the change
+        console.log("Client unlinked successfully, refreshing UI");
+        // Use setTimeout to ensure the database has processed the changes
         setTimeout(() => {
           onRoomsChanged();
-        }, 100);
+        }, 200);
       }
     } catch (error) {
       console.error("Error unlinking client from room:", error);
@@ -94,6 +94,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({
       console.log(`RoomMap.handleUpdateRoomDetails - roomId: ${roomId}, data:`, data);
       const success = await updateRoomDetails(roomId, data);
       if (success && onRoomsChanged) {
+        console.log("Room details updated successfully, refreshing UI");
         onRoomsChanged();
       }
     } catch (error) {

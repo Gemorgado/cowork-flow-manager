@@ -19,15 +19,17 @@ export function useRoomOperations(
       console.log(`useRoomOperations.updateRoomStatus - roomId: ${roomId}, status: ${status}, clientId: ${clientId}`);
       
       // Update local state optimistically - maintain room order by sorting after update
-      setRooms((prevRooms): Room[] => 
-        [...prevRooms.map(room => 
+      setRooms((prevRooms): Room[] => {
+        const updatedRooms = prevRooms.map(room => 
           room.id === roomId ? { ...room, status, clientId } : room
-        )].sort((a, b) => {
-          // Sort by floor first, then by room number
+        );
+        
+        // Sort rooms by floor and then by room number
+        return [...updatedRooms].sort((a, b) => {
           if (a.floor !== b.floor) return a.floor - b.floor;
           return parseInt(a.number) - parseInt(b.number);
-        })
-      );
+        });
+      });
       
       // Make API call
       const success = await handleUpdateRoomStatus(roomId, status, clientId, () => {
@@ -127,16 +129,19 @@ export function useRoomOperations(
       console.log(`useRoomOperations.linkClientToRoom - roomId: ${roomId}, clientId: ${clientId}`);
       
       // Update local state optimistically while maintaining sort order
-      setRooms((prevRooms): Room[] => 
-        [...prevRooms.map(room => 
+      setRooms((prevRooms): Room[] => {
+        const updatedRooms = prevRooms.map(room => 
           room.id === roomId 
             ? { ...room, clientId, status: 'occupied' as LocationStatus } 
             : room
-        )].sort((a, b) => {
+        );
+        
+        // Sort rooms by floor and then by room number
+        return [...updatedRooms].sort((a, b) => {
           if (a.floor !== b.floor) return a.floor - b.floor;
           return parseInt(a.number) - parseInt(b.number);
-        })
-      );
+        });
+      });
       
       // Make API call
       const success = await handleLinkClientToRoom(
@@ -183,16 +188,19 @@ export function useRoomOperations(
       console.log(`useRoomOperations.unlinkClientFromRoom - roomId: ${roomId}`);
       
       // Update local state optimistically while maintaining sort order
-      setRooms((prevRooms): Room[] => 
-        [...prevRooms.map(room => 
+      setRooms((prevRooms): Room[] => {
+        const updatedRooms = prevRooms.map(room => 
           room.id === roomId 
             ? { ...room, clientId: undefined, status: 'available' as LocationStatus } 
             : room
-        )].sort((a, b) => {
+        );
+        
+        // Sort rooms by floor and then by room number
+        return [...updatedRooms].sort((a, b) => {
           if (a.floor !== b.floor) return a.floor - b.floor;
           return parseInt(a.number) - parseInt(b.number);
-        })
-      );
+        });
+      });
       
       // Make API call with proper error handling
       const success = await handleUnlinkClientFromRoom(
