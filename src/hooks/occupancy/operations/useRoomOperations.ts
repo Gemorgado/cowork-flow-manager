@@ -130,7 +130,7 @@ export function useRoomOperations(
       setRooms((prevRooms): Room[] => 
         [...prevRooms.map(room => 
           room.id === roomId 
-            ? { ...room, clientId, status: 'occupied' } 
+            ? { ...room, clientId, status: 'occupied' as LocationStatus } 
             : room
         )].sort((a, b) => {
           if (a.floor !== b.floor) return a.floor - b.floor;
@@ -186,7 +186,7 @@ export function useRoomOperations(
       setRooms((prevRooms): Room[] => 
         [...prevRooms.map(room => 
           room.id === roomId 
-            ? { ...room, clientId: undefined, status: 'available' } 
+            ? { ...room, clientId: undefined, status: 'available' as LocationStatus } 
             : room
         )].sort((a, b) => {
           if (a.floor !== b.floor) return a.floor - b.floor;
