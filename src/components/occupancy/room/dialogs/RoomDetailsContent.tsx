@@ -1,15 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { Room, LocationStatus } from '@/types';
-import {
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
 import { toast } from '@/components/ui/use-toast';
-import { RoomStatusSelect } from './room-details/RoomStatusSelect';
-import { RoomClientInfo } from './room-details/RoomClientInfo';
-import { RoomBasicInfo } from './room-details/RoomBasicInfo';
+import { RoomDetailsHeader } from './room-details/RoomDetailsHeader';
+import { RoomDetailsContainer } from './room-details/RoomDetailsContainer';
 import { RoomClientActions } from './room-details/RoomClientActions';
 import { RoomEditFooter } from './room-details/RoomEditFooter';
 
@@ -163,34 +157,20 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
 
   return (
     <>
-      <DialogHeader>
-        <DialogTitle>Sala {room.number}</DialogTitle>
-        <DialogDescription>
-          Detalhes e informações da sala.
-        </DialogDescription>
-      </DialogHeader>
+      <RoomDetailsHeader />
 
       <div className="space-y-4 py-4">
-        <div className="grid grid-cols-2 gap-4">
-          <RoomStatusSelect 
-            selectedStatus={selectedStatus}
-            onStatusChange={handleStatusChange}
-          />
-          
-          <RoomClientInfo 
-            clientId={room.clientId}
-            getClientInfo={getClientInfo}
-          />
-          
-          <RoomBasicInfo 
-            floor={room.floor}
-            capacity={capacity}
-            area={area}
-            isEditing={isEditing}
-            onCapacityChange={setCapacity}
-            onAreaChange={setArea}
-          />
-        </div>
+        <RoomDetailsContainer 
+          room={room}
+          selectedStatus={selectedStatus}
+          area={area}
+          capacity={capacity}
+          isEditing={isEditing}
+          getClientInfo={getClientInfo}
+          onStatusChange={handleStatusChange}
+          onCapacityChange={setCapacity}
+          onAreaChange={setArea}
+        />
 
         <RoomClientActions
           room={room}
