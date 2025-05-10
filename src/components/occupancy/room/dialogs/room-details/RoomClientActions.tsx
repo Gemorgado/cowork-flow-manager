@@ -41,10 +41,12 @@ export const RoomClientActions: React.FC<RoomClientActionsProps> = ({
   const handleUnlinkClick = () => {
     console.log("RoomClientActions: Unlink button clicked");
     if (onUnlinkClient) {
+      console.log("Calling onUnlinkClient handler");
       onUnlinkClient();
     }
   };
 
+  // If room has a client, show unlink button
   if (room.clientId) {
     return (
       <div className="pt-4 border-t">
@@ -65,6 +67,7 @@ export const RoomClientActions: React.FC<RoomClientActionsProps> = ({
     );
   }
 
+  // If no client but we have openLinkDialog, show link company button
   if (openLinkDialog) {
     return (
       <div className="space-y-4 mt-4 pt-4 border-t">
@@ -80,6 +83,7 @@ export const RoomClientActions: React.FC<RoomClientActionsProps> = ({
     );
   }
 
+  // If we have clients available, show dropdown
   if (availableClients.length > 0) {
     return (
       <div className="space-y-4 mt-4 pt-4 border-t">
@@ -110,6 +114,7 @@ export const RoomClientActions: React.FC<RoomClientActionsProps> = ({
     );
   }
 
+  // Default case: no clients available
   return (
     <div className="space-y-4 mt-4 pt-4 border-t">
       <p className="text-sm text-muted-foreground">

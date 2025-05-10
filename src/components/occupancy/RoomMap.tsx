@@ -62,15 +62,21 @@ export const RoomMap: React.FC<RoomMapProps> = ({
     }
   }, [onRoomsChanged]);
 
-  // Handler for client unlinking
+  // Handler for client unlinking - fixed to ensure proper callbacks
   const handleUnlinkClient = useCallback(async (roomId: string) => {
     try {
       console.log(`RoomMap.handleUnlinkClient - roomId: ${roomId}`);
+      // Track and log the entire operation
+      console.log("Calling unlinkClientFromRoom API...");
       const success = await unlinkClientFromRoom(roomId);
+      console.log(`API call result: ${success}`);
+      
       if (success && onRoomsChanged) {
-        console.log("Unlink successful, refreshing UI");
-        // Ensure UI gets updated after unlinking the client
-        onRoomsChanged();
+        console.log("Unlink successful, calling onRoomsChanged callback");
+        // Add a small delay to ensure the DB has processed the change
+        setTimeout(() => {
+          onRoomsChanged();
+        }, 100);
       }
     } catch (error) {
       console.error("Error unlinking client from room:", error);

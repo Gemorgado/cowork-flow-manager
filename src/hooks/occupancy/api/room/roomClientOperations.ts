@@ -75,7 +75,14 @@ export async function unlinkClientFromRoom(
     console.log('Unlink client from room response:', { data, error });
 
     if (error) {
+      console.error('Supabase error in unlinkClientFromRoom:', error);
       throw error;
+    }
+    
+    if (!data || data.length === 0) {
+      console.warn('No data returned from unlinkClientFromRoom operation');
+    } else {
+      console.log('Successfully unlinked client, data:', data);
     }
     
     return true;

@@ -18,27 +18,50 @@ export function useRoomOperations(
     try {
       console.log(`useRoomOperations.updateRoomStatus - roomId: ${roomId}, status: ${status}, clientId: ${clientId}`);
       
-      // Update local state optimistically
+      // Update local state optimistically - maintain room order by sorting after update
       setRooms((prevRooms): Room[] => 
-        prevRooms.map(room => 
+        [...prevRooms.map(room => 
           room.id === roomId ? { ...room, status, clientId } : room
-        )
+        )].sort((a, b) => {
+          // Sort by floor first, then by room number
+          if (a.floor !== b.floor) return a.floor - b.floor;
+          return parseInt(a.number) - parseInt(b.number);
+        })
       );
       
       // Make API call
       const success = await handleUpdateRoomStatus(roomId, status, clientId, () => {
         console.log("Room status updated successfully, refreshing rooms");
-        fetchRooms().then(setRooms);
+        fetchRooms().then(rooms => {
+          // Sort rooms before setting state
+          const sortedRooms = [...rooms].sort((a, b) => {
+            if (a.floor !== b.floor) return a.floor - b.floor;
+            return parseInt(a.number) - parseInt(b.number);
+          });
+          setRooms(sortedRooms);
+        });
       });
       
       // Revert on failure and refetch to ensure UI is in sync
       if (!success) {
         console.log("Failed to update room status, refreshing data");
-        fetchRooms().then(setRooms);
+        fetchRooms().then(rooms => {
+          const sortedRooms = [...rooms].sort((a, b) => {
+            if (a.floor !== b.floor) return a.floor - b.floor;
+            return parseInt(a.number) - parseInt(b.number);
+          });
+          setRooms(sortedRooms);
+        });
       }
     } catch (error) {
       console.error("Error in updateRoomStatus:", error);
-      fetchRooms().then(setRooms); // Always refetch on error to maintain data integrity
+      fetchRooms().then(rooms => {
+        const sortedRooms = [...rooms].sort((a, b) => {
+          if (a.floor !== b.floor) return a.floor - b.floor;
+          return parseInt(a.number) - parseInt(b.number);
+        });
+        setRooms(sortedRooms);
+      });
     }
   }, [setRooms, fetchRooms]);
 
@@ -47,9 +70,9 @@ export function useRoomOperations(
     try {
       console.log(`useRoomOperations.updateRoomDetails - roomId: ${roomId}, data:`, data);
       
-      // Update local state optimistically
+      // Update local state optimistically while maintaining sort order
       setRooms((prevRooms): Room[] => 
-        prevRooms.map(room => 
+        [...prevRooms.map(room => 
           room.id === roomId 
             ? { 
                 ...room, 
@@ -57,23 +80,44 @@ export function useRoomOperations(
                 capacity: data.capacity !== undefined ? data.capacity : room.capacity
               } 
             : room
-        )
+        )].sort((a, b) => {
+          if (a.floor !== b.floor) return a.floor - b.floor;
+          return parseInt(a.number) - parseInt(b.number);
+        })
       );
       
       // Make API call
       const success = await handleUpdateRoomDetails(roomId, data, () => {
         console.log("Room details updated successfully, refreshing rooms");
-        fetchRooms().then(setRooms);
+        fetchRooms().then(rooms => {
+          const sortedRooms = [...rooms].sort((a, b) => {
+            if (a.floor !== b.floor) return a.floor - b.floor;
+            return parseInt(a.number) - parseInt(b.number);
+          });
+          setRooms(sortedRooms);
+        });
       });
       
       // Revert on failure and refetch to ensure UI is in sync
       if (!success) {
         console.log("Failed to update room details, refreshing data");
-        fetchRooms().then(setRooms);
+        fetchRooms().then(rooms => {
+          const sortedRooms = [...rooms].sort((a, b) => {
+            if (a.floor !== b.floor) return a.floor - b.floor;
+            return parseInt(a.number) - parseInt(b.number);
+          });
+          setRooms(sortedRooms);
+        });
       }
     } catch (error) {
       console.error("Error in updateRoomDetails:", error);
-      fetchRooms().then(setRooms); // Always refetch on error to maintain data integrity
+      fetchRooms().then(rooms => {
+        const sortedRooms = [...rooms].sort((a, b) => {
+          if (a.floor !== b.floor) return a.floor - b.floor;
+          return parseInt(a.number) - parseInt(b.number);
+        });
+        setRooms(sortedRooms);
+      });
     }
   }, [setRooms, fetchRooms]);
 
@@ -82,13 +126,16 @@ export function useRoomOperations(
     try {
       console.log(`useRoomOperations.linkClientToRoom - roomId: ${roomId}, clientId: ${clientId}`);
       
-      // Update local state optimistically 
+      // Update local state optimistically while maintaining sort order
       setRooms((prevRooms): Room[] => 
-        prevRooms.map(room => 
+        [...prevRooms.map(room => 
           room.id === roomId 
             ? { ...room, clientId, status: 'occupied' } 
             : room
-        )
+        )].sort((a, b) => {
+          if (a.floor !== b.floor) return a.floor - b.floor;
+          return parseInt(a.number) - parseInt(b.number);
+        })
       );
       
       // Make API call
@@ -97,18 +144,36 @@ export function useRoomOperations(
         clientId,
         () => {
           console.log("Successfully linked client, refreshing data");
-          fetchRooms().then(setRooms);
+          fetchRooms().then(rooms => {
+            const sortedRooms = [...rooms].sort((a, b) => {
+              if (a.floor !== b.floor) return a.floor - b.floor;
+              return parseInt(a.number) - parseInt(b.number);
+            });
+            setRooms(sortedRooms);
+          });
         }
       );
       
       // Revert on failure and refetch to ensure UI is in sync
       if (!success) {
         console.log("Failed to link client, reverting UI state");
-        fetchRooms().then(setRooms);
+        fetchRooms().then(rooms => {
+          const sortedRooms = [...rooms].sort((a, b) => {
+            if (a.floor !== b.floor) return a.floor - b.floor;
+            return parseInt(a.number) - parseInt(b.number);
+          });
+          setRooms(sortedRooms);
+        });
       }
     } catch (error) {
       console.error("Error in linkClientToRoom:", error);
-      fetchRooms().then(setRooms); // Always refetch on error to maintain data integrity
+      fetchRooms().then(rooms => {
+        const sortedRooms = [...rooms].sort((a, b) => {
+          if (a.floor !== b.floor) return a.floor - b.floor;
+          return parseInt(a.number) - parseInt(b.number);
+        });
+        setRooms(sortedRooms);
+      });
     }
   }, [setRooms, fetchRooms]);
 
@@ -117,34 +182,55 @@ export function useRoomOperations(
     try {
       console.log(`useRoomOperations.unlinkClientFromRoom - roomId: ${roomId}`);
       
-      // Update local state optimistically 
+      // Update local state optimistically while maintaining sort order
       setRooms((prevRooms): Room[] => 
-        prevRooms.map(room => 
+        [...prevRooms.map(room => 
           room.id === roomId 
             ? { ...room, clientId: undefined, status: 'available' } 
             : room
-        )
+        )].sort((a, b) => {
+          if (a.floor !== b.floor) return a.floor - b.floor;
+          return parseInt(a.number) - parseInt(b.number);
+        })
       );
       
-      // Make API call
+      // Make API call with proper error handling
       const success = await handleUnlinkClientFromRoom(
         roomId,
         () => {
           console.log("Successfully unlinked client, refreshing data");
-          fetchRooms().then(setRooms);
+          fetchRooms().then(rooms => {
+            const sortedRooms = [...rooms].sort((a, b) => {
+              if (a.floor !== b.floor) return a.floor - b.floor;
+              return parseInt(a.number) - parseInt(b.number);
+            });
+            setRooms(sortedRooms);
+          });
         }
       );
       
       // Revert on failure and refetch to ensure UI is in sync
       if (!success) {
         console.log("Failed to unlink client, reverting UI state");
-        fetchRooms().then(setRooms);
+        fetchRooms().then(rooms => {
+          const sortedRooms = [...rooms].sort((a, b) => {
+            if (a.floor !== b.floor) return a.floor - b.floor;
+            return parseInt(a.number) - parseInt(b.number);
+          });
+          setRooms(sortedRooms);
+        });
       } else {
         console.log("Unlink operation completed successfully");
       }
     } catch (error) {
       console.error("Error in unlinkClientFromRoom:", error);
-      fetchRooms().then(setRooms); // Always refetch on error to maintain data integrity
+      fetchRooms().then(rooms => {
+        const sortedRooms = [...rooms].sort((a, b) => {
+          if (a.floor !== b.floor) return a.floor - b.floor;
+          return parseInt(a.number) - parseInt(b.number);
+        });
+        setRooms(sortedRooms);
+      });
     }
   }, [setRooms, fetchRooms]);
 

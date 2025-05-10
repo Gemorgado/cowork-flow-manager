@@ -32,15 +32,21 @@ export const RoomGrid: React.FC<RoomGridProps> = ({
   // Function to handle client unlinking with proper UI update
   const handleUnlinkClient = (roomId: string) => {
     if (onUnlinkClient) {
+      console.log(`RoomGrid.handleUnlinkClient called for room ${roomId}`);
       onUnlinkClient(roomId);
     }
   };
 
+  // Sort the rooms by number
+  const sortedRooms = [...rooms].sort((a, b) => {
+    return parseInt(a.number) - parseInt(b.number);
+  });
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3">
-      {rooms.map((room) => (
+      {sortedRooms.map((room) => (
         <RoomCard
-          key={room.id} // Usar apenas o ID para manter a ordem
+          key={room.id}
           room={room}
           hoveredRoomId={hoveredRoomId}
           setHoveredRoomId={setHoveredRoomId}
