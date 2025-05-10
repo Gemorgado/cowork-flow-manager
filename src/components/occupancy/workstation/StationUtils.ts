@@ -1,5 +1,5 @@
 
-import { WorkStation } from '@/types';
+import { WorkStation, LocationStatus } from '@/types';
 
 // Function to get client info for tooltip
 export const getClientInfo = (clientId?: string): string => {

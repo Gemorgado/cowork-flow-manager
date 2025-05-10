@@ -1,14 +1,10 @@
 
 import React from 'react';
 import { WorkStation, LocationStatus } from '@/types';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { StationDialogContent } from './workstation/StationDialogContent';
-import { getClientInfo } from './workstation/StationUtils';
-import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, User } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { EmptyFloorMessage } from './workstation/EmptyFloorMessage';
+import { StationCard } from './workstation/StationCard';
 import { mockClients } from './room/RoomUtils';
 
 interface WorkStationGridProps {
@@ -54,30 +50,17 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
   // If floor 3, show a message that no workstations are available on this floor
   if (currentFloor === '3') {
     return (
-      <div className="p-6 text-center">
-        <Alert variant="default" className="justify-center">
-          <AlertTriangle className="h-4 w-4 mr-2" />
-          <AlertDescription>
-            O 3º andar não possui estações de trabalho.
-          </AlertDescription>
-        </Alert>
-      </div>
+      <EmptyFloorMessage message="O 3º andar não possui estações de trabalho." />
     );
   }
   
   // If there are no stations for this floor, show a message
   if (floorStations.length === 0) {
     return (
-      <div className="p-6 text-center">
-        <Alert variant="default" className="justify-center">
-          <AlertTriangle className="h-4 w-4 mr-2" />
-          <AlertDescription>
-            Nenhuma estação de trabalho encontrada para o {currentFloor}º andar.
-            <br/>
-            Use o botão "Popular Dados" para criar estações de exemplo.
-          </AlertDescription>
-        </Alert>
-      </div>
+      <EmptyFloorMessage 
+        message="Nenhuma estação de trabalho encontrada para o 3º andar.
+                Use o botão 'Popular Dados' para criar estações de exemplo." 
+      />
     );
   }
 
@@ -95,43 +78,11 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
         <div key={`row-${rowIndex}-${currentFloor}`} className="flex gap-4 mb-4 justify-center">
           {row.map(station => (
             <Dialog key={`station-${station.id}`}>
-              <div className="flex flex-col items-center">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <DialogTrigger asChild>
-                      <button
-                        className={cn(
-                          "w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center relative",
-                          getStationStatusStyles(station.status),
-                          "transition-all duration-150 hover:scale-105"
-                        )}
-                        aria-label={`Estação ${station.number}`}
-                      >
-                        {/* Display only the number without "WS-" prefix */}
-                        {station.number.replace('WS-', '')}
-                        {station.clientId && (
-                          <span className="absolute -top-1 -right-1">
-                            <Badge variant="secondary" className="h-5 w-5 p-0 flex items-center justify-center rounded-full">
-                              <User className="h-3 w-3" />
-                            </Badge>
-                          </span>
-                        )}
-                      </button>
-                    </DialogTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <div>
-                      <div>Estação {station.number}</div>
-                      <div>Status: {station.status}</div>
-                      <div>Tipo: {station.type}</div>
-                      {station.clientId && (
-                        <div>Cliente: {getActualClientName(station.clientId)}</div>
-                      )}
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-                <span className="mt-1 text-xs md:text-sm">{station.number.replace('WS-', '')}</span>
-              </div>
+              <StationCard 
+                station={station} 
+                getStationStatusStyles={getStationStatusStyles}
+                getClientName={getActualClientName}
+              />
               <DialogContent className="sm:max-w-md">
                 <StationDialogContent
                   station={station}
