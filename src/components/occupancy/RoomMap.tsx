@@ -21,8 +21,8 @@ export const RoomMap: React.FC<RoomMapProps> = ({
 }) => {
   const floorRooms = rooms.filter((room) => room.floor === parseInt(currentFloor) as any);
   
-  // Handler for updating room status
-  const handleUpdateRoomStatus = useCallback(async (roomId: string, status: LocationStatus) => {
+  // Handler for updating room status - updated to return Promise<boolean>
+  const handleUpdateRoomStatus = useCallback(async (roomId: string, status: LocationStatus): Promise<boolean> => {
     try {
       console.log(`RoomMap.handleUpdateRoomStatus - roomId: ${roomId}, status: ${status}`);
       
@@ -81,7 +81,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({
         // Use setTimeout to ensure the database has processed the changes
         setTimeout(() => {
           onRoomsChanged();
-        }, 500);
+        }, 800); // Increased delay to ensure database consistency
       }
       return success;
     } catch (error) {

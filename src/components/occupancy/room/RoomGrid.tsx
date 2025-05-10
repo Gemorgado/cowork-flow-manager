@@ -5,7 +5,7 @@ import { RoomCard } from './RoomCard';
 
 interface RoomGridProps {
   rooms: Room[];
-  onUpdateStatus?: (roomId: string, status: Room['status']) => void;
+  onUpdateStatus?: (roomId: string, status: Room['status']) => Promise<boolean>;
   onLinkClient?: (roomId: string, clientId: string) => void;
   onUnlinkClient?: (roomId: string) => void;
   onUpdateRoomDetails?: (roomId: string, data: { area?: number, capacity?: number }) => void;
@@ -37,6 +37,23 @@ export const RoomGrid: React.FC<RoomGridProps> = ({
     }
   };
 
+  // Function to handle status updates, making sure it returns a Promise<boolean>
+  const handleUpdateStatus = async (roomId: string, status: Room['status']) => {
+    console.log(`RoomGrid.handleUpdateStatus called for room ${roomId} with status ${status}`);
+    
+    if (onUpdateStatus) {
+      try {
+        return await onUpdateStatus(roomId, status);
+      } catch (error) {
+        console.error("Error in RoomGrid.handleUpdateStatus:", error);
+        return false;
+      }
+    }
+    
+    console.warn("onUpdateStatus is not defined in RoomGrid props");
+    return false;
+  };
+
   // Sort the rooms by number
   const sortedRooms = [...rooms].sort((a, b) => {
     return parseInt(a.number) - parseInt(b.number);
@@ -50,7 +67,7 @@ export const RoomGrid: React.FC<RoomGridProps> = ({
           room={room}
           hoveredRoomId={hoveredRoomId}
           setHoveredRoomId={setHoveredRoomId}
-          onUpdateStatus={onUpdateStatus}
+          onUpdateStatus={handleUpdateStatus}
           onLinkClient={handleLinkClient}
           onUnlinkClient={handleUnlinkClient}
           onUpdateRoomDetails={onUpdateRoomDetails}
