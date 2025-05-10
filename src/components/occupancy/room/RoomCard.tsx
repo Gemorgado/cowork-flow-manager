@@ -13,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { RoomDetailsDialogContent } from './dialogs';
 import { useRoomClientLink } from '@/hooks/occupancy/useRoomClientLink';
 import { ClientLinkDialog } from './dialogs/ClientLinkDialog';
+import { clients } from '@/mock/clients';
 
 interface RoomCardProps {
   room: Room;
@@ -31,7 +32,8 @@ export const RoomCard: React.FC<RoomCardProps> = ({
   setHoveredRoomId,
   getClientInfo = (clientId?: string) => {
     if (!clientId) return "Nenhum cliente";
-    return `Cliente #${clientId.substring(0, 8)}`;
+    const client = clients.find(c => c.id === clientId);
+    return client ? client.companyName : `Cliente #${clientId.substring(0, 8)}`;
   },
   onUpdateStatus,
   onLinkClient,
@@ -107,6 +109,9 @@ export const RoomCard: React.FC<RoomCardProps> = ({
   // Using the room's ID as key keeps component in the same position after updates
   const dialogKey = `room-dialog-${room.id}`;
 
+  // Get client name to display
+  const clientName = getClientInfo(room.clientId);
+
   return (
     <>
       <Dialog key={dialogKey} open={showDialog} onOpenChange={setShowDialog}>
@@ -142,7 +147,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
                 </Badge>
                 {room.clientId && (
                   <div className="mt-1 text-[9px] text-muted-foreground truncate">
-                    {getClientInfo(room.clientId)}
+                    {clientName}
                   </div>
                 )}
               </div>
@@ -154,7 +159,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
               <div>Status: {statusLabels[room.status]}</div>
               <div>Área: {room.area}m²</div>
               <div>Capacidade: {room.capacity} pessoas</div>
-              {room.clientId && <div>Cliente: {getClientInfo(room.clientId)}</div>}
+              {room.clientId && <div>Cliente: {clientName}</div>}
             </div>
           </TooltipContent>
         </Tooltip>

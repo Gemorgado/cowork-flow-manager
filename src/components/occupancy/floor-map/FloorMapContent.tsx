@@ -5,6 +5,7 @@ import { RoomGrid } from '../room/RoomGrid';
 import { WorkStationGrid } from '../WorkStationGrid';
 import { toast } from '@/components/ui/use-toast';
 import { updateStationStatus, convertFlexToFixed } from '@/hooks/occupancy/api';
+import { clients } from '@/mock/clients';
 
 interface FloorMapContentProps {
   activeView: 'unified' | 'rooms' | 'stations';
@@ -53,6 +54,13 @@ export function FloorMapContent({
     '1': 26, // WS-01 to WS-26
     '2': 38, // WS-27 to WS-64
     '3': 0   // No workstations on floor 3
+  };
+  
+  // Get client name by ID
+  const getClientName = (clientId?: string): string => {
+    if (!clientId) return 'Nenhum cliente';
+    const client = clients.find(c => c.id === clientId);
+    return client ? client.companyName : `Cliente ${clientId.substring(0, 8)}`;
   };
   
   // Handler for updating station status
@@ -111,7 +119,10 @@ export function FloorMapContent({
               ({floorRooms.length}/{totalRooms[floor as keyof typeof totalRooms]})
             </span>
           </h3>
-          <RoomGrid rooms={floorRooms} />
+          <RoomGrid 
+            rooms={floorRooms} 
+            getClientInfo={getClientName}
+          />
         </div>
       )}
       
@@ -128,6 +139,7 @@ export function FloorMapContent({
             currentFloor={floor}
             onUpdateStatus={handleUpdateStatus}
             onLinkClient={handleLinkClient}
+            clients={clients}
           />
         </div>
       )}

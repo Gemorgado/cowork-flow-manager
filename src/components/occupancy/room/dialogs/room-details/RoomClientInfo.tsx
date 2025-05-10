@@ -15,7 +15,7 @@ export const RoomClientInfo: React.FC<RoomClientInfoProps> = ({
     <div>
       <Label htmlFor="client">Cliente</Label>
       {clientId ? (
-        <p className="mt-2">{getClientInfo(clientId)}</p>
+        <p className="mt-2 font-medium text-foreground">{getClientInfo(clientId)}</p>
       ) : (
         <p className="text-muted-foreground mt-2">Nenhum cliente vinculado</p>
       )}

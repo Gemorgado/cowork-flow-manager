@@ -17,6 +17,7 @@ interface WorkStationGridProps {
   onAllocateFlexToFixed?: (stationId: string, clientId: string) => void;
   onUpdateStatus?: (stationId: string, status: LocationStatus) => Promise<boolean>;
   onLinkClient?: (stationId: string, clientId: string) => void;
+  clients?: Array<{id: string, companyName: string}>;
 }
 
 export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
@@ -24,8 +25,16 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
   currentFloor,
   onAllocateFlexToFixed,
   onUpdateStatus,
-  onLinkClient
+  onLinkClient,
+  clients = []
 }) => {
+  // Get the actual client name from the clients array
+  const getActualClientName = (clientId?: string): string => {
+    if (!clientId) return '';
+    const client = clients.find(c => c.id === clientId);
+    return client ? client.companyName : mockClients.find(c => c.id === clientId)?.name || `Cliente ${clientId.substring(0, 5)}`;
+  };
+
   // Filter stations by floor
   const floorStations = workStations.filter(
     (station) => station.floor === parseInt(currentFloor) as any
@@ -115,6 +124,9 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
                       <div>Estação {station.number}</div>
                       <div>Status: {station.status}</div>
                       <div>Tipo: {station.type}</div>
+                      {station.clientId && (
+                        <div>Cliente: {getActualClientName(station.clientId)}</div>
+                      )}
                     </div>
                   </TooltipContent>
                 </Tooltip>
@@ -123,7 +135,7 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
               <DialogContent className="sm:max-w-md">
                 <StationDialogContent
                   station={station}
-                  getClientInfo={getClientInfo}
+                  getClientInfo={(clientId) => getActualClientName(clientId)}
                   onAllocate={() => onAllocateFlexToFixed && onAllocateFlexToFixed(station.id, 'client1')}
                   onUpdateStatus={onUpdateStatus ? async (status) => {
                     if (onUpdateStatus) {
@@ -132,7 +144,7 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
                     return false;
                   } : undefined}
                   onLinkClient={onLinkClient ? (clientId) => onLinkClient(station.id, clientId) : undefined}
-                  availableClients={mockClients}
+                  availableClients={clients.length > 0 ? clients.map(c => ({ id: c.id, name: c.companyName })) : mockClients}
                 />
               </DialogContent>
             </Dialog>

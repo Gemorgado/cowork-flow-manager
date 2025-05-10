@@ -139,7 +139,7 @@ export const StationDialogContent: React.FC<StationDialogContentProps> = ({
           </div>
           <div>
             <p className="text-sm font-medium mb-1">Cliente</p>
-            <p>{getClientInfo(station.clientId) || 'Nenhum'}</p>
+            <p className="overflow-hidden text-ellipsis">{station.clientId ? getClientInfo(station.clientId) : 'Nenhum'}</p>
           </div>
           <div>
             <p className="text-sm font-medium mb-1">Andar</p>

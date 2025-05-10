@@ -1,5 +1,5 @@
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { CardContent } from '@/components/ui/card';
 import { WorkStation, LocationStatus } from '@/types';
 import { WorkStationGrid } from '../WorkStationGrid';
@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/use-toast';
 import { updateStationStatus } from '@/hooks/occupancy/api/workstationApi';
 import { convertFlexToFixed } from '@/hooks/occupancy/api/workstationApi';
+import { clients } from '@/mock/clients';
 
 interface WorkStationsTabProps {
   workStations: WorkStation[];
@@ -26,7 +27,7 @@ export const WorkStationsTab: React.FC<WorkStationsTabProps> = ({
   // Filter stations by floor
   const floorStations = workStations.filter(station => station.floor === parseInt(currentFloor) as any);
 
-  // Count fixed and flex stations for display
+  // Count flex stations for display
   const flexStations = floorStations.filter(station => station.type === 'flex');
   const flexCount = flexStations.length;
   
@@ -110,6 +111,7 @@ export const WorkStationsTab: React.FC<WorkStationsTabProps> = ({
           onAllocateFlexToFixed={handleAllocateFlexToFixed}
           onUpdateStatus={handleUpdateStatus}
           onLinkClient={handleLinkClient}
+          clients={clients}
         />
       )}
     </CardContent>
