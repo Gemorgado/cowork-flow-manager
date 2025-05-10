@@ -8,6 +8,7 @@ import { fetchClients } from '@/utils/clients/clientsApi';
 export interface ClientOption {
   id: string;
   name: string;
+  companyName: string; // Add this property to match the expected type
 }
 
 export function useRoomClientLink(onSuccess?: () => void) {
@@ -33,7 +34,8 @@ export function useRoomClientLink(onSuccess?: () => void) {
       setAvailableClients(
         clients.map(client => ({ 
           id: client.id, 
-          name: client.companyName 
+          name: client.companyName,
+          companyName: client.companyName // Add this property to match the expected type
         }))
       );
     } catch (error) {

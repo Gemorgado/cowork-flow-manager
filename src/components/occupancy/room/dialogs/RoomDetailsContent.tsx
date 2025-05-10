@@ -90,13 +90,27 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
     setIsEditing(false);
   }, [room.area, room.capacity]);
   
+  // Wrapper functions to handle proper function call signatures
+  const handleOpenLinkDialog = useCallback(() => {
+    if (openLinkDialog) {
+      openLinkDialog(room);
+    }
+  }, [openLinkDialog, room]);
+  
+  const handleUnlinkClient = useCallback(() => {
+    if (onUnlinkClient) {
+      console.log(`Calling onUnlinkClient for room ${room.id}`);
+      onUnlinkClient(room.id);
+    }
+  }, [onUnlinkClient, room.id]);
+  
   return (
     <>
       <DialogHeader className="pb-2">
         <DialogTitle>Sala {room.number}</DialogTitle>
         <RoomDetailsHeader 
-          floor={room.floor} 
-          number={room.number} 
+          roomNumber={room.number} 
+          floor={room.floor}
         />
       </DialogHeader>
 
@@ -114,8 +128,8 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
       
       <RoomClientActions 
         room={room}
-        onLinkClient={openLinkDialog}
-        onUnlinkClient={onUnlinkClient}
+        onLinkClient={handleOpenLinkDialog}
+        onUnlinkClient={handleUnlinkClient}
       />
       
       <RoomEditFooter 
