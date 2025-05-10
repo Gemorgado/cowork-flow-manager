@@ -39,7 +39,7 @@ export const RoomClientActions: React.FC<RoomClientActionsProps> = ({
   isUnlinking
 }) => {
   const handleUnlinkClick = () => {
-    console.log("RoomClientActions: Unlink button clicked");
+    console.log("RoomClientActions: Unlink button clicked, room:", room.id);
     if (onUnlinkClient) {
       console.log("Calling onUnlinkClient handler");
       onUnlinkClient();

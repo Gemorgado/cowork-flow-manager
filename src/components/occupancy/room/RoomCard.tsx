@@ -1,5 +1,4 @@
 
-// Update import section to make sure we have the correct imports
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Room } from '@/types';
@@ -32,7 +31,6 @@ export const RoomCard: React.FC<RoomCardProps> = ({
   setHoveredRoomId,
   getClientInfo = (clientId?: string) => {
     if (!clientId) return "Nenhum cliente";
-    // In a real app, we would fetch client details here
     return `Cliente #${clientId.substring(0, 8)}`;
   },
   onUpdateStatus,
@@ -70,12 +68,16 @@ export const RoomCard: React.FC<RoomCardProps> = ({
     console.log(`RoomCard.handleUnlinkClient - roomId: ${roomId}`);
     if (onUnlinkClient) {
       try {
+        console.log("Calling onUnlinkClient from RoomCard");
         await onUnlinkClient(roomId);
+        console.log("onUnlinkClient completed, closing dialog");
         // Close the dialog when the operation completes
         setShowDialog(false);
       } catch (error) {
         console.error("Error in handleUnlinkClient:", error);
       }
+    } else {
+      console.warn("onUnlinkClient callback is not defined");
     }
   };
 

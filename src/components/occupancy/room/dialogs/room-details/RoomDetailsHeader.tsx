@@ -6,10 +6,14 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 
-export const RoomDetailsHeader: React.FC = () => {
+interface RoomDetailsHeaderProps {
+  roomNumber?: string;
+}
+
+export const RoomDetailsHeader: React.FC<RoomDetailsHeaderProps> = ({ roomNumber }) => {
   return (
     <DialogHeader>
-      <DialogTitle>Sala</DialogTitle>
+      <DialogTitle>Sala {roomNumber}</DialogTitle>
       <DialogDescription>
         Detalhes e informações da sala.
       </DialogDescription>

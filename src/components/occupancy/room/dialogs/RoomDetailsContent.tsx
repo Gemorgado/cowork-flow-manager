@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Room, LocationStatus } from '@/types';
 import { toast } from '@/components/ui/use-toast';
@@ -157,7 +156,7 @@ export const RoomDetailsDialogContent: React.FC<RoomDetailsDialogContentProps> =
 
   return (
     <>
-      <RoomDetailsHeader />
+      <RoomDetailsHeader roomNumber={room.number} />
 
       <div className="space-y-4 py-4">
         <RoomDetailsContainer 

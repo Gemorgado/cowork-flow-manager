@@ -1,4 +1,3 @@
-
 import React, { useCallback } from 'react';
 import { Room, LocationStatus } from '@/types';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -76,7 +75,7 @@ export const RoomMap: React.FC<RoomMapProps> = ({
         // Use setTimeout to ensure the database has processed the changes
         setTimeout(() => {
           onRoomsChanged();
-        }, 200);
+        }, 300);
       }
     } catch (error) {
       console.error("Error unlinking client from room:", error);
