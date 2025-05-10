@@ -34,7 +34,12 @@ export function useSupabaseOccupancy() {
     updateRoomStatus,
     updateRoomDetails,
     linkClientToRoom,
-    unlinkClientFromRoom
+    unlinkClientFromRoom,
+    refreshRooms,
+    isUpdatingStatus,
+    isUpdatingDetails,
+    isLinking,
+    isUnlinking
   } = useRoomOperations(rooms, setRooms, fetchRooms);
 
   // Get workstation operations
@@ -61,5 +66,10 @@ export function useSupabaseOccupancy() {
     updateRoomDetails,
     linkClientToRoom,
     unlinkClientFromRoom,
+    refreshRooms,
+    isUpdatingStatus,
+    isUpdatingDetails,
+    isLinking,
+    isUnlinking,
   };
 }
