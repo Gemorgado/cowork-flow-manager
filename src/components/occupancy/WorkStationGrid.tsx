@@ -15,7 +15,7 @@ interface WorkStationGridProps {
   workStations: WorkStation[];
   currentFloor: string;
   onAllocateFlexToFixed?: (stationId: string, clientId: string) => void;
-  onUpdateStatus?: (stationId: string, status: LocationStatus) => void;
+  onUpdateStatus?: (stationId: string, status: LocationStatus) => Promise<boolean>;
   onLinkClient?: (stationId: string, clientId: string) => void;
 }
 
@@ -98,6 +98,8 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
                         )}
                         aria-label={`Estação ${station.number}`}
                       >
+                        {/* Display only the number without "WS-" prefix */}
+                        {station.number.replace('WS-', '')}
                         {station.clientId && (
                           <span className="absolute -top-1 -right-1">
                             <Badge variant="secondary" className="h-5 w-5 p-0 flex items-center justify-center rounded-full">
@@ -116,14 +118,19 @@ export const WorkStationGrid: React.FC<WorkStationGridProps> = ({
                     </div>
                   </TooltipContent>
                 </Tooltip>
-                <span className="mt-1 text-xs md:text-sm">{station.number}</span>
+                <span className="mt-1 text-xs md:text-sm">{station.number.replace('WS-', '')}</span>
               </div>
               <DialogContent className="sm:max-w-md">
                 <StationDialogContent
                   station={station}
                   getClientInfo={getClientInfo}
                   onAllocate={() => onAllocateFlexToFixed && onAllocateFlexToFixed(station.id, 'client1')}
-                  onUpdateStatus={onUpdateStatus ? (status) => onUpdateStatus(station.id, status) : undefined}
+                  onUpdateStatus={onUpdateStatus ? async (status) => {
+                    if (onUpdateStatus) {
+                      return await onUpdateStatus(station.id, status);
+                    }
+                    return false;
+                  } : undefined}
                   onLinkClient={onLinkClient ? (clientId) => onLinkClient(station.id, clientId) : undefined}
                   availableClients={mockClients}
                 />

@@ -31,14 +31,19 @@ export const WorkStationsTab: React.FC<WorkStationsTabProps> = ({
   const flexCount = flexStations.length;
   
   // Handler for updating station status
-  const handleUpdateStatus = useCallback(async (stationId: string, status: LocationStatus) => {
+  const handleUpdateStatus = useCallback(async (stationId: string, status: LocationStatus): Promise<boolean> => {
     try {
-      await updateStationStatus(stationId, status);
-      toast({
-        title: 'Status atualizado',
-        description: `Status da estação atualizado para ${status}.`
-      });
-      if (onDataChange) onDataChange();
+      const success = await updateStationStatus(stationId, status);
+      
+      if (success) {
+        toast({
+          title: 'Status atualizado',
+          description: `Status da estação atualizado para ${status}.`
+        });
+        if (onDataChange) onDataChange();
+      }
+      
+      return success;
     } catch (error) {
       console.error("Error updating station status:", error);
       toast({
@@ -46,6 +51,7 @@ export const WorkStationsTab: React.FC<WorkStationsTabProps> = ({
         description: 'Não foi possível atualizar o status da estação.',
         variant: 'destructive'
       });
+      return false;
     }
   }, [onDataChange]);
 

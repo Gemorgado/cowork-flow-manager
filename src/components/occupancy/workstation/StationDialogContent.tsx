@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select';
 import { Form, FormField, FormItem, FormControl } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
+import { Loader2 } from 'lucide-react';
 
 interface StationDialogContentProps {
   station: WorkStation;
@@ -19,7 +20,7 @@ interface StationDialogContentProps {
   onAllocate?: () => void;
   allocatingFlexToFixed?: boolean;
   onLinkClient?: (clientId: string) => void;
-  onUpdateStatus?: (status: LocationStatus) => void;
+  onUpdateStatus?: (status: LocationStatus) => Promise<boolean>;
   availableClients?: {id: string, name: string}[];
 }
 
@@ -34,6 +35,9 @@ export const StationDialogContent: React.FC<StationDialogContentProps> = ({
 }) => {
   const [selectedClientId, setSelectedClientId] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<LocationStatus>(station.status);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isLinkingClient, setIsLinkingClient] = useState(false);
+  
   const isFixedType = station.type === 'fixed';
   const statusLabels: Record<string, string> = {
     'available': 'Livre',
@@ -49,16 +53,37 @@ export const StationDialogContent: React.FC<StationDialogContentProps> = ({
     }
   });
 
-  const handleLinkClient = () => {
+  const handleLinkClient = async () => {
     if (onLinkClient && selectedClientId) {
-      onLinkClient(selectedClientId);
+      setIsLinkingClient(true);
+      try {
+        await onLinkClient(selectedClientId);
+        setIsLinkingClient(false);
+      } catch (error) {
+        console.error("Error linking client:", error);
+        setIsLinkingClient(false);
+      }
     }
   };
 
-  const handleStatusChange = (status: LocationStatus) => {
+  const handleStatusChange = async (status: LocationStatus) => {
+    if (!onUpdateStatus) return;
+    
+    setIsUpdatingStatus(true);
     setSelectedStatus(status);
-    if (onUpdateStatus) {
-      onUpdateStatus(status);
+    
+    try {
+      const success = await onUpdateStatus(status);
+      if (!success) {
+        // Revert back if the update failed
+        setSelectedStatus(station.status);
+      }
+    } catch (error) {
+      console.error("Error updating station status:", error);
+      // Revert back if there was an error
+      setSelectedStatus(station.status);
+    } finally {
+      setIsUpdatingStatus(false);
     }
   };
 
@@ -66,7 +91,7 @@ export const StationDialogContent: React.FC<StationDialogContentProps> = ({
     <>
       <DialogHeader>
         <DialogTitle>
-          Estação {station.status === 'flex' ? 'Flex ' : ''}{station.number}
+          Estação {station.status === 'flex' ? 'Flex ' : ''}{station.number.replace('WS-', '')}
         </DialogTitle>
         <DialogDescription>
           {station.status === 'flex' 
@@ -88,9 +113,17 @@ export const StationDialogContent: React.FC<StationDialogContentProps> = ({
               <Select 
                 value={selectedStatus} 
                 onValueChange={(value) => handleStatusChange(value as LocationStatus)}
+                disabled={isUpdatingStatus}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={statusLabels[station.status] || station.status} />
+                  {isUpdatingStatus ? (
+                    <div className="flex items-center">
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <span>Atualizando...</span>
+                    </div>
+                  ) : (
+                    <SelectValue placeholder={statusLabels[station.status] || station.status} />
+                  )}
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="available">Livre</SelectItem>
@@ -131,6 +164,7 @@ export const StationDialogContent: React.FC<StationDialogContentProps> = ({
                           field.onChange(value);
                         }} 
                         value={field.value}
+                        disabled={isLinkingClient}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione um cliente" />
@@ -151,9 +185,16 @@ export const StationDialogContent: React.FC<StationDialogContentProps> = ({
             <Button 
               className="mt-2 w-full"
               onClick={handleLinkClient} 
-              disabled={!selectedClientId}
+              disabled={!selectedClientId || isLinkingClient}
             >
-              Vincular Cliente
+              {isLinkingClient ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Vinculando...
+                </>
+              ) : (
+                'Vincular Cliente'
+              )}
             </Button>
           </div>
         )}
@@ -179,8 +220,9 @@ export const StationDialogContent: React.FC<StationDialogContentProps> = ({
                   variant="destructive" 
                   size="sm"
                   onClick={() => handleStatusChange('available')}
+                  disabled={isUpdatingStatus}
                 >
-                  Desvincular
+                  {isUpdatingStatus ? 'Desvinculando...' : 'Desvincular'}
                 </Button>
               )}
             </div>

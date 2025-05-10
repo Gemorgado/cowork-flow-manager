@@ -13,7 +13,7 @@ export function useWorkstationOperations(
   setWorkStations: React.Dispatch<React.SetStateAction<WorkStation[]>>
 ) {
   // Handler for allocating flex stations
-  const handleAllocateFlexStations = useCallback(async (quantity: number) => {
+  const handleAllocateFlexStations = useCallback(async (quantity: number): Promise<boolean> => {
     const success = await allocateFlexStations(
       workStations, 
       quantity, 
@@ -29,10 +29,12 @@ export function useWorkstationOperations(
         )
       );
     }
+    
+    return success;
   }, [workStations, setWorkStations]);
 
   // Handler for converting flex to fixed
-  const handleConvertFlexToFixedWorkstation = useCallback(async (stationId: string, clientId: string) => {
+  const handleConvertFlexToFixedWorkstation = useCallback(async (stationId: string, clientId: string): Promise<boolean> => {
     // Update local state optimistically
     setWorkStations((prevStations): WorkStation[] => convertFlexToFixed(prevStations, stationId, clientId));
     
@@ -48,6 +50,8 @@ export function useWorkstationOperations(
     if (!success) {
       fetchWorkstations().then(setWorkStations);
     }
+    
+    return success;
   }, [workStations, setWorkStations]);
 
   return {

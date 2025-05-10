@@ -1,21 +1,25 @@
 
-import React from 'react';
-import { Room, WorkStation } from '@/types';
+import React, { useCallback } from 'react';
+import { Room, WorkStation, LocationStatus } from '@/types';
 import { RoomGrid } from '../room/RoomGrid';
 import { WorkStationGrid } from '../WorkStationGrid';
+import { toast } from '@/components/ui/use-toast';
+import { updateStationStatus, convertFlexToFixed } from '@/hooks/occupancy/api';
 
 interface FloorMapContentProps {
   activeView: 'unified' | 'rooms' | 'stations';
   rooms: Room[] | null;
   workStations: WorkStation[] | null;
   floor: string;
+  onDataChange?: () => void;
 }
 
 export function FloorMapContent({ 
   activeView, 
   rooms, 
   workStations,
-  floor 
+  floor,
+  onDataChange
 }: FloorMapContentProps) {
   console.log("FloorMapContent rendering:", { 
     activeView, 
@@ -51,6 +55,52 @@ export function FloorMapContent({
     '3': 0   // No workstations on floor 3
   };
   
+  // Handler for updating station status
+  const handleUpdateStatus = useCallback(async (stationId: string, status: LocationStatus): Promise<boolean> => {
+    try {
+      const success = await updateStationStatus(stationId, status);
+      if (success) {
+        toast({
+          title: 'Status atualizado',
+          description: `Status da estação atualizado com sucesso.`
+        });
+        if (onDataChange) onDataChange();
+      }
+      return success;
+    } catch (error) {
+      console.error("Error updating station status:", error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível atualizar o status da estação.',
+        variant: 'destructive'
+      });
+      return false;
+    }
+  }, [onDataChange]);
+
+  // Handler for linking client to station
+  const handleLinkClient = useCallback(async (stationId: string, clientId: string) => {
+    try {
+      const success = await convertFlexToFixed(stationId, clientId);
+      if (success) {
+        toast({
+          title: 'Cliente vinculado',
+          description: 'Cliente vinculado à estação com sucesso.'
+        });
+        if (onDataChange) onDataChange();
+      }
+      return success;
+    } catch (error) {
+      console.error("Error linking client to station:", error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível vincular o cliente à estação.',
+        variant: 'destructive'
+      });
+      return false;
+    }
+  }, [onDataChange]);
+  
   return (
     <div className="space-y-8">
       {(activeView === 'unified' || activeView === 'rooms') && rooms && (
@@ -75,7 +125,9 @@ export function FloorMapContent({
           </h3>
           <WorkStationGrid 
             workStations={workStations} 
-            currentFloor={floor} 
+            currentFloor={floor}
+            onUpdateStatus={handleUpdateStatus}
+            onLinkClient={handleLinkClient}
           />
         </div>
       )}
