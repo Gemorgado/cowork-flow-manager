@@ -5,6 +5,34 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Checkbox } from '@/components/ui/checkbox';
 import { Service } from '@/types';
 
+// Define a location type since it's not part of the Service type
+interface Location {
+  id: string;
+  name: string;
+}
+
+// Mock locations mapping to services
+// In a production app, this would come from an API or be part of the service object
+const serviceLocationsMap: Record<string, Location[]> = {
+  // Define some mock locations for each service - this would typically come from your backend
+  'fiscal-address': [
+    { id: 'loc1', name: 'Downtown' },
+    { id: 'loc2', name: 'Business District' },
+  ],
+  'flex-station': [
+    { id: 'loc3', name: 'Floor 1' },
+    { id: 'loc4', name: 'Floor 2' },
+  ],
+  'fixed-station': [
+    { id: 'loc5', name: 'Zone A' },
+    { id: 'loc6', name: 'Zone B' },
+  ],
+  'private-room': [
+    { id: 'loc7', name: 'Office Suite 101' },
+    { id: 'loc8', name: 'Executive Room 203' },
+  ],
+};
+
 interface ClientServiceSelectProps {
   services: Service[];
   selectedServiceId: string;
@@ -22,14 +50,23 @@ export const ClientServiceSelect: React.FC<ClientServiceSelectProps> = ({
   errors = {},
   disabled = false,
 }) => {
-  const [availableLocations, setAvailableLocations] = useState<{ id: string; name: string }[]>([]);
+  const [availableLocations, setAvailableLocations] = useState<Location[]>([]);
 
   // Update available locations when selected service changes
   useEffect(() => {
     if (selectedServiceId) {
       const selectedService = services.find(service => service.id === selectedServiceId);
-      if (selectedService && selectedService.locations) {
-        setAvailableLocations(selectedService.locations);
+      if (selectedService) {
+        // Use the type or id from the service to get the locations
+        const serviceType = selectedService.type;
+        const locationKey = selectedService.id;
+        
+        // Try to get locations by exact ID first, then by type as fallback
+        const locations = serviceLocationsMap[locationKey] || 
+                          serviceLocationsMap[serviceType] || 
+                          [];
+        
+        setAvailableLocations(locations);
       } else {
         setAvailableLocations([]);
       }
